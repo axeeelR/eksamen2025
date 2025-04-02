@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAA Invest</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <h1>Welcome to MAA Invest</h1>
+  <h2>-Invest in your future-</h2>
+  <p class="loginorcreate">Log in or create an account</p>
+  <form action="/users" method = "post"></form>
+  <a href="/login"><button class ="Login">Login</button></a>
+  <a href="/blikunde"><button class="Blikunde">Bli kunde</button></a>
+  <a href="/"><button class="home-button">Home</button></a>
+  <div class="about-box">
+    <h2>About us</h2>
+  <p>
+    MAA Invest is a modern investment platform created to empower everyday people to take control of their financial future. We believe that investing should be accessible, transparent, and tailored to your personal goals.
+  </p>
+  <p>
+    With our intuitive tools and expert insights, you can build a strong portfolio, track your progress, and make informed decisions. Whether you're a beginner or a seasoned investor, MAA Invest gives you the support you need to succeed.
+  </p>
+  <p>
+    Our mission is to help you achieve financial independence. We are committed to responsible investing, long-term growth, and personalized service. With MAA Invest, your future is in your hands — and we’re here to guide you every step of the way...
+  </p>
+  
+  <a href="/lesmer" class="lesmerbtn">Les mer</a>
+  </div>
+  
+  <footer class="footer">
+    <p>© 2025 MAA Invest. Alle rettigheter forbeholdt.</p>
+  </footer>
+
+  <div class="stock-table">
+    <h2>Aksjekurser</h2>
+    <table id="stocks">
+      <thead>
+        <tr>
+          <th>Aksje</th>
+          <th>Pris (USD)</th>
+          <th>Endring (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+ <script>
+  const symbols = ["AAPL", "TSLA", "MSFT", "AMZN", "NVDA"];
+  const apiKey = "F9XWDUXLN4Z4N2OZ";
+  const tbody = document.querySelector("#stocks tbody");
+
+  symbols.forEach((symbol, index) => {
+    setTimeout(() => {
+      fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`)
+        .then(res => res.json())
+        .then(data => {
+          const quote = data["Global Quote"];
+          if (!quote || !quote["05. price"]) {
+            console.warn("Ingen data for", symbol, data);
+            return;
+          }
+
+          const price = parseFloat(quote["05. price"]).toFixed(2);
+          const change = parseFloat(quote["10. change percent"]).toFixed(2);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${symbol}</td>
+            <td>$${price}</td>
+            <td style="color: ${change >= 0 ? 'green' : 'red'};">${change}%</td> 
+          `; //velger farge basert på om endringen er positiv eller negativ
+          tbody.appendChild(row);
+        })
+        .catch(err => {
+          console.error(`Feil ved henting av ${symbol}`, err);
+        });
+    }, index * 15000); // 15 sekunder mellom hvert kall
+  });
+</script>
+
+  
+
+</body>
+</html>
