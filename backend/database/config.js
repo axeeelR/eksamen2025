@@ -1,12 +1,14 @@
 module.exports = {
   passwordConfig: {
-    user: 'axelovesen',
-    password: 'Axel1104',
-    server: 'axelovesen.database.windows.net',
-    database: 'Eksamen2025',
+    user: 'mathiasnygaard', 
+    password: 'mathias12345!', 
+    server: 'mattyserver.database.windows.net', 
+    database: 'MattyDB',
     options: {
       encrypt: true,
-      trustServerCertificate: true,
-    },
+      enableArithAbort: true
+    }
   },
 };
+
+
