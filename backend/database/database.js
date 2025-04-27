@@ -18,6 +18,7 @@ class Database {
     } catch (error) {
       console.error('Error connecting to the database:', error);
       this.connected = false;
+      throw error;
     }
   }
 
@@ -110,9 +111,14 @@ class Database {
 
 const createDatabaseConnection = async (passwordConfig) => {
   database = new Database(passwordConfig);
-  await database.connect();
-  await database.createTable();
-  return database;
+  try {
+    await database.connect();
+    await database.createTable();
+    return database;
+  } catch (error) {
+    console.error('Failed to create database connection:', error);
+    throw error;
+  }
 };
 
 module.exports = { Database, createDatabaseConnection };

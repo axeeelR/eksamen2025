@@ -43,6 +43,14 @@ app.post('/submit', (req, res) => {
 });
 
 // Start server
-app.listen(port, () => {
+const { getDatabase } = require('./backend/database/instance.js');
+
+app.listen(port, async () => {
+    try {
+        await getDatabase();
+        console.log('Database connection established on server startup.');
+    } catch (error) {
+        console.error('Database connection failed on server startup:', error);
+    }
     console.log(`Server kjører på http://localhost:${port}`);
 });
