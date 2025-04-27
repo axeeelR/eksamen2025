@@ -3,6 +3,9 @@ const express = require('express');
 const path = require('path');
 const usersRouter = require('./backend/routes/users.js');
 
+const { getDatabase } = require('./backend/database/instance.js');
+const { VarChar } = require('mssql');
+
 const app = express();
 const port = 3000;
 
@@ -26,7 +29,36 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+    // console.log("GET mottat")
     res.render('login');
+});
+
+app.post('/login', async(req, res) => {
+    const bruker = req.body
+    try{
+        const database = await getDatabase();
+        const request = database.poolconnection.request();
+
+        request.input('brukernavn', VarChar(255), bruker.brukernavn);
+        request.input('passord', VarChar(255), bruker.passord);
+        const result = await request.query(`
+            SELECT brukernavn FROM investApp.bruker 
+            WHERE brukernavn = @brukernavn AND passord = @passord
+            `)
+        console.log(result)
+
+        if(result.recordset.length <= 0){
+            console.log("Bruker finnes ikke")
+            return res.status(500).json({ message: 'Bruker finnes ikke' });
+        }
+
+        console.log(req.body);
+        console.log("Bruker finnes")
+        res.status(200).json({ message: 'Bruker finnes' });
+    } catch (error) {
+        console.error('Error in POST /login:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 app.get('/blikunde', (req, res) => {
@@ -42,8 +74,7 @@ app.post('/submit', (req, res) => {
     res.json({ message: 'Data mottatt', name, age });
 });
 
-// Start server
-const { getDatabase } = require('./backend/database/instance.js');
+
 
 app.listen(port, async () => {
     try {

@@ -1,4 +1,4 @@
-module.exports = {
+const matti = {
   passwordConfig: {
     user: 'mathiasnygaard', 
     password: 'mathias12345!', 
@@ -10,5 +10,20 @@ module.exports = {
     }
   },
 };
+
+const axel = {
+  passwordConfig: {
+    user: 'axelovesen', 
+    password: 'Axel1104', 
+    server: 'axelovesen.database.windows.net', 
+    database: 'Eksamen2025',
+    options: {
+      encrypt: true,
+      enableArithAbort: true
+    }
+  },
+};
+
+module.exports = {axel, matti}
 
 

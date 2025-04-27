@@ -9,14 +9,44 @@
 <body>
   <div>
     <h1>Log in</h1>
-    <form action="/login" method="post"> 
-      <input type="text" name="name" placeholder="Brukernavn">
+    <form > 
+      <input type="text" placeholder="Brukernavn" id="brukernavn">
       <br>
-      <input type="text" name="password" placeholder="Password">
+      <input type="text" placeholder="Password" id="passord">
+      <button type="buttoon" class="Submit" id="submitbutton">Submit</button>
     </form>
-    <a href="/portefolje"><button class="Submit">Submit</button></a>
   </div>
   <a href="/"><button class="home-button">Home</button></a>
   
 </body>
+<script>
+  const submitbutton = document.getElementById('submitbutton');
+  
+  
+  submitbutton.addEventListener('click', function(event) {
+    const brukernavn = document.getElementById('brukernavn').value;
+    const passord = document.getElementById('passord').value;
+    console.log(brukernavn, passord)
+    // event.preventDefault(); // Prevent the default form submission
+  
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        brukernavn: brukernavn,
+        passord: passord
+      })
+    })
+    .then(response => {
+      return response.json()
+    })
+    .then(data => {
+      console.log(data)
+      window.location.href = '/';
+    })
+    .catch(error => console.error('Error:', error));
+  });
+</script>
 </html>

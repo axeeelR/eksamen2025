@@ -97,7 +97,7 @@ class Database {
 
   async createTable() {
     this.executeQuery(
-      "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users') BEGIN CREATE TABLE [dbo].[Users]( [user_id] [int] IDENTITY(1,1) NOT NULL, [username] [varchar](255) NOT NULL, [email] [varchar](255) NOT NULL ) ON [PRIMARY] END"
+      "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '1Users') BEGIN CREATE TABLE [dbo].[Users]( [user_id] [int] IDENTITY(1,1) NOT NULL, [username] [varchar](255) NOT NULL, [email] [varchar](255) NOT NULL ) ON [PRIMARY] END"
     )
       .then(() => {
         console.log('Users table created');
@@ -113,10 +113,9 @@ const createDatabaseConnection = async (passwordConfig) => {
   database = new Database(passwordConfig);
   try {
     await database.connect();
-    await database.createTable();
     return database;
   } catch (error) {
-    console.error('Failed to create database connection:', error);
+      console.error('Failed to create database connection:', error);
     throw error;
   }
 };
