@@ -3,21 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Blli kunde</title>
+  <title>Bli Kunde</title>
   <link rel="stylesheet" href="blikunde.css">
 </head>
 <body>
   <div>
     <h1>Bli kunde</h1>
-    <form action="/login" method="post" id="blikunde">
-      <input type="text" name="name" placeholder="Navn">
+    <form > 
+      <input type="text" placeholder="Nytt Brukernavn" id="brukernavn">
       <br>
-      <input type="text" name="email" placeholder="Email">
+      <input type="text" placeholder="Nytt Passord" id="passord">
       <br>
-      <input type="text" name="password" placeholder="Password">
+      <input type="text" placeholder="Ny Email" id="email">
+      <br>
+      <button type="button" class="Submit" id="submitbutton">Submit</button>
     </form>
   </div>
   <a href="/"><button class="home-button">Home</button></a>
-  <a href="/login"><button class="Submit">Submit</button></a>
 </body>
+<script>
+  const submitbutton = document.getElementById('submitbutton');
+  
+  
+  submitbutton.addEventListener('click', function(event) {
+    event.preventDefault(); 
+    const brukernavn = document.getElementById('brukernavn').value;
+    const passord = document.getElementById('passord').value;
+    const email = document.getElementById('email').value;
+    console.log(brukernavn, passord, email)
+   
+    fetch('/blikunde', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        brukernavn: brukernavn,
+        passord: passord,
+        email: email
+      })
+    })
+    .then(response => {
+      return response.json()
+    })
+    
+    if (!response.ok) {
+      return response.json().then(data => {
+        throw new Error(data.message);
+      });
+    }
+    }
+    .then(data => {
+      console.log('Kunde opprettet:', data);
+      alert('Kunde opprettet! Du kan nå logge inn.');
+      window.location.href = '/login'; // Gå til innloggingssiden
+    })
+    .catch(error => console.error('Error:', error));
+  });
+</script>
 </html>

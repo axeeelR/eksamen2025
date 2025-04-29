@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bytt Passord</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <div>
+    <h1>Bytt Passord</h1>
+    <form>
+      <input type="text" id="brukernavn" placeholder="Brukernavn" /><br />
+      <input type="password" id="oldPassord" placeholder="Gammelt Passord" /><br />
+      <input type="password" id="newPassord" placeholder="Nytt Passord" /><br />
+      <button type="button" id="submitbutton">Bytt Passord</button>
+    </form>
+  </div>
+  <a href="/"><button>Home</button></a>
+
+  <script>
+    const submitbutton = document.getElementById('submitbutton');
+    submitbutton.addEventListener('click', function (event) {
+      event.preventDefault();
+      const brukernavn = document.getElementById('brukernavn').value;
+      const oldPassord = document.getElementById('oldPassord').value;
+      const newPassord = document.getElementById('newPassord').value;
+
+      fetch('/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brukernavn, oldPassord, newPassord }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message);
+          if (response.ok) {
+            window.location.href = '/login';
+          }
+        })
+        .catch((error) => console.error('Error:', error));
+    });
+  </script>
+</body>
+</html>

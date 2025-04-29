@@ -1,0 +1,43 @@
+Global:
+Background: 1E1E1E
+font: Inter
+font-weight: Semi Bold
+Light-gray-color: C3C3C1
+Dark-gray-color: 84837E
+Positive-color: 46634C
+Negative-color: BD3A3A
+
+Container:
+Background-Color: 1B1B19
+
+Sidebar:
+Font-Size: 8
+
+Header:
+Font-Size: 16
+
+Cards:
+-Header 
+Font-Size: 7
+-Value
+ font-size: 13
+-Change-counter:
+ foint-size: 10
+
+Graph:
+-Header
+ font-Size: 16
+-Cotent:
+ font-Size: 10
+ serie 1 light blue: 2C64BC
+ serie 2 dark blue: 2B2733
+
+Button:
+ Background: 	242424
+ text:		8B8B89
+
+Table:
+- Table-header: 
+Font-size: 7
+- Table-body: 
+font-size: 8

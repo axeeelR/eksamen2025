@@ -13,9 +13,10 @@
       <input type="text" placeholder="Brukernavn" id="brukernavn">
       <br>
       <input type="text" placeholder="Password" id="passord">
-      <button type="buttoon" class="Submit" id="submitbutton">Submit</button>
+      <button type="button" class="Submit" id="submitbutton">Submit</button>
     </form>
   </div>
+  <a href="/byttepassord"></a><button class="byttepassord">Bytt passord</button></a>
   <a href="/"><button class="home-button">Home</button></a>
   
 </body>
@@ -24,11 +25,11 @@
   
   
   submitbutton.addEventListener('click', function(event) {
+    event.preventDefault(); 
     const brukernavn = document.getElementById('brukernavn').value;
     const passord = document.getElementById('passord').value;
     console.log(brukernavn, passord)
-    // event.preventDefault(); // Prevent the default form submission
-  
+   
     fetch('/login', {
       method: 'POST',
       headers: {
@@ -40,13 +41,22 @@
       })
     })
     .then(response => {
-      return response.json()
+      if (!response.ok) {
+        return response.json().then(data => { 
+          throw new Error(data.message); 
+        });
+    }
+    return response.json();
     })
     .then(data => {
-      console.log(data)
-      window.location.href = '/';
-    })
-    .catch(error => console.error('Error:', error));
+    console.log('Innlogging vellykket:', data);
+    localStorage.setItem('brukernavn', brukernavn); // Lagre brukernavnet i localStorage
+    window.location.href = '/portefolje'; // Suksess: gå til porteføljesiden
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert(error.message); // Viser feilmeldingen fra serveren
   });
+});
 </script>
 </html>
