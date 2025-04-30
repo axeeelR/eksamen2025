@@ -110,7 +110,6 @@ app.post('/blikunde', async (req, res) => {
     }
 });
 
-
 app.get('/konto', async (req, res) => {
     try {
         const brukernavn = req.headers['brukernavn'];
@@ -140,22 +139,13 @@ app.get('/konto', async (req, res) => {
     }
 });
 
-app.post('/submit', (req, res) => {
+
+
+/*app.post('/submit', (req, res) => {
     const { name, age } = req.body;
     res.json({ message: 'Data mottatt', name, age });
-});
+});*/
 
-
-
-app.listen(port, async () => {
-    try {
-        await getDatabase();
-        console.log('Database connection established on server startup.');
-    } catch (error) {
-        console.error('Database connection failed on server startup:', error);
-    }
-    console.log(`Server kjører på http://localhost:${port}`);
-});
 
 app.post('/byttepassord', async (req, res) => {
     const { brukernavn, oldPassord, newPassord } = req.body;
@@ -200,3 +190,12 @@ app.post('/byttepassord', async (req, res) => {
     res.render('byttepassord');
   });
   
+  app.listen(port, async () => {
+    try {
+        await getDatabase();
+        console.log('Database connection established on server startup.');
+    } catch (error) {
+        console.error('Database connection failed on server startup:', error);
+    }
+    console.log(`Server kjører på http://localhost:${port}`);
+});
