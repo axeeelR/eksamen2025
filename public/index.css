@@ -1,65 +1,104 @@
-.Login{
-    position:fixed;
-    right: 20px;
-    top: 70px;
-    background-color: #049fff;
-    color: rgb(30, 22, 181);
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 10%;
-}
-
-.Blikunde{
-    position:fixed;
-    right: 20px;
-    top: 120px;
-    background-color: #049fff;
-    color: rgb(30, 22, 181);
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 10%;
+body {
+  margin: 0;
+  height: 200vh;
+  background-color: #1E1E1E;
+  font-family: 'Inter,' sans-serif;
+  font-weight: 600;
+  background-size: cover;
+  background-position: center;
 }
 
 h1{
-    color: #003874;
-    font-size: 50px;
-    text-align: center;
-    margin-top: 50px;
-    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  color: #c3c3c3;
+  text-align: center;
+  font-family: 'Inter,' sans-serif;
+  font-size: 50px;
+  margin-top: 50px;
 }
+
+h2 {
+  color: #c3c3c3;
+  text-align: center;
+  font-family: 'Inter,' sans-serif;
+  font-size: 30px;
+  margin-top: 10px;
+}
+
 p{
-    color: #000000;
-    font-size: 20px;
-    text-align: center;
-    margin-top: 20px;
-    font-family: cursive;
+  color: #c3c3c3;
+  text-align: center;
+  font-family: 'Inter,' sans-serif;
+  font-size: 20px;
+  margin-top: 20px;
 }
-button:hover{
-    background-color: #969696;
+
+button {
+  background-color: #3a3a3a;
+  color: #8b8b8b;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.Login{
+  background-color: #3a3a3a;
+  color: #8b8b8b;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: fixed;
+  right: 20px;
+  width: 10%;
+  top: 70px;
+}
+
+.Blikunde{
+  background-color: #3a3a3a;
+  color: #8b8b8b;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: fixed;
+  right: 20px;
+  width: 10%;
+  top: 120px;
 }
 
 .home-button {
-    position: fixed; /* Holder knappen oppe i hjørnet uansett scrolling */
-    top: 20px;
-    left: 20px;
-    padding: 10px 20px;
-    background-color: #007BFF; /* Profesjonell blåfarge */
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-  }
-  
-  .home-button:hover {
-    background-color: #0056b3; /* Mørkere blå ved hover */
-  }
+  background-color: #3a3a3a;
+  color: #8b8b8b;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.loginorcreate{
+  background-color: #3a3a3a;
+  color: #8b8b8b;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: fixed;
+  right: 20px;
+  width: 10%;
+  top: 20px;
+  right: 0px;
+}
 
 .generelt{
     padding: 14px 20px;
@@ -68,77 +107,30 @@ button:hover{
     cursor: pointer;
     width: 100%;
 }
-
-.bilde{
-    position:fixed;
-    top: 20px;
-    right: 20px;
-}
-
-body {
-    margin: 0;
-    height: 200vh; /* Bare for å lage scroll */
-    background-image: url("https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgfaeNCcWAepSWQoavU9jvG_4GnGssXcCXk6rBDCMrqluEOhAcZsjX0cDrtSEhyuTMhAcPla-8qpKVBGUZF0_I6mN9SdQEmP67WwRFovqEXr052lH5DD8Amv7F48Rv9HQj3sazuWhSFV4On/s1600/ID-10017854.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed; /* ← Dette gjør at bildet ikke scroller med */
-  }
   
 .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: rgba(0, 50, 129, 0.95);
-    color: #333;
-    text-align: center;
-    padding: 12px;
-    font-size: 14px;
-    box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
-  }
-
-h2{
-    color: #00356d;
-    font-size: 30px;
-    text-align: center;
-    margin-top: 10px;
-    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1b1b1b;
+  color: #84837e;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
 }
-
-.loginorcreate{
-    position:fixed;
-    right: 0px;
-    top: 20px;
-    color: rgb(0, 0, 0);
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 10%;
-}
-
 .about-box {
-    left: 20px;
-    max-width: 700px;
-    /*margin: 150px auto; /* sentrerer boksen og gir plass under navbar */
-    background-color: rgb(173, 173, 173);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-    color: #333;
-  }
-  .about-box h2 {
-    margin-top: 0;
-    color: #007BFF;
-  }
-  .about-box p {
-    line-height: 1.6;
-  }
-
-.lesmerbtn :hover{
-    color: #333;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1b1b1b;
+  color: #84837e;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
 }
 
 .stock-table {
@@ -146,32 +138,32 @@ h2{
     top: 450px; /* plasser litt under navbar */
     right: 0;
     width: 50vw; /* halvparten av skjermen */
-    background-color: rgba(255, 255, 255, 0.75); /* hvit + 75% gjennomsiktighet */
+    background-color: rgba(27, 27, 25, 0.95); /* hvit + 75% gjennomsiktighet */
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
   }
   
-  .stock-table h2 {
-    color: #007BFF;
-    margin-bottom: 20px;
-    text-align: center;
+.stock-table h2 {
+    color: #2c64bc;
+    margin-bottom: 16px;
   }
   
-  .stock-table table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+.stock-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8px;
+}
   
-  .stock-table th, .stock-table td {
-    padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-  }
+.stock-table th, .stock-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #84837e;
+  color: c3c3c3;
+}
   
-  .stock-table tr:hover {
-    background-color: #f1f1f1;
-  }
+.stock-table tr:hover {
+  background-color: #2b2733;
+}
   
   
