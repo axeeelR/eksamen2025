@@ -12,10 +12,11 @@
   <a href="/"><button class="home-button">Home</button></a>
 </body>
 <script>
-  const brukernavn = localStorage.getItem('brukernavn');
 
+  const brukernavn = localStorage.getItem('brukernavn');
   if (!brukernavn) {
-    window.location.href = '/login'; // Ikke logget inn
+    alert('Du må være logget inn for å se porteføljen.');
+    window.location.href = '/login';
   }
 
   fetch('/portefolje', {
@@ -32,6 +33,16 @@
     .then(data => {
       console.log('Eiendeler:', data.items);
       // Vis data i UI
+      const portfolioContainer = document.getElementById('portfolio-container');
+      if (data.items && data.items.length > 0) {
+        data.items.forEach(item => {
+          const itemElement = document.createElement('p');
+          itemElement.textContent = `Eiendel: ${item.name}, Verdi: ${item.value}`;
+          portfolioContainer.appendChild(itemElement);
+        });
+      } else {
+        portfolioContainer.textContent = 'Ingen eiendeler funnet.';
+      }
     })
     .catch(error => {
       alert(error.message);

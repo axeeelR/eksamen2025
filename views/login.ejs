@@ -40,8 +40,8 @@
         passord: passord
       })
     })
-    .then(response => {
-      if (!response.ok) {
+    .then(async response => {
+        if (!response.ok) {
         return response.json().then(data => { 
           throw new Error(data.message); 
         });
@@ -55,7 +55,7 @@
   })
   .catch(error => {
     console.error('Error:', error);
-    alert(error.message); // Viser feilmeldingen fra serveren
+    res.status(500).json({ message: 'Internal Server Error' });
   });
 });
 </script>

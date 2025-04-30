@@ -44,21 +44,20 @@
       })
     })
     .then(response => {
-      return response.json()
-    })
-    
-    if (!response.ok) {
+      if (!response.ok) {
       return response.json().then(data => {
         throw new Error(data.message);
-      });
-    }
-    }
+        });
+      } 
+      return response.json();
+    })
     .then(data => {
       console.log('Kunde opprettet:', data);
       alert('Kunde opprettet! Du kan nå logge inn.');
       window.location.href = '/login'; // Gå til innloggingssiden
     })
     .catch(error => console.error('Error:', error));
-  });
+      alert(error.message); // Viser feilmeldingen fra serveren
+    });
 </script>
 </html>

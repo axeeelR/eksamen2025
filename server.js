@@ -49,18 +49,19 @@ app.post('/login', async(req, res) => {
         console.log(result)
 
 
-        if(result.recordset.length <= 0){
+        if(result.recordset.length === 0){
             console.log("Feil brukernavn eller passord:")
             return res.status(401).json({ message: 'Feil brukernavn eller passord' });
         }
 
         console.log(req.body);
         console.log("Innlogging vellykket", bruker.brukernavn);
+
         res.status(200).json({ message: 'Innlogging vellykket' });
 
     } catch (error) {
         console.error('Error in POST /login:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json('Internal Server Error');
     }
 });
 
@@ -110,19 +111,33 @@ app.post('/blikunde', async (req, res) => {
 });
 
 
-app.get('/portefolje', async(req, res) => {
-    const brukernavn = req.headers['brukernavn'];
-    if (!brukernavn) {
-        return res.status(401).json({message:'Brukernavn er påkrevd'});
+app.get('/portefolje', async (req, res) => {
+    try {
+        const brukernavn = req.headers['brukernavn'];
+
+        if (!brukernavn) {
+            return res.status(401).json({ message: 'Brukernavn mangler' });
+        }
+
+        const database = await getDatabase();
+        const request = database.poolconnection.request();
+
+        // Fetch the user's portfolio from the database
+        request.input('brukernavn', VarChar(255), brukernavn);
+        const result = await request.query(`
+            SELECT name, value FROM investApp.portefolje 
+            WHERE brukernavn = @brukernavn
+        `);
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'Ingen portefølje funnet for brukeren' });
+        }
+
+        res.status(200).json({ items: result.recordset });
+    } catch (error) {
+        console.error('Error in GET /portefolje:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-    const database = await getDatabase();
-    const request = database.poolconnection.request();
-    request.input('brukernavn', VarChar(255), brukernavn);
-    const result = await request.query(`
-        SELECT * FROM investApp.portefolje 
-        WHERE brukernavn = @brukernavn
-    `);
-    res.status(200).json(result.recordset);
 });
 
 app.post('/submit', (req, res) => {
