@@ -111,7 +111,7 @@ app.post('/blikunde', async (req, res) => {
 });
 
 
-app.get('/portefolje', async (req, res) => {
+app.get('/konto', async (req, res) => {
     try {
         const brukernavn = req.headers['brukernavn'];
 
@@ -122,20 +122,20 @@ app.get('/portefolje', async (req, res) => {
         const database = await getDatabase();
         const request = database.poolconnection.request();
 
-        // Fetch the user's portfolio from the database
+        // Fetch the user's konto from the database
         request.input('brukernavn', VarChar(255), brukernavn);
         const result = await request.query(`
-            SELECT name, value FROM investApp.portefolje 
+            SELECT name, value FROM investApp.konto 
             WHERE brukernavn = @brukernavn
         `);
 
         if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Ingen portefølje funnet for brukeren' });
+            return res.status(404).json({ message: 'Ingen konto funnet for brukeren' });
         }
 
         res.status(200).json({ items: result.recordset });
     } catch (error) {
-        console.error('Error in GET /portefolje:', error);
+        console.error('Error in GET /konto:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });

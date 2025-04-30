@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portefolje</title>
-  <link rel="stylesheet" href="portefolje.css">
+  <title>Konto</title>
+  
+  <link rel="stylesheet" href="konto.css">
 </head>
 <body>
-  <h1>Min portefølje</h1>
-  <p>Her kan du se din portefølje</p>
+  <h1>Min konto</h1>
+  <p>Her kan du se din konto</p>
   <a href="/"><button class="home-button">Home</button></a>
 </body>
 <script>
 
   const brukernavn = localStorage.getItem('brukernavn');
   if (!brukernavn) {
-    alert('Du må være logget inn for å se porteføljen.');
+    alert('Du må være logget inn for å se konto.');
     window.location.href = '/login';
   }
 
-  fetch('/portefolje', {
+  fetch('/konto', {
     headers: {
       'brukernavn': brukernavn
     }
@@ -33,15 +34,15 @@
     .then(data => {
       console.log('Eiendeler:', data.items);
       // Vis data i UI
-      const portfolioContainer = document.getElementById('portfolio-container');
+      const kontoContainer = document.getElementById('konto');
       if (data.items && data.items.length > 0) {
         data.items.forEach(item => {
           const itemElement = document.createElement('p');
           itemElement.textContent = `Eiendel: ${item.name}, Verdi: ${item.value}`;
-          portfolioContainer.appendChild(itemElement);
+          kontoContainer.appendChild(itemElement);
         });
       } else {
-        portfolioContainer.textContent = 'Ingen eiendeler funnet.';
+        kontoContainer.textContent = 'Ingen eiendeler funnet.';
       }
     })
     .catch(error => {
