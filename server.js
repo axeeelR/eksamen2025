@@ -96,6 +96,8 @@ app.post('/blikunde', async (req, res) => {
             `)
         console.log(result)
 
+        
+
         if(result.rowsAffected[0] <= 0){
             console.log("Kontoen din ble ikke lagt til")
             return res.status(500).json({ message: 'Kunne ikke opprette bruker' });
@@ -109,6 +111,11 @@ app.post('/blikunde', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.get('/kontoside', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'konto.html'));
+  });
+  
 
 app.get('/konto', async (req, res) => {
     try {
