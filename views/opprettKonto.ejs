@@ -5,8 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Opprett konto</title>
   <link rel="stylesheet" href="opprettKonto.css">
+  <link rel="stylesheet" href="/styles/index.css">
+  <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
+
+  <%- include ('partials/menyPanel') %>
+  
+  <main class="main-content">
   <div>
     <h1>Bli kunde</h1>
     <form > 
@@ -19,6 +25,8 @@
       <button type="button" class="Submit" id="submitbutton">Submit</button>
     </form>
   </div>
+</main>
+
   <a href="/"><button class="home-button">Home</button></a>
 <script>
   const submitbutton = document.getElementById('submitbutton');
