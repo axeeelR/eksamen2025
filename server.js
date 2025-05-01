@@ -65,6 +65,12 @@ app.post('/login', async(req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
 app.get('/blikunde', (req, res) => {
     res.render('blikunde');
 });
@@ -111,9 +117,7 @@ app.post('/blikunde', async (req, res) => {
         console.error('Error in POST /blikunde:', error);
         res.status(500).send('Internal Server Error');
     }
-});
-
-  
+}); 
 
 app.get('/konto', async (req, res) => {
     try {
