@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Opprett konto</title>
+<<<<<<< HEAD
+  
   <link rel="stylesheet" href="/styles/opprettKonto.css">
-  <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
 
@@ -14,7 +14,7 @@
   
   <main class="main-content">
   <div>
-    <h1>Opprett konto</h1>
+    <h1>Opprett konto </h1>
     <form > 
       <input type="text" placeholder="Navnet på din konto" id="kontoNavn">
       <br>
@@ -32,16 +32,19 @@
 <script>
   const submitbutton = document.getElementById('submitbutton');
   
-  //const bruker = localStorage.getItem('brukernavn');
+  const brukernavn = localStorage.getItem('brukernavn');
   
   submitbutton.addEventListener('click', function(event) {
     event.preventDefault(); 
-    // const brukernavn = localStorage.getItem('brukernavn');
+
     const kontoNavn = document.getElementById('kontoNavn').value;
-    const opprettelsesdatoK = document.getElementById('opprettelsesdatoK').value;
+    const opprettelsedatoK = document.getElementById('opprettelsedatoK').value;
+    const lukkedatoK = document.getElementById('lukkedatoK').value;
+    const valuta = document.getElementById('valuta').value;
     const bank = document.getElementById('bank').value;
     const saldo = document.getElementById('saldo').value;
-    console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo)
+
+    // console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo, lukkedatoK, valuta);
    
     fetch('/opprettKonto', {
       method: 'POST',
@@ -51,10 +54,12 @@
       },
       body: JSON.stringify({
         kontoNavn: kontoNavn,
-        opprettelsesdatoK: opprettelsesdatoK,
+        opprettelsedatoK: opprettelsedatoK,
         bank: bank, 
         saldo: saldo,
-        brukernavn: brukernavn
+        brukernavn: brukernavn,
+        lukkedatoK: lukkedatoK,
+        valuta: valuta
       })
     })
     .then(async res => {

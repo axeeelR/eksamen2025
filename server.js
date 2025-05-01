@@ -5,6 +5,7 @@ const usersRouter = require('./backend/routes/users.js');
 
 const { getDatabase } = require('./backend/database/instance.js');
 const { VarChar } = require('mssql');
+const sql = require('mssql'); // Importer hele mssql-biblioteket
 
 const app = express();
 const port = 3000;
@@ -211,18 +212,33 @@ app.post('/byttepassord', async (req, res) => {
   
 
 app.post('/opprettKonto', async (req, res) => {
-    const {kontoNavn, brukernavn, opprettelsesdatoK, saldo, bank} = req.body
+    const {kontoNavn, opprettelsedatoK, saldo, bank, lukkedatoK, valuta, brukernavn} = req.body
     try{
         const database = await getDatabase();
+
+        const brukerResult = await database.poolconnection.request()
+
+      .input('brukernavn', sql.VarChar(255), brukernavn)
+      .query('SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn');
+
+    if (brukerResult.recordset.length === 0) {
+      return res.status(404).json({ message: 'Bruker ikke funnet' });
+    }
+
+    const brukerID = brukerResult.recordset[0].brukerID;
         
         const insertRequest = database.poolconnection.request();
-        insertRequest.input('kontoNavn', VarChar(255), konto.kontoNavn);
-        insertRequest.input('opprettelsesdatoK', VarChar(255), konto.opprettelsesdatoK);
-        insertRequest.input('saldo', VarChar(255), konto.saldo);
-        insertRequest.input('bank', VarChar(255), konto.bank);
+        insertRequest.input('kontoNavn', sql.VarChar(255), kontoNavn);
+        insertRequest.input('opprettelsedatoK', sql.VarChar(255), opprettelsedatoK);
+        insertRequest.input('saldo', sql.VarChar(255), saldo);
+        insertRequest.input('bank', sql.VarChar(255), bank);
+        insertRequest.input('lukkedatoK', sql.VarChar(255), lukkedatoK);
+        insertRequest.input('valuta', sql.VarChar(255), valuta);
+        insertRequest.input('brukerID', sql.Int, brukerID); // Bruk sql.Int for integer
+
         const result = await insertRequest.query(`
-            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsesdatoK, bank) 
-            VALUES (@kontoNavn, @saldo, @opprettelsesdatoK, @bank)
+            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, lukkedatoK, valuta, brukerID) 
+            VALUES (@kontoNavn, @saldo, @opprettelsedatoK, @bank, @lukkedatoK, @valuta, @brukerID)
             `)
         console.log(result)
 
@@ -231,17 +247,20 @@ app.post('/opprettKonto', async (req, res) => {
             return res.status(500).json({ message: 'Kunne ikke opprette konto' });
         }
         console.log(req.body);
-        console.log("Ny konto registrert:", konto.kontoNavn);
+        console.log("Ny konto registrert:", kontoNavn);
         res.status(201).json({ message: 'Konto opprettet' });
 
     } catch (error) {
-        console.error('Error in POST /blikunde:', error);
+        console.error('Error in POST /opprettKonto:', error);
         res.status(500).json({message:'Internal Server Error'});
     }
 });
 
 app.get('/opprettKonto', (req, res) => {
     res.render('opprettKonto');
+<<<<<<< HEAD
+});
+=======
 }
 );
 
@@ -252,3 +271,4 @@ app.get('/dashboard', (req, res) => {
 app.get('/portofolje', (req, res) => {
     res.render('portofolje');
 });
+>>>>>>> b82594fb7247d5a91d3b4ec1f5304489be36fdeb
