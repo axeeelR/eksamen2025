@@ -244,3 +244,11 @@ app.get('/opprettKonto', (req, res) => {
     res.render('opprettKonto');
 }
 );
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard');
+});
+
+app.get('/portofolje', (req, res) => {
+    res.render('portofolje');
+});
