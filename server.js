@@ -112,9 +112,6 @@ app.post('/blikunde', async (req, res) => {
     }
 });
 
-app.get('/kontoside', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'konto.html'));
-  });
   
 
 app.get('/konto', async (req, res) => {

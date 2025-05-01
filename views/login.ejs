@@ -51,7 +51,7 @@
     .then(data => {
     console.log('Innlogging vellykket:', data);
     localStorage.setItem('brukernavn', brukernavn); // Lagre brukernavnet i localStorage
-    window.location.href = '/kontoside'; // Suksess: gå til kontosiden
+    window.location.href = '/konto'; // Suksess: gå til kontosiden
   })
   .catch(error => {
     console.error('Error:', error);
