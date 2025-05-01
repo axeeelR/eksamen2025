@@ -18,6 +18,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.listen(port, async () => {
+    try {
+        await getDatabase();
+        console.log('Database connection established on server startup.');
+    } catch (error) {
+        console.error('Database connection failed on server startup:', error);
+    }
+    console.log(`Server kjører på http://localhost:${port}`);
+});
+
 // In-memory database
 let db = [];
 
@@ -199,31 +209,11 @@ app.post('/byttepassord', async (req, res) => {
     res.render('byttepassord');
   });
   
-  app.listen(port, async () => {
-    try {
-        await getDatabase();
-        console.log('Database connection established on server startup.');
-    } catch (error) {
-        console.error('Database connection failed on server startup:', error);
-    }
-    console.log(`Server kjører på http://localhost:${port}`);
-});
 
 app.post('/opprettKonto', async (req, res) => {
-    const konto = req.body
+    const {kontoNavn, brukernavn, opprettelsesdatoK, saldo, bank} = req.body
     try{
         const database = await getDatabase();
-        const request = database.poolconnection.request();
-
-        request.input('brukernavn', VarChar(255), brukernavn);
-        const checkResult = await request.query(`
-            SELECT brukernavn FROM investApp.bruker 
-            WHERE brukernavn = @brukernavn
-        `);
-
-        if (checkResult.recordset.length === 0) {
-            return res.status(400).json({ message: 'Bruker finnes ikke' });
-        }
         
         const insertRequest = database.poolconnection.request();
         insertRequest.input('kontoNavn', VarChar(255), konto.kontoNavn);
@@ -231,7 +221,7 @@ app.post('/opprettKonto', async (req, res) => {
         insertRequest.input('saldo', VarChar(255), konto.saldo);
         insertRequest.input('bank', VarChar(255), konto.bank);
         const result = await insertRequest.query(`
-            INSERT INTO investApp.konto (kontoNavn, saldo, oprettelsesdatoK, bank) 
+            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsesdatoK, bank) 
             VALUES (@kontoNavn, @saldo, @opprettelsesdatoK, @bank)
             `)
         console.log(result)
@@ -246,7 +236,7 @@ app.post('/opprettKonto', async (req, res) => {
 
     } catch (error) {
         console.error('Error in POST /blikunde:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({message:'Internal Server Error'});
     }
 });
 
