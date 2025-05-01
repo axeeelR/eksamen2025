@@ -116,12 +116,7 @@ app.post('/blikunde', async (req, res) => {
         console.error('Error in POST /blikunde:', error);
         res.status(500).send('Internal Server Error');
     }
-});
-
-app.get('/kontoside', (req, res) => {
-    res.sendFile(path.join(__dirname, 'konto'));
-  });
-  
+}); 
 
 app.get('/konto', async (req, res) => {
     try {
