@@ -1,52 +1,47 @@
-.Submit{
-  background-color: #25239c;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: 'Roboto', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: 0.3s;
-}
-form{
-  border-radius: 12px;
-  background-color: #f2f2f2;
-  padding: 20px;
-  margin: 20px 0;
-}
-button:hover{
-  background-color: #000000;
-}
-h1{
-  color: #000000;
-  font-size: 50px;
-  text-align: center;
-  margin-top: 50px;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+body {
+  margin: 0;
+  height: 200vh;
+  background-color: #1E1E1E;
+  font-family: 'Inter,' sans-serif;
+  font-weight: 600;
+  background-size: cover;
+  background-position: center;  
+  color: #c3c3c3;
 }
 
-.home-button {
-  position: fixed; /* Holder knappen oppe i hjørnet uansett scrolling */
-  top: 20px;
-  left: 20px;
+.main-content {
+  padding: 60px 40px;
+  margin-left: 200px;
+}
+
+h1 {
+  color: #c3c3c3;
+  text-align: center;
+  font-family: 'Inter,' sans-serif;
+  font-size: 40px;
+  margin-top: 50px;
+}
+
+form {
+  max-width: 400px;
+  border-radius: 12px;
+  background-color: #d54e4e;
+  padding: 20px;
+  margin: 20px 0;
+} 
+
+button.submit-button {
+  background-color: #ffffff;
+  color: rgb(65, 75, 182);
   padding: 10px 20px;
-  background-color: #007BFF; /* Profesjonell blåfarge */
-  color: white;
-  text-decoration: none;
+  border: none;
+  cursor: pointer;
   border-radius: 8px;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
 
-.home-button:hover {
-  background-color: #0056b3; /* Mørkere blå ved hover */
+button.submit-button:hover {
+  background-color: #ff6f6f;
 }
-

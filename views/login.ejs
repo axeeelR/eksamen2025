@@ -5,24 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>login</title>
   <link rel="stylesheet" href="/styles/login.css">
+  <link rel="stylesheet" href="/styles/index.css">
+
 </head>
 <body>
   <div>
+    <main class="main-content">
     <h1>Log in</h1>
-    <form > 
+    <form> 
       <input type="text" placeholder="Brukernavn" id="brukernavn">
-      <br>
       <input type="text" placeholder="Password" id="passord">
       <button type="button" class="Submit" id="submitbutton">Submit</button>
     </form>
   </div>
   <a href="/byttepassord"><button class="byttepassord">Bytt passord</button></a>  
+</main>
   <a href="/"><button class="home-button">Home</button></a>
   
 </body>
 <script>
   const submitbutton = document.getElementById('submitbutton');
-  
   
   submitbutton.addEventListener('click', function(event) {
     event.preventDefault(); 
