@@ -4,18 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Konto</title>
-
-  <link rel="stylesheet" href="konto.css">
+  <link rel="stylesheet" href="/styles/konto.css">
+  <link rel="stylesheet" href="/styles/index.css">
 </head>
 <body>
+
+  <% include partials/menyPanel %>
+
+  <main class="main-content">
   <h1>Min konto</h1>
   <p>Her kan du se din konto</p>
   <div id="konto">konto</div>
   <div id="Eiendeler">Eiendeler</div>
   <a href="/"><button class="home-button">Home</button></a>
-</body>
-<script>
+  </main>
 
+<script>
   const brukernavn = localStorage.getItem('brukernavn');
 
   if (!brukernavn) {
@@ -54,4 +58,5 @@
       window.location.href = '/login';
     });
 </script>
+</body>
 </html>
