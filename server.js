@@ -258,4 +258,17 @@ app.post('/opprettKonto', async (req, res) => {
 
 app.get('/opprettKonto', (req, res) => {
     res.render('opprettKonto');
+<<<<<<< HEAD
 });
+=======
+}
+);
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard');
+});
+
+app.get('/portofolje', (req, res) => {
+    res.render('portofolje');
+});
+>>>>>>> b82594fb7247d5a91d3b4ec1f5304489be36fdeb

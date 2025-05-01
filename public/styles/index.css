@@ -166,4 +166,13 @@ button {
   background-color: #2b2733;
 }
   
-  
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20%;
+  height: 100vh;
+  background-color: #1b1b1b;
+  padding: 20px;
+  box-shadow: 2px 0px 5px rgba(0,0,0,0.5);
+}
