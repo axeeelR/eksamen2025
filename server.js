@@ -65,6 +65,12 @@ app.post('/login', async(req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
 app.get('/blikunde', (req, res) => {
     res.render('blikunde');
 });
@@ -113,7 +119,7 @@ app.post('/blikunde', async (req, res) => {
 });
 
 app.get('/kontoside', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'konto.html'));
+    res.sendFile(path.join(__dirname, 'konto'));
   });
   
 
