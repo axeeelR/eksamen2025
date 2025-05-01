@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opprett konto</title>
+  <link rel="stylesheet" href="/styles/opprettKonto.css">
+</head>
+<body>
+
+  <%- include ('partials/menyPanel') %> 
+  
+  <main class="main-content">
+  <div>
+
+    <h1>Opprett Konto</h1>
+  <form id="opprettKontoForm">
+    <label for="kontoNavn">Kontonavn:</label>
+    <input type="text" id="kontoNavn" name="kontoNavn" required>
+    <br>
+    <label for="valuta">Valuta:</label>
+    <input type="text" id="valuta" name="valuta" required>
+    <br>
+    <label for="lukkedatoK">Lukkedato:</label>
+    <input type="date" id="lukkedatoK" name="lukkedatoK">
+    <br>
+    <label for="opprettelsedatoK">Opprettelsesdato:</label>
+    <input type="date" id="opprettelsedatoK" name="opprettelsedatoK" required>
+    <br>
+    <label for="saldo">Saldo:</label>
+    <input type="number" id="saldo" name="saldo" required>
+    <br>
+    <label for="bank">Bank:</label>
+    <input type="text" id="bank" name="bank" required>
+    <br>
+    <button type="submit" id="submitbutton">Opprett Konto</button>
+  </form>
+  <a href="/"><button class="home-button">Home</button></a>
+<script>
+  const submitbutton = document.getElementById('submitbutton');
+  
+  const brukernavn = localStorage.getItem('brukernavn');
+  
+  submitbutton.addEventListener('click', function(event) {
+    event.preventDefault(); 
+
+    const kontoNavn = document.getElementById('kontoNavn').value;
+    const opprettelsedatoK = document.getElementById('opprettelsedatoK').value;
+    const lukkedatoK = document.getElementById('lukkedatoK').value;
+    const valuta = document.getElementById('valuta').value;
+    const bank = document.getElementById('bank').value;
+    const saldo = document.getElementById('saldo').value;
+
+    // console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo, lukkedatoK, valuta);
+   
+    fetch('/opprettKonto', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+
+      },
+      body: JSON.stringify({
+        kontoNavn: kontoNavn,
+        opprettelsedatoK: opprettelsedatoK,
+        bank: bank, 
+        saldo: saldo,
+        brukernavn: brukernavn,
+        lukkedatoK: lukkedatoK,
+        valuta: valuta
+      })
+    })
+    .then(async res => {
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message);
+  alert("Konto opprettet!");
+})
+.catch(err => {
+  console.error(err);
+  alert(err.message);
+  });
+});
+</script>
+</body>
+</html>
