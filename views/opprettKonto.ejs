@@ -12,7 +12,7 @@
     <form > 
       <input type="text" placeholder="kontoNavn" id="kontoNavn">
       <br>
-      <input type="text" placeholder="opprettelsesdato" id="opprettelsesdato">
+      <input type="text" placeholder="opprettelsesdato" id="opprettelsesdatoK">
       <br>
       <input type="text" placeholder="bank" id="bank">
       <br>
@@ -27,37 +27,32 @@
   
   submitbutton.addEventListener('click', function(event) {
     event.preventDefault(); 
-    const brukernavn = document.getElementById('brukernavn').value;
-    const passord = document.getElementById('passord').value;
-    const email = document.getElementById('email').value;
-    console.log(brukernavn, passord, email)
+    const brukernavn = localStorage.getItem('brukernavn');
+    const kontoNavn = document.getElementById('kontoNavn').value;
+    const opprettelsesdatoK = document.getElementById('opprettelsesdatoK').value;
+    const bank = document.getElementById('bank').value;
+    console.log(kontoNavn, opprettelsesdato, bank)
    
-    fetch('/blikunde', {
+    fetch('/opprettKonto', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        brukernavn: brukernavn,
-        passord: passord,
-        email: email
+        kontoNavn: kontoNavn,
+        opprettelsesdatoK: opprettelsesdatoK,
+        bank: bank 
       })
     })
-    .then(response => {
-      if (!response.ok) {
-      return response.json().then(data => {
-        throw new Error(data.message);
-        });
-      } 
-      return response.json();
-    })
-    .then(data => {
-      console.log('Kunde opprettet:', data);
-      alert('Kunde opprettet! Du kan nå logge inn.');
-      window.location.href = '/login'; // Gå til innloggingssiden
-    })
-    .catch(error => console.error('Error:', error));
-      alert(error.message); // Viser feilmeldingen fra serveren
-    });
+    .then(async res => {
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message);
+  alert("Konto opprettet!");
+})
+.catch(err => {
+  console.error(err);
+  alert(err.message);
+  });
+});
 </script>
 </html>
