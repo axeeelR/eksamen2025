@@ -69,6 +69,7 @@ app.get('/blikunde', (req, res) => {
     res.render('blikunde');
 });
 
+
 app.post('/blikunde', async (req, res) => {
     const bruker = req.body
     try{
@@ -202,4 +203,45 @@ app.post('/byttepassord', async (req, res) => {
         console.error('Database connection failed on server startup:', error);
     }
     console.log(`Server kjører på http://localhost:${port}`);
+});
+
+app.post('/opprettKonto', async (req, res) => {
+    const konto = req.body
+    try{
+        const database = await getDatabase();
+        const request = database.poolconnection.request();
+
+        request.input('brukernavn', VarChar(255), brukernavn);
+        const checkResult = await request.query(`
+            SELECT brukernavn FROM investApp.bruker 
+            WHERE brukernavn = @brukernavn
+        `);
+
+        if (checkResult.recordset.length === 0) {
+            return res.status(400).json({ message: 'Bruker finnes ikke' });
+        }
+        
+        const insertRequest = database.poolconnection.request();
+        insertRequest.input('kontoNavn', VarChar(255), konto.kontoNavn);
+        insertRequest.input('opprettelsesdatoK', VarChar(255), konto.opprettelsesdatoK);
+        insertRequest.input('saldo', VarChar(255), konto.saldo);
+        insertRequest.input('bank', VarChar(255), konto.bank);
+        const result = await insertRequest.query(`
+            INSERT INTO investApp.konto (kontoNavn, saldo, oprettelsesdatoK, bank) 
+            VALUES (@kontoNavn, @saldo, @opprettelsesdatoK, @bank)
+            `)
+        console.log(result)
+
+         if(result.rowsAffected[0] === 0){
+            console.log("Kontoen din ble ikke opprettet")
+            return res.status(500).json({ message: 'Kunne ikke opprette konto' });
+        }
+        console.log(req.body);
+        console.log("Ny konto registrert:", konto.kontoNavn);
+        res.status(201).json({ message: 'Konto opprettet' });
+
+    } catch (error) {
+        console.error('Error in POST /blikunde:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
