@@ -8,13 +8,15 @@
 </head>
 <body>
   <div>
-    <h1>Bli kunde</h1>
+    <h1>Opprett konto </h1>
     <form > 
-      <input type="text" placeholder="kontoNavn" id="kontoNavn">
+      <input type="text" placeholder="Navnet på din konto" id="kontoNavn">
       <br>
-      <input type="text" placeholder="opprettelsesdato" id="opprettelsesdatoK">
+      <input type="text" placeholder="Opprettelsesdato" id="opprettelsesdatoK">
       <br>
-      <input type="text" placeholder="bank" id="bank">
+      <input type="text" placeholder="Bank" id="bank">
+      <br>
+      <input type="text" placeholder="Startsaldo" id="saldo">
       <br>
       <button type="button" class="Submit" id="submitbutton">Submit</button>
     </form>
@@ -23,24 +25,29 @@
 <script>
   const submitbutton = document.getElementById('submitbutton');
   
+  //const bruker = localStorage.getItem('brukernavn');
   
   submitbutton.addEventListener('click', function(event) {
     event.preventDefault(); 
-    const brukernavn = localStorage.getItem('brukernavn');
+    // const brukernavn = localStorage.getItem('brukernavn');
     const kontoNavn = document.getElementById('kontoNavn').value;
     const opprettelsesdatoK = document.getElementById('opprettelsesdatoK').value;
     const bank = document.getElementById('bank').value;
-    console.log(kontoNavn, opprettelsesdato, bank)
+    const saldo = document.getElementById('saldo').value;
+    console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo)
    
     fetch('/opprettKonto', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+
       },
       body: JSON.stringify({
         kontoNavn: kontoNavn,
         opprettelsesdatoK: opprettelsesdatoK,
-        bank: bank 
+        bank: bank, 
+        saldo: saldo,
+        brukernavn: brukernavn
       })
     })
     .then(async res => {
