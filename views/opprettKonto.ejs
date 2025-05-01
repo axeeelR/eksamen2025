@@ -4,37 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Opprett konto</title>
-  <link rel="stylesheet" href="opprettKonto.css">
+  
 </head>
 <body>
   <div>
-    <h1>Opprett konto </h1>
-    <form > 
-      <input type="text" placeholder="Navnet på din konto" id="kontoNavn">
-      <br>
-      <input type="text" placeholder="Opprettelsesdato" id="opprettelsesdatoK">
-      <br>
-      <input type="text" placeholder="Bank" id="bank">
-      <br>
-      <input type="text" placeholder="Startsaldo" id="saldo">
-      <br>
-      <button type="button" class="Submit" id="submitbutton">Submit</button>
-    </form>
-  </div>
+    <h1>Opprett Konto</h1>
+  <form id="opprettKontoForm">
+    <label for="kontoNavn">Kontonavn:</label>
+    <input type="text" id="kontoNavn" name="kontoNavn" required>
+    <br>
+    <label for="valuta">Valuta:</label>
+    <input type="text" id="valuta" name="valuta" required>
+    <br>
+    <label for="lukkedatoK">Lukkedato:</label>
+    <input type="date" id="lukkedatoK" name="lukkedatoK">
+    <br>
+    <label for="opprettelsedatoK">Opprettelsesdato:</label>
+    <input type="date" id="opprettelsedatoK" name="opprettelsedatoK" required>
+    <br>
+    <label for="saldo">Saldo:</label>
+    <input type="number" id="saldo" name="saldo" required>
+    <br>
+    <label for="bank">Bank:</label>
+    <input type="text" id="bank" name="bank" required>
+    <br>
+    <button type="submit" id="submitbutton">Opprett Konto</button>
+  </form>
   <a href="/"><button class="home-button">Home</button></a>
 <script>
   const submitbutton = document.getElementById('submitbutton');
   
-  //const bruker = localStorage.getItem('brukernavn');
+  const brukernavn = localStorage.getItem('brukernavn');
   
   submitbutton.addEventListener('click', function(event) {
     event.preventDefault(); 
-    // const brukernavn = localStorage.getItem('brukernavn');
+
     const kontoNavn = document.getElementById('kontoNavn').value;
-    const opprettelsesdatoK = document.getElementById('opprettelsesdatoK').value;
+    const opprettelsedatoK = document.getElementById('opprettelsedatoK').value;
+    const lukkedatoK = document.getElementById('lukkedatoK').value;
+    const valuta = document.getElementById('valuta').value;
     const bank = document.getElementById('bank').value;
     const saldo = document.getElementById('saldo').value;
-    console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo)
+
+    // console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo, lukkedatoK, valuta);
    
     fetch('/opprettKonto', {
       method: 'POST',
@@ -44,10 +56,12 @@
       },
       body: JSON.stringify({
         kontoNavn: kontoNavn,
-        opprettelsesdatoK: opprettelsesdatoK,
+        opprettelsedatoK: opprettelsedatoK,
         bank: bank, 
         saldo: saldo,
-        brukernavn: brukernavn
+        brukernavn: brukernavn,
+        lukkedatoK: lukkedatoK,
+        valuta: valuta
       })
     })
     .then(async res => {
