@@ -134,12 +134,13 @@ app.get('/konto', (req, res) => {
     res.render('konto');
 });
 
-
-app.get('/konto', async (req, res) => {
+app.get('/api/konto', async (req, res) => {
     const brukernavn = req.headers['brukernavn']; 
     console.log('Brukernavn mottatt fra headers:', brukernavn); // Logg brukernavn
-    if (!brukernavn) return res.status(401).json({ message: 'Ikke logget inn' });
-    onsole.error('Ingen brukernavn mottatt i headers.');
+    if (!brukernavn) {
+      console.error('Ingen brukernavn mottatt i headers.');
+      return res.status(401).json({ message: 'Ikke logget inn' });
+    }
   
     try {
       const database = await getDatabase();
@@ -162,10 +163,11 @@ app.get('/konto', async (req, res) => {
   
       res.json(kontoResult.recordset);
     } catch (error) {
-      console.error('Error in GET /konto:', error);
+      console.error('Error in GET /api/konto:', error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   });
+  
   
 
 
