@@ -5,21 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bytt Passord</title>
   <link rel="stylesheet" href="/styles/login.css" />
+  <link rel="stylesheet" href="/styles/sentrer.css" />
 </head>
 <body>
-  <div>
     <h1>Bytt Passord</h1>
+    <div class="center-screen">
     <form>
-      <input type="text" id="brukernavn" placeholder="Brukernavn">
-      <br>
-      <input type="password" id="oldPassord" placeholder="Gammelt Passord">
-      <br>
-      <input type="password" id="newPassord" placeholder="Nytt Passord">
-      <br>
+      <input type="text" id="brukernavn" placeholder="Brukernavn" />
+      <input type="password" id="oldPassord" placeholder="Gammelt Passord" />
+      <input type="password" id="newPassord" placeholder="Nytt Passord" />
       <button type="button" id="submitbutton">Submit</button>
     </form>
+    <button class="home-button"><a href="/">Home</a></button>
   </div>
-  <a href="/"><button>Home</button></a>
 
   <script>
     const submitbutton = document.getElementById('submitbutton');

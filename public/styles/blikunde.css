@@ -1,5 +1,5 @@
 .Submit{
-    background-color: #1e1e1e;
+    background-color: #73ec6a;
     color: white;
     padding: 10px 20px;
     margin: 8px 0;
@@ -14,9 +14,13 @@
 
 form{
     border-radius: 12px;
-    background-color: #c3c3c3;
+    background-color: #ffffff;
     padding: 20px;
     margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 h1{
@@ -26,7 +30,6 @@ h1{
   font-size: 50px;
   margin-top: 50px;
 }
-
 
 .home-button {
     background-color: #3a3a3a;
