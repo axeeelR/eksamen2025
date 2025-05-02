@@ -130,35 +130,41 @@ app.post('/blikunde', async (req, res) => {
     }
 }); 
 
-app.get('/konto', async (req, res) => {
-    try {
-        const brukernavn = req.headers['brukernavn'];
-
-        if (!brukernavn) {
-            return res.status(401).json({ message: 'Brukernavn mangler' });
-        }
-
-        const database = await getDatabase();
-        const request = database.poolconnection.request();
-
-        // Fetch the user's konto from the database
-        request.input('brukernavn', VarChar(255), brukernavn);
-        const result = await request.query(`
-            SELECT name, value FROM investApp.konto 
-            WHERE brukernavn = @brukernavn
-        `);
-
-        if (result.recordset.length === 0) {
-            return res.status(404).json({ message: 'Ingen konto funnet for brukeren' });
-        }
-
-        res.status(200).json({ items: result.recordset });
-    } catch (error) {
-        console.error('Error in GET /konto:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
+app.get('/konto', (req, res) => {
+    res.render('konto');
 });
 
+
+app.get('/konto', async (req, res) => {
+    const brukernavn = req.headers['brukernavn']; 
+    if (!brukernavn) return res.status(401).json({ message: 'Ikke logget inn' });
+  
+    try {
+      const database = await getDatabase();
+  
+      // Hent brukerID først
+      const brukerResult = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .query('SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn');
+  
+      if (brukerResult.recordset.length === 0) {
+        return res.status(404).json({ message: 'Bruker ikke funnet' });
+      }
+  
+      const brukerID = brukerResult.recordset[0].brukerID;
+  
+      // Hent kontoene
+      const kontoResult = await database.poolconnection.request()
+        .input('brukerID', sql.Int, brukerID)
+        .query('SELECT * FROM investApp.konto WHERE brukerID = @brukerID');
+  
+      res.json(kontoResult.recordset);
+    } catch (error) {
+      console.error('Error in GET /konto:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  });
+  
 
 
 /*app.post('/submit', (req, res) => {

@@ -3,60 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Konto</title>
-  <link rel="stylesheet" href="/styles/konto.css">
-  <link rel="stylesheet" href="/styles/index.css">
+  <title>Min konto</title>
 </head>
 <body>
+  <h1>Mine kontoer</h1>
+  <div id="kontoContainer">Laster kontoer...</div>
+  <a href="/"><button>Home</button></a>
 
-  <% include partials/menyPanel %>
+  <script>
+    const brukernavn = localStorage.getItem('brukernavn');
+    const kontoContainer = document.getElementById('kontoContainer');
 
-  <main class="main-content">
-  <h1>Min konto</h1>
-  <p>Her kan du se din konto</p>
-  <div id="konto">konto</div>
-  <div id="Eiendeler">Eiendeler</div>
-  <a href="/"><button class="home-button">Home</button></a>
-  </main>
-
-<script>
-  const brukernavn = localStorage.getItem('brukernavn');
-
-  if (!brukernavn) {
-    alert('Du må være logget inn for å se konto.');
-    window.location.href = '/login';
-  }
-
-  fetch('/konto', {
-    headers: {
-      'brukernavn': brukernavn
-    }
-  })
-    .then(res => {
-      console.log('Lokal lagret brukernavn:', brukernavn);
-      if (!res.ok) {
-        throw new Error('Ikke logget inn');
-      }
-      return res.json();
-    })
-    .then(data => {
-      console.log('Eiendeler:', data.items);
-      // Vis data i UI
-      const kontoContainer = document.getElementById('konto');
-      if (data.items && data.items.length > 0) {
-        data.items.forEach(item => {
-          const itemElement = document.createElement('p');
-          itemElement.textContent = `Eiendel: ${item.name}, Verdi: ${item.value}`;
-          kontoContainer.appendChild(itemElement);
-        });
-      } else {
-        kontoContainer.textContent = 'Ingen eiendeler funnet.';
-      }
-    })
-    .catch(error => {
-      alert(error.message);
+    if (!brukernavn) {
+      alert('Du må være logget inn.');
       window.location.href = '/login';
+    }
+
+    fetch('/konto', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'brukernavn': brukernavn,
+      }
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      if (data.length === 0) {
+        kontoContainer.textContent = "Du har ingen kontoer.";
+        return;
+      }
+
+      kontoContainer.innerHTML = '';
+      data.forEach(konto => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <h3>${konto.kontoNavn}</h3>
+          <p>Saldo: ${konto.saldo}</p>
+          <p>Valuta: ${konto.valuta}</p>
+          <p>Bank: ${konto.bank}</p>
+          <p>Opprettet: ${konto.opprettelsesdatoK}</p>
+          ${konto.lukkedatoK ?`<p>Lukket: ${konto.lukkedatoK}</p>` : ''}
+          <hr>
+        `;
+        kontoContainer.appendChild(div);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      kontoContainer.textContent = "Feil ved henting av kontoer.";
     });
-</script>
+  </script>
 </body>
 </html>
