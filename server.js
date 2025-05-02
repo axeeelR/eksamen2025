@@ -137,6 +137,7 @@ app.get('/konto', (req, res) => {
 
 app.get('/konto', async (req, res) => {
     const brukernavn = req.headers['brukernavn']; 
+    console.log('Brukernavn mottatt fra headers:', brukernavn); // Logg brukernavn
     if (!brukernavn) return res.status(401).json({ message: 'Ikke logget inn' });
   
     try {
