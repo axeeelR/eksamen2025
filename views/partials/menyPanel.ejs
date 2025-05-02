@@ -5,6 +5,18 @@
     <nav class="nav-links">
         <a href="/dashboard" class="nav-link">DASHBOARD</a>
         <a href="/konto" class="nav-link">ACCOUNT</a>
-        <a href="/Portofølje" class="nav-link">PORTOFOLIO</a>
+        <a href="/portofolje" class="nav-link">PORTOFOLIO</a>
+        <a href="/" class="nav-link" id="logout">LOG OUT</a>
     </nav>
+
+<script>
+  const logoutLink = document.getElementById('logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = '/login';
+    });
+  }
+</script>
+
 </aside>
