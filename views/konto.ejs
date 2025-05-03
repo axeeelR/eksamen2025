@@ -5,33 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mine kontoer</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/konto.css">
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-attachment: fixed;
-      background-color: #ddd;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    tr:hover {
-      background-color: #236fa922;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles/opprettKonto.css">
+  <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
+  <%- include ('partials/menyPanel') %> 
   <h1>Mine kontoer</h1>
   <div id="kontoContainer">
     <table>
@@ -49,9 +27,8 @@
         <!-- Kontoene vil bli lagt til her dynamisk -->
       </tbody>
     </table>
+    <a href="/opprettKonto"><button class="opprettKonto">Opprett konto</button></a>
   </div>
-  <a href="/"><button>Home</button></a>
-  <a href="/opprettKonto"><button>Opprett konto</button></a>
 
   <script>
     const brukernavn = localStorage.getItem('brukernavn');
@@ -97,5 +74,6 @@
       kontoTableBody.innerHTML = `<tr><td colspan="6">Feil ved henting av kontoer.</td></tr>`;
     });
   </script>
+
 </body>
 </html>

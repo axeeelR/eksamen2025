@@ -167,14 +167,6 @@ app.get('/api/konto', async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error' });
     }
   });
-  
-  
-
-
-/*app.post('/submit', (req, res) => {
-    const { name, age } = req.body;
-    res.json({ message: 'Data mottatt', name, age });
-});*/
 
 
 app.post('/byttepassord', async (req, res) => {
@@ -222,8 +214,8 @@ app.post('/byttepassord', async (req, res) => {
   
 
 app.post('/opprettKonto', async (req, res) => {
-    const {kontoNavn, opprettelsedatoK, saldo, bank, lukkedatoK, valuta, brukernavn} = req.body
     try{
+      const {kontoNavn, opprettelsedatoK, saldo, bank, lukkedatoK, valuta, brukernavn} = req.body
         const database = await getDatabase();
 
         const brukerResult = await database.poolconnection.request()
@@ -236,13 +228,17 @@ app.post('/opprettKonto', async (req, res) => {
     }
 
     const brukerID = brukerResult.recordset[0].brukerID;
+
+    //formatere datoene til YYYY-MM-DD
+    const formattedOpprettelsedatoK = new Date(opprettelsedatoK).toISOString().split('T')[0];
+    const formattedLukkedatoK = lukkedatoK ? new Date(lukkedatoK).toISOString().split('T')[0] : null;
         
         const insertRequest = database.poolconnection.request();
         insertRequest.input('kontoNavn', sql.VarChar(255), kontoNavn);
-        insertRequest.input('opprettelsedatoK', sql.VarChar(255), opprettelsedatoK);
-        insertRequest.input('saldo', sql.VarChar(255), saldo);
+        insertRequest.input('opprettelsedatoK', sql.Date, formattedOpprettelsedatoK);
+        insertRequest.input('saldo', sql.BigInt, saldo);
         insertRequest.input('bank', sql.VarChar(255), bank);
-        insertRequest.input('lukkedatoK', sql.VarChar(255), lukkedatoK);
+        insertRequest.input('lukkedatoK', sql.Date, formattedLukkedatoK);
         insertRequest.input('valuta', sql.VarChar(255), valuta);
         insertRequest.input('brukerID', sql.Int, brukerID); // Bruk sql.Int for integer
 
