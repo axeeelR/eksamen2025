@@ -132,6 +132,10 @@ button {
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  justify-content: center;
+  display: column;
+  margin: 0 auto;
 }
   
 .stock-table h2 {
@@ -140,7 +144,7 @@ button {
     font-family: 'inter', sans-serif;
   }
   
-.stock-table table {
+.stock-table table{
   width: 100%;
   border-collapse: collapse;
   font-size: 8px;

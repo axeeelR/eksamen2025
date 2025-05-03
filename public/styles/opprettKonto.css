@@ -10,6 +10,7 @@ form {
     background-color: #c3c3c3;
     padding: 20px;
     margin: 20px 0;
+    margin-left: 220px;
 }
 
 input {
@@ -23,3 +24,24 @@ input {
     font-family: 'inter', sans-serif;
     font-size: 16px;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    margin-left: 160px;
+    background-color: #f9f9f9;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+
+ 

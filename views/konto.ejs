@@ -3,26 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Min konto</title>
+  <title>Mine kontoer</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/konto.css">
+  <link rel="stylesheet" href="/styles/opprettKonto.css">
+  <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
+  <%- include ('partials/menyPanel') %> 
   <h1>Mine kontoer</h1>
-  <div id="kontoContainer">Laster kontoer...</div>
-  <a href="/"><button>Home</button></a>
-  <a href="/opprettKonto"><button>Opprett konto</button> </a>
+  <div id="kontoContainer">
+    <table>
+      <thead>
+        <tr>
+          <th>Kontonavn</th>
+          <th>Saldo</th>
+          <th>Valuta</th>
+          <th>Bank</th>
+          <th>Opprettet</th>
+          <th>Lukket</th>
+        </tr>
+      </thead>
+      <tbody id="kontoTableBody">
+        <!-- Kontoene vil bli lagt til her dynamisk -->
+      </tbody>
+    </table>
+    <a href="/opprettKonto"><button class="opprettKonto">Opprett konto</button></a>
+  </div>
 
   <script>
     const brukernavn = localStorage.getItem('brukernavn');
-    const kontoContainer = document.getElementById('kontoContainer');
+    const kontoTableBody = document.getElementById('kontoTableBody');
 
     if (!brukernavn) {
       alert('Du må være logget inn.');
       window.location.href = '/login';
     }
 
-    fetch('/konto', {
+    fetch('/api/konto', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -34,29 +51,29 @@
       if (!res.ok) throw new Error(data.message);
 
       if (data.length === 0) {
-        kontoContainer.textContent = "Du har ingen kontoer.";
+        kontoTableBody.innerHTML = `<tr><td colspan="6">Du har ingen kontoer.</td></tr>`;
         return;
       }
 
-      kontoContainer.innerHTML = '';
+      kontoTableBody.innerHTML = '';
       data.forEach(konto => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-          <h3>${konto.kontoNavn}</h3>
-          <p>Saldo: ${konto.saldo}</p>
-          <p>Valuta: ${konto.valuta}</p>
-          <p>Bank: ${konto.bank}</p>
-          <p>Opprettet: ${konto.opprettelsesdatoK}</p>
-          ${konto.lukkedatoK ?`<p>Lukket: ${konto.lukkedatoK}</p>` : ''}
-          <hr>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${konto.kontoNavn}</td>
+          <td>${konto.saldo}</td>
+          <td>${konto.valuta}</td>
+          <td>${konto.bank}</td>
+          <td>${konto.opprettelsesdatoK}</td>
+          <td>${konto.lukkedatoK || 'Ikke lukket'}</td>
         `;
-        kontoContainer.appendChild(div);
+        kontoTableBody.appendChild(row);
       });
     })
     .catch(err => {
       console.error(err);
-      kontoContainer.textContent = "Feil ved henting av kontoer.";
+      kontoTableBody.innerHTML = `<tr><td colspan="6">Feil ved henting av kontoer.</td></tr>`;
     });
   </script>
+
 </body>
 </html>

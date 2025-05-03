@@ -71,3 +71,12 @@ body {
 .home-button:hover {
   background-color: #0056b3; /* Mørkere blå ved hover */
 }
+
+.opprettKonto {
+  background-color: #f2f2f2;
+  color: #cdc2c2;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  margin-left: 300px;
+}
+
