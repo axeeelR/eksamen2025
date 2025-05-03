@@ -17,8 +17,55 @@
         <p>Her kan du se din konto</p>
         <div id="konto">konto</div>
         <div id="Eiendeler">Eiendeler</div>
-           
         
     </main>
+    <script>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let brukernavn = urlParams.get('brukernavn');
+
+        if (!brukernavn){
+            brukernavn = localStorage.getItem('brukernavn');
+        }
+
+        const kontoDiv = document.getElementById('konto');
+
+        if (!brukernavn) {
+            kontoDiv.innerHTML = '<p>Du må være logget inn fir å se kontoene dine.</p>';
+            throw new Error('Brukernavn mangler');
+        }
+
+        fetch (`/api/kontoer?brukernavn=${brukernavn}`)
+            .then(res => res.json())
+            .then(kontoer => {
+                if (kontoer.length === 0) {
+                    kontoDiv.innerHTML = '<p>Ingen kontoer funnet.</p>';
+                    return;
+            }
+
+        kontoer.forEach(konto => {
+            const kontoElement = document.createElement('div');
+            kontoElement.classList.add('konto-kort');
+
+            kontoElement.innerHTML = `
+                <h2>${konto.kontoNavn}</h2>
+                <p>Bank: ${konto.bank}</p>
+                <p>Valuta: ${konto.valuta}</p>
+                <p>Saldo: ${konto.saldo}</p>
+                <p>Opprettelsedato: ${new Date (konto.opprettelsedatoK).toLocaleDateString()}</p>
+                <button class="avslutt-konto-knapp" data-kontoid="${konto.kontoID}">Avslutt konto</button>
+            `;
+            kontoElement.querySelector('.avslutt-konto-knapp').addEventListener('click', () => {
+                alert(`Konto ${konto.kontoNavn} er avsluttet.`);
+            });
+
+            kontoDiv.appendChild(kontoElement);
+        });
+    })
+    .catch(err => {
+        console.error('Feil ved henting av kontoer:', err);
+        kontoDiv.innerHTML = '<p>Det oppstod en feil ved henting av kontoer.</p>';
+    });
+    </script>
 </body>
 </html>

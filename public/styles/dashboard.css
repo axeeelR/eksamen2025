@@ -1,0 +1,9 @@
+.avslutt-konto-knapp{
+    background-color: #f44336;
+    color: white; 
+}
+
+.avslutt-konto-knapp:hover{
+    background-color: #f44336;
+    color: white;
+}

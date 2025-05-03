@@ -4,7 +4,7 @@ h1{
   text-align: center;
   margin-top: 50px;
   font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-};
+}
 
 button{
   background-color: #25239c;
@@ -21,14 +21,14 @@ button{
   text-transform: uppercase;
   letter-spacing: 2px;
   transition: 0.3s;
-};
+}
 
 form{
   border-radius: 12px;
   background-color: #f2f2f2;
   padding: 20px;
   margin: 20px 0;
-};
+}
 
 button:hover{
   background-color: #000000;
@@ -40,7 +40,12 @@ p{
   text-align: center;
   margin-top: 20px;
   font-family: cursive;
-};
+}
+
+main{
+  margin-top: 100px;
+  padding: 0 20px;
+}
 
 body {
   margin: 0;
@@ -60,6 +65,7 @@ body {
   font-size: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
+  z-index: 9999; /* Sørger for at knappen er over andre elementer */
 }
 
 .home-button:hover {
