@@ -24,5 +24,41 @@
         </select>
         <button type="submit">Opprett Portefølje</button>
     </form>
+    
+    <script>
+        const submitbutton = document.getElementById('submitbutton');
+        submitbutton.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const navn = document.getElementById('navn').value;
+            const kontoID = document.getElementById('kontoID').value;
+
+            if (!navn || !kontoID) {
+                alert('Vennligst fyll ut alle felt.');
+                return;
+            }
+
+            fetch('/opprettPortefolje', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    navn: navn,
+                    kontoID: kontoID
+                })
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                alert('Portefølje opprettet:')
+                window.location.href = '/portefolje';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            alert(error.message)
+            });
+        });
+    </script>
 </body>
 </html>

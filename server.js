@@ -274,11 +274,9 @@ app.get('/portofolje', (req, res) => {
     res.render('portofolje');
 });
 
-<<<<<<< HEAD
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
-  
-=======
+});
 
 /*---------------------------------------------------------*/
 /* Opprette portefølje */
@@ -303,14 +301,14 @@ app.post('/opprettPortefolje', async (req, res) => {
   const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
 
   try {
-    const database = await getDatabase();
-    await database.request()
-    .input('navn', sql.VarChar(255), navn)
+    const { poolconnection } = await getDatabase();
+    await poolconnection.request()
+    .input('portefoljeNavn', sql.VarChar(255), navn)
     .input('kontoID', sql.Int, kontoID)
-    .input('dato', sql.Date, dato)
+    .input('opprettelsedatoP', sql.Date, dato)
     .query(`
-      INSERT INTO investApp.portefolje (navn, kontoID, dato)
-      VALUES (@navn, @kontoID, @dato)
+      INSERT INTO investApp.portefolje (portefoljeNavn, kontoID, opprettelsedatoP)
+      VALUES (@portefoljeNavn, @kontoID, @opprettelsedatoP)
     `);
 
     res.redirect('/portofolje');
@@ -319,4 +317,4 @@ app.post('/opprettPortefolje', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
->>>>>>> ea8f034363837fd5fa299ff6977ca11241da429d
+
