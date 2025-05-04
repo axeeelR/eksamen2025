@@ -273,3 +273,44 @@ app.get('/dashboard', (req, res) => {
 app.get('/portofolje', (req, res) => {
     res.render('portofolje');
 });
+
+
+/*---------------------------------------------------------*/
+/* Opprette portefølje */
+
+app.get('/opprettPortefolje', async (req, res) => {
+  try {
+    const database = await getDatabase();
+    const request = database.poolconnection.request();
+    const result = await request.query('SELECT kontoID, kontoNavn, saldo FROM investApp.konto');
+    const kontoer = result.recordset;
+
+    console.log('Kontoer hentet fra databasen:', kontoer); //debug
+    res.render('opprettPortefolje', { kontoer });
+  } catch (error) {
+    console.error('FEIL i GET /opprettPortefolje:', error);
+    res.status(500).send('Noe er feil');
+  }
+});
+
+app.post('/opprettPortefolje', async (req, res) => {
+  const { navn, kontoID } = req.body;
+  const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
+
+  try {
+    const database = await getDatabase();
+    await database.request()
+    .input('navn', sql.VarChar(255), navn)
+    .input('kontoID', sql.Int, kontoID)
+    .input('dato', sql.Date, dato)
+    .query(`
+      INSERT INTO investApp.portefolje (navn, kontoID, dato)
+      VALUES (@navn, @kontoID, @dato)
+    `);
+
+    res.redirect('/portofolje');
+} catch (error) {
+    console.error('Feil i POST /opprettPortefolje:', error);
+    res.status(500).send(error.message);
+  }
+});
