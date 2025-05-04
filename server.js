@@ -270,8 +270,8 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
 
-app.get('/portofolje', (req, res) => {
-    res.render('portofolje');
+app.get('/portefolje', (req, res) => {
+    res.render('portefolje');
 });
 
 app.post('/transaksjoner', async (req, res) => {
@@ -311,7 +311,7 @@ app.post('/opprettPortefolje', async (req, res) => {
       VALUES (@portefoljeNavn, @kontoID, @opprettelsedatoP)
     `);
 
-    res.redirect('/portofolje');
+    res.redirect('/portefolje');
 } catch (error) {
     console.error('Feil i POST /opprettPortefolje:', error);
     res.status(500).send(error.message);
