@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opprett Portefølje</title>
+    <link rel="stylesheet" href="/styles/index.css">
+    <link rel="stylesheet" href="/styles/portofolje.css">
+</head>
+<body>
+    <h1>Opprett Portefølje</h1>
+
+    <form action="/opprettPortefolje" method="POST">
+        <label for="navn">Porteføljenavn:</label>
+        <input type="text" id="navn" name="navn" required>
+
+        <label for="kontoID">Velg konto:</label>
+        <select name="kontoID" id="kontoID" required>
+            <% kontoer.forEach(konto => { %>
+                <option value="<%= konto.kontoID %>">
+                    <%= konto.kontoNavn %> - saldo: <%= konto.saldo %> DKK </option>
+            <% }) %>
+        </select>
+        <button type="submit">Opprett Portefølje</button>
+    </form>
+</body>
+</html>
