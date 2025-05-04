@@ -274,6 +274,11 @@ app.get('/portofolje', (req, res) => {
     res.render('portofolje');
 });
 
+<<<<<<< HEAD
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+  
+=======
 
 /*---------------------------------------------------------*/
 /* Opprette portefølje */
@@ -314,3 +319,4 @@ app.post('/opprettPortefolje', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+>>>>>>> ea8f034363837fd5fa299ff6977ca11241da429d
