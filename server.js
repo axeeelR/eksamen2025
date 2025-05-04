@@ -273,3 +273,7 @@ app.get('/dashboard', (req, res) => {
 app.get('/portofolje', (req, res) => {
     res.render('portofolje');
 });
+
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+  
