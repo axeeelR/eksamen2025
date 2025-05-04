@@ -1,0 +1,21 @@
+.main-content {
+    padding: 60px 40px;
+    margin-left: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.opprettKnapp {
+    margin-top: 30px;
+    font-size: 12px;
+    background-color: #bebfbe;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: backround-color 0.3s ease;
+}
+
+.opprettKnapp:hover {
+    background-color: aquamarine;
+}
