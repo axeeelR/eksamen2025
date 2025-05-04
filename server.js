@@ -270,8 +270,17 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
 
-app.get('/portefolje', (req, res) => {
-    res.render('portefolje');
+app.get('/portefolje', async (req, res) => {
+  try {
+    const { poolconnection } = await getDatabase();
+    const result = await poolconnection.request().query('SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
+    
+    const portefoljer = result.recordset;
+    res.render('portefolje', { portefoljer });
+  } catch (error) {
+    console.error('FEIL i GET /portefolje:', error);
+    res.status(500).send('Kunne ikke hente porteføljer');
+  }
 });
 
 app.post('/transaksjoner', async (req, res) => {

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portefølje</title>
     <link rel="stylesheet" href="/styles/index.css">
-    <link rel="stylesheet" href="/styles/portofolje.css">   
+    <link rel="stylesheet" href="/styles/portefolje.css">   
     <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
@@ -14,8 +14,25 @@
     <main class="main-content">
         <h1>Portefølje</h1>
         <p>Her kan du se din portefølje</p>
-        <div id="portofolje"></div>
-        
+        <div id="portefolje">
+            <% if (portefoljer && portefoljer.length > 0) { %>
+            <ul class="portefoljeOversikt">
+                <% portefoljer.forEach(p => { %>
+                    <li class="portefoljeEnkelt">
+                        <strong><%= p.navn %></strong><br>Konto: <%= p.kontoNavn %><br>Saldo: <%= p.saldo %> DKK<br>Opprettet:
+                    <% if (p.opprettelsedatoP) { %>
+                        <%= new Date(p.opprettelsedatoP).toLocaleDateString('no-NO') %>
+                        <% } else { %>
+                            Ukjent dato
+                        <% } %>
+                    </li>
+                    <% }) %>
+                </ul>
+                <% } else { %>
+                    <p>Ingen porteføljer funnet</p>
+                    <% } %>
+            </div>
+
         <a href="/opprettPortefolje"><button class="opprettKnapp">Opprett portefølje</button></a>
     </main>
 </body>
