@@ -1,55 +1,62 @@
-.Submit{
-    background-color: #73ec6a;
-    color: white;
-    padding: 10px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-    font-family: 'inter', sans-serif;
-    font-size: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
+body {
+  margin: 0;
+  background-color: #1E1E1E;
+  font-family: 'Inter,' sans-serif;
+  color: #1E1E1E;
 }
 
-form{
-    border-radius: 12px;
-    background-color: #ffffff;
-    padding: 20px;
-    margin: 20px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    max-width: 400px;
-    width: 100%;
-    gap: 12px;
-}
-
-h1{
+h1 {
   color: #c3c3c3;
   text-align: center;
   font-family: 'Inter,' sans-serif;
-  font-size: 50px;
-  margin-top: 50px;
+  font-size: 40px;
+  margin-top: 40px;
 }
 
-.home-button {
+.center-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+form {
+  font-family: 'inter', sans-serif;
+  background-color: #ffffff;
+  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+}
+
+form input {
+  width: 90%;
+  padding: 12px;
+  margin: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #c3c3c3;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+}
+
+.Submit {
   background-color: #3a3a3a;
-  color: #8b8b8b;
+  color: #ffffff;
   padding: 14px 20px;
   margin: 8px 0;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  border-radius: 8px;
+  font-family: 'inter', sans-serif;
   font-size: 16px;
+  border-radius: 8px;
 }
-  
-  .home-button:hover {
-    background-color: #2b2733; /* Mørkere blå ved hover */
-  }
-  
