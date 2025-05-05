@@ -273,7 +273,8 @@ app.get('/dashboard', (req, res) => {
 app.get('/portefolje', async (req, res) => {
   try {
     const { poolconnection } = await getDatabase();
-    const result = await poolconnection.request().query('SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
+    const result = await poolconnection.request().query(
+    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
     
     const portefoljer = result.recordset;
     res.render('portefolje', { portefoljer });
@@ -282,11 +283,6 @@ app.get('/portefolje', async (req, res) => {
     res.status(500).send('Kunne ikke hente porteføljer');
   }
 });
-
-app.post('/transaksjoner', async (req, res) => {
-  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
-});
-
 
 
 app.get('/opprettPortefolje', async (req, res) => {
@@ -326,3 +322,7 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
+
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+});
