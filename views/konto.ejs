@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mine kontoer</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/opprettKonto.css">
+  <link rel="stylesheet" href="/styles/konto.css">
   <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
@@ -53,7 +53,7 @@
       if (!res.ok) throw new Error(data.message);
 
       if (data.length === 0) {
-        kontoTableBody.innerHTML = `<tr><td colspan="6">Du har ingen kontoer.</td></tr>`;
+        kontoTableBody.innerHTML = 'Du har ingen kontoer.';
         return;
       }
 
@@ -65,7 +65,7 @@
           <td>${konto.saldo}</td>
           <td>${konto.valuta}</td>
           <td>${konto.bank}</td>
-          <td>${konto.opprettelsesdatoK}</td>
+          <td>${konto.opprettelsedatoK}</td>
           <td>${konto.lukkedatoK || 'Ikke lukket'}</td>
         `;
         kontoTableBody.appendChild(row);
@@ -73,7 +73,7 @@
     })
     .catch(err => {
       console.error(err);
-      kontoTableBody.innerHTML = `<tr><td colspan="6">Feil ved henting av kontoer.</td></tr>`;
+      kontoTableBody.innerHTML = 'Feil ved henting av kontoer';
     });
   </script>
 
