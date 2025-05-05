@@ -25,7 +25,9 @@ form {
   background-color: #ffffff;
   width: 100%;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  display: flex;
+  align-items: center;
 }
 
 .form-layout {

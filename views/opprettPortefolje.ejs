@@ -14,10 +14,10 @@
     <h1>Opprett Portefølje</h1>
 
     <form action="/opprettPortefolje" method="POST">
-        <label for="navn">Porteføljenavn:</label>
+        <label for="navn">PORTEFØLJE-NAVN</label>
         <input type="text" id="navn" name="navn" required>
 
-        <label for="kontoID">Konto ID:</label>
+        <label for="kontoID">KONTO ID</label>
         <select id="kontoID" name="kontoID" required>
             <% kontoer.forEach(konto => { %>
                 <option value="<%= konto.kontoID %>"><%= konto.kontoNavn %></option>

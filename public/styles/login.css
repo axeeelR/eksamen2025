@@ -22,7 +22,7 @@ h1 {
 
 form {
   font-family: 'inter', sans-serif;
-  background-color: #ffffff;
+  background-color: #c3c3c3;
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -61,7 +61,7 @@ form {
 }
 
 label {
-  color: #c3c3c3;
+  color: #3a3a3a;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   margin-bottom: 8px;
@@ -73,8 +73,7 @@ form input {
   margin-bottom: 20px;
   border: none;
   border-radius: 8px;
-  background-color: #3204ec;
-  color: #c3c3c3;
+  background-color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
 }
