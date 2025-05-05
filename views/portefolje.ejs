@@ -12,28 +12,24 @@
     <%- include ('partials/menyPanel') %>
 
     <main class="main-content">
+        <div id="knappContainer">
+            <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
         <h1>Portefølje</h1>
         <p>Her kan du se din portefølje</p>
         <div id="portefolje">
-            <% if (portefoljer && portefoljer.length > 0) { %>
-            <ul class="portefoljeOversikt">
-                <% portefoljer.forEach(p => { %>
-                    <li class="portefoljeEnkelt">
-                        <strong><%= p.navn %></strong><br>Konto: <%= p.kontoNavn %><br>Saldo: <%= p.saldo %> DKK<br>Opprettet:
-                    <% if (p.opprettelsedatoP) { %>
-                        <%= new Date(p.opprettelsedatoP).toLocaleDateString('no-NO') %>
-                        <% } else { %>
-                            Ukjent dato
-                        <% } %>
-                    </li>
-                    <% }) %>
-                </ul>
-                <% } else { %>
-                    <p>Ingen porteføljer funnet</p>
-                    <% } %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Porteføljenavn</th>
+                        <th>Konto</th>
+                        <th>Saldo</th>
+                        <th>Opprettet</th>
+                    </tr>
+                    <tbody id="portefoljeOversikt"><!-- Porteføljene vil bli lagt til her dynamisk -->
+                </thead>
             </div>
-        <a href= '/opprettPortefolje'><button class="opprettKnapp">Opprett portefølje</button></a>
-    </main>
+        </main>
+
     <script>
         const brukernavn = localStorage.getItem('brukernavn');
 
@@ -42,11 +38,46 @@
             window.location.href = '/login';
         }
 
+        fetch('/api/portefolje', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'brukernavn': brukernavn,
+            }
+        })
+
+        .then(res => res.json())
+        .then(portefoljer => {
+            const tbody = document.getElementById('portefoljeOversikt');
+
+            if (!portefoljer.length) {
+                document.getElementById('portefolje').innerHTML = '<p>Ingen porteføljer funnet</p>';
+                return;
+            }
+
+            portefoljer.forEach(portefolje => {
+                const li = document.createElement('tr');
+                li.innerHTML = `
+                <td>${portefolje.portefoljeNavn}</td>
+                <td>Konto: ${portefolje.kontoNavn}</td>
+                <td>Saldo: ${portefolje.saldo} DKK</td>
+                <td>Opprettet: ${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
+                    `;
+                tbody.appendChild(li);
+            });
+        })
+        .catch(err => {
+            console.error('Error ved å hente portefoljer:', err);
+        });
+        /*
+        const brukernavn = localStorage.getItem('brukernavn');
+
         const url = new URL(window.location.href);
         if (!url.searchParams.get('brukernavn')){
             url.searchParams.set('brukernavn', brukernavn);
             window.location.href = url.toString();
         }
+        */
     </script>
 </body>
 </html>

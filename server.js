@@ -268,21 +268,26 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
 
-app.get('/portefolje', async (req, res) => {
-  const brukernavn = req.query.brukernavn; // Hent brukernavn fra query-parameter
+app.get('/portefolje', (req, res) => {
+    res.render('portefolje');
+});
+
+app.get('/api/portefolje', async (req, res) => {
+  const brukernavn = req.headers['brukernavn']; // Hent brukernavn fra query-parameter
   
   try {
     const { poolconnection } = await getDatabase();
     const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(
     'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID JOIN investApp.bruker b ON k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn');
     
-    const portefoljer = result.recordset;
-    res.render('portefolje', { portefoljer: result.recordset });
+    res.json(result.recordset);
   } catch (error) {
     console.error('FEIL i GET /portefolje:', error);
-    res.status(500).send('Kunne ikke hente porteføljer');
+    res.status(500).json({message:'Kunne ikke hente porteføljer'});
   }
 });
+
+/*------------------------------------------------------------------ */
 
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
@@ -390,5 +395,4 @@ app.post('/indsettelse', async (req, res) => {
     console.error('Feil i POST /indsettelse:', error);
     res.status(500).json({ message: 'Intern feil' });
   }
->>>>>>> 8f4d0c7e8f685efa2d9c76fd8ec66e64e5d78556
 });
