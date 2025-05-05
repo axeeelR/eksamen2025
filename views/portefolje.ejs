@@ -32,8 +32,21 @@
                     <p>Ingen porteføljer funnet</p>
                     <% } %>
             </div>
-
-        <a href="/opprettPortefolje"><button class="opprettKnapp">Opprett portefølje</button></a>
+        <a href= '/opprettPortefolje'><button class="opprettKnapp">Opprett portefølje</button></a>
     </main>
+    <script>
+        const brukernavn = localStorage.getItem('brukernavn');
+
+        if (!brukernavn) {
+            alert('Du må være logget inn.');
+            window.location.href = '/login';
+        }
+
+        const url = new URL(window.location.href);
+        if (!url.searchParams.get('brukernavn')){
+            url.searchParams.set('brukernavn', brukernavn);
+            window.location.href = url.toString();
+        }
+    </script>
 </body>
 </html>

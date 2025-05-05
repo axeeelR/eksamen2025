@@ -269,13 +269,15 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/portefolje', async (req, res) => {
+  const brukernavn = req.query.brukernavn; // Hent brukernavn fra query-parameter
+  
   try {
     const { poolconnection } = await getDatabase();
-    const result = await poolconnection.request().query(
-    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
+    const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(
+    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID JOIN investApp.bruker b ON k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn');
     
     const portefoljer = result.recordset;
-    res.render('portefolje', { portefoljer });
+    res.render('portefolje', { portefoljer: result.recordset });
   } catch (error) {
     console.error('FEIL i GET /portefolje:', error);
     res.status(500).send('Kunne ikke hente porteføljer');
@@ -289,10 +291,14 @@ app.post('/transaksjoner', async (req, res) => {
 /*--------------------------------------------------------------- */
 
 app.get('/opprettPortefolje', async (req, res) => {
+  const brukernavn = req.query.brukernavn; // Hent brukernavn fra query-parameter
+  
   try {
     const database = await getDatabase();
     const request = database.poolconnection.request();
-    const result = await request.query('SELECT kontoID, kontoNavn, saldo FROM investApp.konto');
+    request.input('brukernavn', sql.VarChar(255), brukernavn);
+
+    const result = await request.query(`SELECT k.kontoID, k.kontoNavn, k.saldo FROM investApp.konto k JOIN investApp.bruker b on k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn`);
     const kontoer = result.recordset;
 
     console.log('Kontoer hentet fra databasen:', kontoer); //debug
@@ -318,14 +324,14 @@ app.post('/opprettPortefolje', async (req, res) => {
       VALUES (@portefoljeNavn, @kontoID, @opprettelsedatoP)
     `);
 
-    res.redirect('/portefolje');
+    res.redirect('/portefolje?brukernavn=' + req.body.brukernavn); // Redirect to portefolje page with brukernavn as query parameter
 } catch (error) {
     console.error('Feil i POST /opprettPortefolje:', error);
     res.status(500).send(error.message);
   }
 });
 
-
+/*-------------------------------------------------------------------------- */
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
 });

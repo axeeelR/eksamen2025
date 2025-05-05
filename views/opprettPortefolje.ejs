@@ -10,23 +10,35 @@
     <link rel="stylesheet" href="/styles/sentrer.css">
 </head>
 <body>
+    <main>
     <h1>Opprett Portefølje</h1>
 
     <form action="/opprettPortefolje" method="POST">
         <label for="navn">Porteføljenavn:</label>
         <input type="text" id="navn" name="navn" required>
 
-        <label for="kontoID">Velg konto:</label>
-        <select name="kontoID" id="kontoID" required>
+        <label for="kontoID">Konto ID:</label>
+        <select id="kontoID" name="kontoID" required>
             <% kontoer.forEach(konto => { %>
-                <option value="<%= konto.kontoID %>">
-                    <%= konto.kontoNavn %> - saldo: <%= konto.saldo %> DKK </option>
+                <option value="<%= konto.kontoID %>"><%= konto.kontoNavn %></option>
             <% }) %>
         </select>
+
+        <input type="hidden" name="brukernavn" id="brukernavnSkjult"></input>
         <button type="submit">Opprett Portefølje</button>
     </form>
+    </main>
 
     <script>
+        const brukernavn = localStorage.getItem('brukernavn');
+
+        document.getElementById('brukernavnSkjult').value = localStorage.getItem('brukernavn');
+        if (brukernavn && !location.search.includes('brukernavn')) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('brukernavn', brukernavn);
+            window.location.href = url.toString();
+        }
+        /*
         const brukernavn = localStorage.getItem('brukernavn');
         
         const submitbutton = document.getElementById('submitbutton');
@@ -63,6 +75,7 @@
             alert(error.message)
             });
         });
+        */
     </script>
 </body>
 </html>
