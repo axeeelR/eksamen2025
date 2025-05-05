@@ -231,20 +231,18 @@ app.post('/opprettKonto', async (req, res) => {
 
     //formatere datoene til YYYY-MM-DD
     const formattedOpprettelsedatoK = new Date(opprettelsedatoK).toISOString().split('T')[0];
-    const formattedLukkedatoK = lukkedatoK ? new Date(lukkedatoK).toISOString().split('T')[0] : null;
         
         const insertRequest = database.poolconnection.request();
         insertRequest.input('kontoNavn', sql.VarChar(255), kontoNavn);
         insertRequest.input('opprettelsedatoK', sql.Date, formattedOpprettelsedatoK);
         insertRequest.input('saldo', sql.BigInt, saldo);
         insertRequest.input('bank', sql.VarChar(255), bank);
-        insertRequest.input('lukkedatoK', sql.Date, formattedLukkedatoK);
         insertRequest.input('valuta', sql.VarChar(255), valuta);
         insertRequest.input('brukerID', sql.Int, brukerID); // Bruk sql.Int for integer
 
         const result = await insertRequest.query(`
-            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, lukkedatoK, valuta, brukerID) 
-            VALUES (@kontoNavn, @saldo, @opprettelsedatoK, @bank, @lukkedatoK, @valuta, @brukerID)
+            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, valuta, brukerID) 
+            VALUES (@kontoNavn, @saldo, @opprettelsedatoK, @bank, @valuta, @brukerID)
             `)
         console.log(result)
 
@@ -273,7 +271,8 @@ app.get('/dashboard', (req, res) => {
 app.get('/portefolje', async (req, res) => {
   try {
     const { poolconnection } = await getDatabase();
-    const result = await poolconnection.request().query('SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
+    const result = await poolconnection.request().query(
+    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
     
     const portefoljer = result.recordset;
     res.render('portefolje', { portefoljer });
@@ -326,3 +325,7 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
+
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+});
