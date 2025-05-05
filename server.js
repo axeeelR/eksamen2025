@@ -287,7 +287,7 @@ app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
 });
 
-
+/*--------------------------------------------------------------- */
 
 app.get('/opprettPortefolje', async (req, res) => {
   try {
