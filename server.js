@@ -231,20 +231,18 @@ app.post('/opprettKonto', async (req, res) => {
 
     //formatere datoene til YYYY-MM-DD
     const formattedOpprettelsedatoK = new Date(opprettelsedatoK).toISOString().split('T')[0];
-    const formattedLukkedatoK = lukkedatoK ? new Date(lukkedatoK).toISOString().split('T')[0] : null;
         
         const insertRequest = database.poolconnection.request();
         insertRequest.input('kontoNavn', sql.VarChar(255), kontoNavn);
         insertRequest.input('opprettelsedatoK', sql.Date, formattedOpprettelsedatoK);
         insertRequest.input('saldo', sql.BigInt, saldo);
         insertRequest.input('bank', sql.VarChar(255), bank);
-        insertRequest.input('lukkedatoK', sql.Date, formattedLukkedatoK);
         insertRequest.input('valuta', sql.VarChar(255), valuta);
         insertRequest.input('brukerID', sql.Int, brukerID); // Bruk sql.Int for integer
 
         const result = await insertRequest.query(`
-            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, lukkedatoK, valuta, brukerID) 
-            VALUES (@kontoNavn, @saldo, @opprettelsedatoK, @bank, @lukkedatoK, @valuta, @brukerID)
+            INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, valuta, brukerID) 
+            VALUES (@kontoNavn, @saldo, @opprettelsedatoK, @bank, @valuta, @brukerID)
             `)
         console.log(result)
 

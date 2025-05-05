@@ -27,9 +27,6 @@
     <label for="opprettelsedatoK">Opprettelsesdato:</label>
     <input type="date" id="opprettelsedatoK" name="opprettelsedatoK" required>
     <br>
-    <label for="lukkedatoK">Lukkedato:</label>
-    <input type="date" id="lukkedatoK" name="lukkedatoK">
-    <br>
     <label for="saldo">Saldo:</label>
     <input type="number" id="saldo" name="saldo" required>
     <br>
@@ -48,7 +45,6 @@
 
     const kontoNavn = document.getElementById('kontoNavn').value;
     const opprettelsedatoK = document.getElementById('opprettelsedatoK').value;
-    const lukkedatoK = document.getElementById('lukkedatoK').value;
     const valuta = document.getElementById('valuta').value;
     const bank = document.getElementById('bank').value;
     const saldo = document.getElementById('saldo').value;
@@ -73,7 +69,6 @@
         bank: bank, 
         saldo: saldo,
         brukernavn: brukernavn,
-        lukkedatoK: lukkedatoK,
         valuta: valuta
       })
     })
