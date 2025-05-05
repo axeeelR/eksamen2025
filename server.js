@@ -215,7 +215,7 @@ app.post('/byttepassord', async (req, res) => {
 
 app.post('/opprettKonto', async (req, res) => {
     try{
-      const {kontoNavn, opprettelsedatoK, saldo, bank, lukkedatoK, valuta, brukernavn} = req.body
+      const {kontoNavn, opprettelsedatoK, saldo, bank, valuta, brukernavn} = req.body
         const database = await getDatabase();
 
         const brukerResult = await database.poolconnection.request()
@@ -325,7 +325,58 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
+app.get('/indsettelse', async (req, res) => {
+  res.render('indsettelse');
+});
 
-app.post('/transaksjoner', async (req, res) => {
-  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+app.post('/indsettelse', async (req, res) => {
+  const { kontoID, valuta, verdi, type } = req.body;
+
+  try {
+    const { poolconnection } = await getDatabase();
+
+    const saldoResult = await poolconnection.request()
+      .input('kontoID', sql.Int, kontoID)
+      .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
+
+    if (saldoResult.recordset.length === 0) {
+      return res.status(404).json({ message: 'Konto ikke funnet' });
+    }
+
+    let saldo = saldoResult.recordset[0].saldo;
+    const beløp = parseFloat(verdi);
+
+    if (type === 'innskudd') {
+      saldo += beløp;
+    } else if (type === 'uttak') {
+      if (saldo < beløp) return res.status(400).json({ message: 'Ikke nok saldo' });
+      saldo -= beløp;
+    } else {
+      return res.status(400).json({ message: 'Ugyldig type' });
+    }
+
+    await poolconnection.request()
+      .input('kontoID', sql.Int, kontoID)
+      .input('saldo', sql.Decimal(18, 2), saldo)
+      .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
+
+    await poolconnection.request()
+      .input('kontoID', sql.Int, kontoID)
+      .input('valuta', sql.VarChar(10), valuta)
+      .input('verdi', sql.Decimal(18, 2), beløp)
+      .input('dato_tidspunkt', sql.DateTime, new Date())
+      .input('type', sql.VarChar(10), type)
+      .input('saldoEtter', sql.Decimal(18, 2), saldo)
+      .query(`
+        INSERT INTO investApp.indsettelse 
+        (kontoID, valuta, verdi, dato_tidspunkt, type, saldoEtter)
+        VALUES (@kontoID, @valuta, @verdi, @dato_tidspunkt, @type, @saldoEtter)
+      `);
+
+    res.status(200).json({ message: 'Transaksjon registrert', nySaldo: saldo });
+
+  } catch (error) {
+    console.error('Feil i POST /indsettelse:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
 });

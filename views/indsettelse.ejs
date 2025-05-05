@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innsettelse</title>
+</head>
+<body>
+  <h1>Innskudd til konto</h1>
+  <form id="innskuddsform">
+    <label for="kontoValg">Velg konto:</label>
+    <select id="kontoValg" name="kontoID" required></select><br><br>
+
+    <label for="valuta">Valuta:</label>
+    <input type="text" id="valuta" name="valuta" required><br><br>
+
+    <label for="beløp">Beløp:</label>
+    <input type="number" id="verdi" name="verdi" required><br><br>
+
+    <input type="hidden" id="type" name="type" value="innskudd">
+
+    <button type="submit" name="submit">Sett inn</button>
+  </form>
+
+<script>
+const brukernavn = localStorage.getItem('brukernavn');
+const kontoValg = document.getElementById('kontoValg');
+const form = document.getElementById('innskuddsform');
+
+
+// Hent kontoer for bruker
+fetch('/api/konto', {
+  headers: {
+    'Content-Type': 'application/json',
+    'brukernavn': brukernavn
+  }
+})
+.then(res => res.json())
+.then(kontoer => {
+  kontoer.forEach(konto => {
+    const option = document.createElement('option');
+    option.value = konto.kontoID;
+    option.textContent = `${konto.kontoNavn} - saldo: ${konto.saldo}`;
+    kontoValg.appendChild(option);
+  });
+})
+.catch(err => {
+  console.error(err);
+  alert('Kunne ikke hente kontoer.');
+});
+
+// 👉 Lytt til skjemaet, ikke knappen!
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const kontoID = document.getElementById('kontoValg').value;
+  const valuta = document.getElementById('valuta').value;
+  const verdi = document.getElementById('verdi').value;
+
+  if (!kontoID || !valuta || !verdi) {
+    alert('Alle feltene må være fylt inn');
+    return;
+  }
+
+  fetch('/indsettelse', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      kontoID: kontoID,
+      valuta: valuta,
+      verdi: verdi,
+      type: 'innskudd'
+    })
+  })
+  .then(async res => {
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    alert('Innskudd registrert!');
+    window.location.href = '/dashboard';
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Feil:' + err.message);
+  });
+});
+  </script>
+  
+</body>
+</html>
