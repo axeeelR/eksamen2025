@@ -1,0 +1,31 @@
+.main-content {
+    padding: 60px 40px;
+    margin-left: 200px;
+}
+
+.opprettKnapp {
+    margin-top: 30px;
+    font-size: 12px;
+    background-color: #bebfbe;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: backround-color 0.3s ease;
+}
+
+.opprettKnapp:hover {
+    background-color: aquamarine;
+}
+
+.portefoljeOversikt {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.portefoljeEnkelt {
+    background-color: #2c2c2c;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: white;
+}

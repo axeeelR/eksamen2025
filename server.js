@@ -268,6 +268,59 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
 
-app.get('/portofolje', (req, res) => {
-    res.render('portofolje');
+app.get('/portefolje', async (req, res) => {
+  try {
+    const { poolconnection } = await getDatabase();
+    const result = await poolconnection.request().query('SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID');
+    
+    const portefoljer = result.recordset;
+    res.render('portefolje', { portefoljer });
+  } catch (error) {
+    console.error('FEIL i GET /portefolje:', error);
+    res.status(500).send('Kunne ikke hente porteføljer');
+  }
 });
+
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+});
+
+
+
+app.get('/opprettPortefolje', async (req, res) => {
+  try {
+    const database = await getDatabase();
+    const request = database.poolconnection.request();
+    const result = await request.query('SELECT kontoID, kontoNavn, saldo FROM investApp.konto');
+    const kontoer = result.recordset;
+
+    console.log('Kontoer hentet fra databasen:', kontoer); //debug
+    res.render('opprettPortefolje', { kontoer });
+  } catch (error) {
+    console.error('FEIL i GET /opprettPortefolje:', error);
+    res.status(500).send('Noe er feil');
+  }
+});
+
+app.post('/opprettPortefolje', async (req, res) => {
+  const { navn, kontoID } = req.body;
+  const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
+
+  try {
+    const { poolconnection } = await getDatabase();
+    await poolconnection.request()
+    .input('portefoljeNavn', sql.VarChar(255), navn)
+    .input('kontoID', sql.Int, kontoID)
+    .input('opprettelsedatoP', sql.Date, dato)
+    .query(`
+      INSERT INTO investApp.portefolje (portefoljeNavn, kontoID, opprettelsedatoP)
+      VALUES (@portefoljeNavn, @kontoID, @opprettelsedatoP)
+    `);
+
+    res.redirect('/portefolje');
+} catch (error) {
+    console.error('Feil i POST /opprettPortefolje:', error);
+    res.status(500).send(error.message);
+  }
+});
+
