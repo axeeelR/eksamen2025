@@ -397,3 +397,50 @@ app.post('/indsettelse', async (req, res) => {
 app.get('/enkeltPortefolje', async (req, res) => {
   res.render('enkeltPortefolje');
 });
+
+app.get('/api/portefolje/:id', async (req, res) => {
+  const portefoljeID = req.params.id;
+
+  try {
+    const { poolconnection } = await getDatabase();
+    const result = await poolconnection.request()
+      .input('portefoljeID', sql.Int, portefoljeID)
+      .query('SELECT * kontoNavn valuta FROM investApp.portefoljeJOIN investApp.konto ON kontoID = kontoID WHERE portefoljeID = @portefoljeID');
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'Portefølje ikke funnet' });
+    }
+
+    res.json(result.recordset[0]);
+
+  } catch (error) {
+    console.error('Feil i GET /api/portefolje/:id:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
+});
+
+const yahooFinance = require('yahoo-finance2').default;
+
+app.get('/api/aksje/:navn', async (req, res) => {
+  const søk = req.params.navn;
+
+  try {
+  const result = await yahooFinance.search(søk); // Søk etter aksje
+  const førsteTreff = result.quotes?.[0]
+
+  if (!førsteTreff) {
+    return res.status(404).json({ message: 'Ingen treff funnet for søket' });
+  }
+
+  const aksjeData = await yahooFinance.quote(førsteTreff.symbol); // Hent detaljer
+  res.json(aksjeData);
+
+} catch (error) {
+  console.error('Feil i aksjesøk:', error);
+  res.status(500).json({ message: 'Klarte ikke hente aksjeinformasjon' });
+  }
+});
+
+app.get('/handel', (req, res) => {
+  res.render('handel');
+});

@@ -9,11 +9,75 @@
   <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
+
   <%- include ('partials/menyPanel') %>
 
-      
+  <main class="main">
+    <div class="toppseksjon">
+      <h1 id="portefoljeNavn">Laster portefølje...</h1>
+      <div class="knappecontainer">
+        <button id="historikkKnapp">HANDELS HISTORIKK</button>
+        <button id="kjøpAksjeKnapp">REGISTRER HANDEL</button>
+      </div>
+    </div>
 
+    <div class="verdiOgFordeling">
+      <section class="verdiutvikling">
+        <h3>Samlet verdiutvikling</h3>
+        <canvas id="verdiGraf"></canvas>
+      </section>
 
-  
+      <section class="fordeling">
+        <h3>Fordeling av verdi</h3>
+        <canvas id="fordelingGraf"></canvas>
+        <p class="totalverdiTekst">Total verdi i DKK</p>
+        <p id="totalVerdi">0 DKK</p>
+      </section>
+    </div>
+
+    <section class="aksjetabell">
+      <h3>Aksjer i porteføljen</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Navn</th>
+            <th>Volume</th>
+            <th>24h Endring</th>
+            <th>Pris</th>
+            <th>Verdi</th>
+          </tr>
+        </thead>
+        <tbody id="aksjeInnhold"><!-- Fylles inn senere --></tbody>
+      </table>
+    </section>
+  </main>
 </body>
+    <script>
+      const portefoljeNavn = document.getElementById('portefoljeNavn');
+      const kjøpAksjeKnapp = document.getElementById('kjøpAksjeKnapp');
+
+      const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+
+      if (!portefoljeID) {
+        alert("Ingen portefølje valgt.");
+        window.location.href = '/portefolje';
+      }
+
+      fetch(`/api/portefolje/${portefoljeID}`)
+        .then(res => res.json())
+        .then(portefolje => {
+          portefoljeNavn.textContent = portefolje.portefoljeNavn;
+          // Her kan det også fylle inn annen porteføljeinfo 
+        })
+        .catch(err => {
+          console.error('Feil ved henting av portefølje:', err);
+          alert("Kunne ikke hente porteføljeinformasjon.");
+          window.location.href = '/portefolje';
+        });
+
+      kjøpAksjeKnapp.addEventListener('click', () => {
+        window.location.href = '/handel';
+      });
+    </script>
+  </body>
 </html>
