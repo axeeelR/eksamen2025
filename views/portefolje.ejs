@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="/styles/portefolje.css">   
     <link rel="stylesheet" href="/styles/menyPanel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <%- include ('partials/menyPanel') %>
@@ -14,9 +15,11 @@
     <main class="main-content">
         <div id="knappContainer">
             <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
-        <h1>Portefølje oversikt</h1>
-        <p>Her kan du se din portefølje</p>
-        <div id="portefolje">
+        
+            <h1>Portefølje oversikt</h1>
+            <p>Her kan du se din portefølje</p>
+        
+            <div id="portefolje">
             <table>
                 <thead>
                     <tr>
@@ -28,6 +31,11 @@
                     <tbody id="portefoljeOversikt"><!-- Porteføljene vil bli lagt til her dynamisk -->
                 </thead>
             </div>
+            
+            <h2>Portefølje diagram</h2>
+            <div class="diagramChart">
+                <canvas id="myChart"></canvas>
+            </div>
         </main>
 
     <script>
@@ -37,6 +45,9 @@
             alert('Du må være logget inn.');
             window.location.href = '/login';
         }
+
+        const labels = [];
+        const saldo = [];
 
         fetch('/api/portefolje', {
             method: 'GET',
@@ -56,28 +67,60 @@
             }
 
             portefoljer.forEach(portefolje => {
-                const li = document.createElement('tr');
-                li.innerHTML = `
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td>${portefolje.portefoljeNavn}</td>
                 <td>Konto: ${portefolje.kontoNavn}</td>
                 <td>Saldo: ${portefolje.saldo} DKK</td>
                 <td>Opprettet: ${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
                     `;
-                tbody.appendChild(li);
+                tbody.appendChild(tr);
+
+                labels.push(portefolje.portefoljeNavn);
+                saldo.push(portefolje.saldo);
             });
+
+        /*Donut diagram --------------------------------------*/
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Portefølje',
+                data: saldo,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 1.0)',
+                    'rgba(54, 162, 235, 1.0)',
+                    'rgba(255, 206, 86, 1.0)',
+                    'rgba(75, 192, 192, 1.0)',
+                    'rgba(153, 102, 255, 1.0)',
+                    'rgba(255, 159, 64, 1.0)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Portefølje'
+                    }
+                }
+            },
+        };
+
+        new Chart(ctx, config);
+
         })
         .catch(err => {
             console.error('Error ved å hente portefoljer:', err);
         });
-        /*
-        const brukernavn = localStorage.getItem('brukernavn');
-
-        const url = new URL(window.location.href);
-        if (!url.searchParams.get('brukernavn')){
-            url.searchParams.set('brukernavn', brukernavn);
-            window.location.href = url.toString();
-        }
-        */
     </script>
 </body>
 </html>

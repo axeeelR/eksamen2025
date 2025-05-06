@@ -48,3 +48,9 @@ th, td {
     padding: 8px;
     text-align: left;
 }
+
+.diagramChart {
+    width: 300px;
+    height: 300px;
+    margin: auto;
+}
