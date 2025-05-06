@@ -1,70 +1,67 @@
-.knapp {
-  background-color: #ffffff;
-  color: #aeaeae;
+body {
+  margin: 0;
   font-family: 'inter', sans-serif;
-  font-size: 16px;
+  background-color: #1e1e1e;
+  color: #c3c3c3;
+}
+
+.main-content {
+  margin-left: 160px; /* plass til menyen */
+  padding: 32px;
+  max-width: 100%;
+}
+
+.knapp {
+  background-color: #242424;
+  color: #8b8b8b;
+  font-family: 'inter', sans-serif;
+  font-size: 12px;
   position: absolute;
-  top: 20px;
-  right: 30px;
-  cursor: pointer;
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-.main-content {
-  background-color: #1E1E1E;
-  color: c3c3c;
-  padding: 60px 40px;
-  margin-left: 300px;
+
+.knapp:hover {
+  background-color: #484eff;
+} 
+
+.knapp {
+  top: 20px;
+  right: 30px;
 }
 
 input {
-  width: 98%;
-  padding: 14px;
+  width: 100%;
+  padding: 12px;
   margin-bottom: 20px;
   border: none;
   border-radius: 8px;
-  background-color: #ffffff;
-  color: #c3c3c3cb;
+  background-color: #1b1b1b;
+  color: #c3c3c3;
   font-family: 'inter', sans-serif;
   font-size: 16px;
 }
 
 table {
-  width: 75%;
+  width: 100%;
+  background: #1b1b1b;
+  width: 80%;
   border-collapse: collapse;
-  margin-top: 50px;
-  margin-left: 160px;
-  background-color: #c3c3c3;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+  margin-top: 40px;
+  font-size: 12px;
+  border-radius: 12px;
+  margin-left: 250px;
 }
 
 th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-  color: #1E1E1E;
+  padding: 16px 12px;
+  text-align: left;
 }
 
-.indsettelse {
-background-color: #ffffff;
-color: #aeaeae;
-font-family: 'inter', sans-serif;
-font-size: 16px;
-position: absolute;
-top: 70px;
-right: 30px;
-cursor: pointer;
-border: none;
-padding: 10px 20px;
-border-radius: 6px;
-}
-
-tbody tr {
-  background-color: #f2f2f2;
-  color: #1E1E1E;
+td {
+  padding: 16px 12px;
+  text-align: left;
 }

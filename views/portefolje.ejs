@@ -13,40 +13,44 @@
     <%- include ('partials/menyPanel') %>
 
     <main class="main-content">
-        <div id="knappContainer">
-            <h1>Portefølje oversikt</h1>
-            <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
-            <div id="portefolje">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Porteføljenavn</th>
-                        <th>Konto</th>
-                        <th>Saldo</th>
-                        <th>Opprettet</th>
-                    </tr>
-                    <tbody id="portefoljeOversikt"><!-- Porteføljene vil bli lagt til her dynamisk -->
-                </thead>
-            </div>
-            <div class="oversikt">
-                <div class="totalverdi">
-                    <h3>Total verdi i DKK</h3>
+        <h1>Portefølje oversikt</h1>
+        <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
+        
+        <div class="oversiktSeksjon">
+            <div class="infoBokser">
+                <div class="samletVerdi">
+                    <h3>Samlet verdi</h3>
+                    <p id="samletVerdi"></p>
                 </div>
-            
-                <div class="endringerD">
+                <div class="endringerSisteDager">
                     <h3>Endringer siste dager</h3>
-                    <div class="endringsTall">
-                    </div>
+                    <p id="endringer"></p>
                 </div>
-
             </div>
+
+            <!--Diagram-->
+
             <div class="diagramChart">
-                <h3>Fordeling av verdi i porteføljer</h3>
                 <canvas id="myChart"></canvas>
             </div>
-            </div>
-        </main>
 
+            <!-- tabeller -->
+        </div>
+            <div class="portefolje">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Portefølje Navn</th>
+                            <th>Bank Account</th>
+                            <th>24h Change</th>
+                            <th>Siste Handel</th>
+                            <th>Total Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="portefoljeOversikt"></tbody>
+                    </table>
+                </div>
+        </main>
     <script>
         const brukernavn = localStorage.getItem('brukernavn');
 
