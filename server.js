@@ -287,13 +287,11 @@ app.get('/api/portefolje', async (req, res) => {
   }
 });
 
-/*------------------------------------------------------------------ */
-
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
 });
 
-/*--------------------------------------------------------------- */
+
 
 app.get('/opprettPortefolje', async (req, res) => {
   const brukernavn = req.query.brukernavn; // Hent brukernavn fra query-parameter
@@ -336,7 +334,6 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
-/*-------------------------------------------------------------------------- */
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
 });
@@ -395,4 +392,8 @@ app.post('/indsettelse', async (req, res) => {
     console.error('Feil i POST /indsettelse:', error);
     res.status(500).json({ message: 'Intern feil' });
   }
+});
+
+app.get('/enkeltPortefolje', async (req, res) => {
+  res.render('enkeltPortefolje');
 });

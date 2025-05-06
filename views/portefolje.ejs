@@ -81,7 +81,7 @@
             portefoljer.forEach(portefolje => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td>${portefolje.portefoljeNavn}</td>
+                <td><button onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
                 <td>Konto: ${portefolje.kontoNavn}</td>
                 <td>Saldo: ${portefolje.saldo} DKK</td>
                 <td>Opprettet: ${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
@@ -133,6 +133,12 @@
         .catch(err => {
             console.error('Error ved å hente portefoljer:', err);
         });
+
+        function åpnePortefolje(portefoljeID) {
+        localStorage.setItem('aktivPortefoljeID', portefoljeID);
+        window.location.href = '/enkeltPortefolje';
+}
+
     </script>
 </body>
 </html>
