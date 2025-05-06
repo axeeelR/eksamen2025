@@ -9,63 +9,59 @@
     <link rel="stylesheet" href="/styles/menyPanel.css">    
 </head>
 <body>
+    <h1>Dashboard</h1>
 
     <%- include ('partials/menyPanel') %>   
     
-    <main class="main-content">
-        <h1>Dashboard</h1>
-        <p>Her kan du se din konto</p>
-        <div id="konto">konto</div>
-        <div id="Eiendeler">Eiendeler</div>
-        
-    </main>
+    <main class="dashboard-innhold">
+        <!-- Øverste rad med summer -->
+        <section class="samletVerdiBoks">
+          <div class="info-boks">
+            <h3>Samlet verdi</h3>
+            <p id="samletVerdi"></p>
+          </div>
+          <div class="realisertGevinstBoks">
+            <h3>Realisert gevinst</h3>
+            <p id="realisertGevinst"></p>
+          </div>
+          <div class="urealisertGevinstBoks">
+            <h3>Urealisert gevinst</h3>
+            <p id="urealisertGevinst"></p>
+          </div>
+        </section>
+    
+        <!-- Verdiutvikling -->
+        <section class="verdiutvikling">
+          <h3>Samlet verdiutvikling</h3>
+          <div class="graf-placeholder">[Graf kommer her]</div>
+        </section>
+    
+        <!-- Aksjetabeller -->
+        <section class="aksjetabeller">
+          <div class="aksjetabell">
+            <h3>Topp 5 aksjer etter verdi</h3>
+            <table>
+              <thead>
+                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+              </thead>
+              <tbody id="aksjerVerdi"></tbody>
+            </table>
+          </div>
+    
+          <div class="aksjetabell">
+            <h3>Topp 5 aksjer etter gevinst</h3>
+            <table>
+              <thead>
+                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+              </thead>
+              <tbody id="aksjerGevinst"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
     <script>
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let brukernavn = urlParams.get('brukernavn');
-
-        if (!brukernavn){
-            brukernavn = localStorage.getItem('brukernavn');
-        }
-
-        const kontoDiv = document.getElementById('konto');
-
-        if (!brukernavn) {
-            kontoDiv.innerHTML = '<p>Du må være logget inn fir å se kontoene dine.</p>';
-            throw new Error('Brukernavn mangler');
-        }
-
-        fetch (`/api/kontoer?brukernavn=${brukernavn}`)
-            .then(res => res.json())
-            .then(kontoer => {
-                if (kontoer.length === 0) {
-                    kontoDiv.innerHTML = '<p>Ingen kontoer funnet.</p>';
-                    return;
-            }
-
-        kontoer.forEach(konto => {
-            const kontoElement = document.createElement('div');
-            kontoElement.classList.add('konto-kort');
-
-            kontoElement.innerHTML = `
-                <h2>${konto.kontoNavn}</h2>
-                <p>Bank: ${konto.bank}</p>
-                <p>Valuta: ${konto.valuta}</p>
-                <p>Saldo: ${konto.saldo}</p>
-                <p>Opprettelsedato: ${new Date (konto.opprettelsedatoK).toLocaleDateString()}</p>
-                <button class="avslutt-konto-knapp" data-kontoid="${konto.kontoID}">Avslutt konto</button>
-            `;
-            kontoElement.querySelector('.avslutt-konto-knapp').addEventListener('click', () => {
-                alert(`Konto ${konto.kontoNavn} er avsluttet.`);
-            });
-
-            kontoDiv.appendChild(kontoElement);
-        });
-    })
-    .catch(err => {
-        console.error('Feil ved henting av kontoer:', err);
-        kontoDiv.innerHTML = '<p>Det oppstod en feil ved henting av kontoer.</p>';
-    });
+        
     </script>
 </body>
 </html>

@@ -1,9 +1,128 @@
-.avslutt-konto-knapp{
-    background-color: #f44336;
-    color: white; 
-}
-
-.avslutt-konto-knapp:hover{
-    background-color: #f44336;
-    color: white;
-}
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #0d0d0d;
+    color: #fff;
+  }
+  
+  /* Hovedinnhold etter menyen */
+  .dashboard-innhold {
+    margin-left: 160px; /* plass til menyen */
+    padding: 2rem;
+    max-width: calc(100% - 160px);
+  }
+  
+  /* Øverste rad med 3 infobokser */
+  .samletVerdiBoks {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .info-boks, .realisertGevinstBoks, .urealisertGevinstBoks {
+    flex: 1 1 30%;
+    background: #1a1a1a;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    min-width: 240px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  .info-boks h3,
+  .realisertGevinstBoks h3,
+  .urealisertGevinstBoks h3 {
+    font-size: 1rem;
+    color: #aaa;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .info-boks p,
+  .realisertGevinstBoks p,
+  .urealisertGevinstBoks p {
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  /* Valgfri spesialfarge */
+  .realisertGevinstBoks {
+    background-color: #1f3b2c;
+  }
+  
+  .urealisertGevinstBoks {
+    background-color: #3d2b1c;
+  }
+  
+  /* Verdiutvikling */
+  .verdiutvikling {
+    background: #191919;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .verdiutvikling h3 {
+    font-size: 1rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+  }
+  
+  .graf-placeholder {
+    height: 200px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+  
+  /* Aksjetabeller */
+  .aksjetabeller {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .aksjetabell {
+    flex: 1 1 45%;
+    background: #1a1a1a;
+    padding: 1.5rem;
+    border-radius: 12px;
+    min-width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  .aksjetabell h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #ddd;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  
+  table th, table td {
+    padding: 0.6rem 0.4rem;
+    border-bottom: 1px solid #2f2f2f;
+  }
+  
+  table th {
+    color: #aaa;
+    font-weight: 500;
+  }
+  
+  table td {
+    color: #ddd;
+  }
+  
+  table tbody tr:hover {
+    background-color: #252525;
+  }
+  
