@@ -13,11 +13,10 @@
 }
 .main-content {
   background-color: #1E1E1E;
-  color: c3c3c3;
+  color: c3c3c;
   padding: 60px 40px;
   margin-left: 300px;
 }
-
 
 input {
   width: 98%;
@@ -26,7 +25,7 @@ input {
   border: none;
   border-radius: 8px;
   background-color: #ffffff;
-  color: #c3c3c3;
+  color: #c3c3c3cb;
   font-family: 'inter', sans-serif;
   font-size: 16px;
 }
@@ -48,6 +47,7 @@ th, td {
 th {
   background-color: #f4f4f4;
   font-weight: bold;
+  color: #1E1E1E;
 }
 
 .indsettelse {
@@ -62,4 +62,9 @@ cursor: pointer;
 border: none;
 padding: 10px 20px;
 border-radius: 6px;
+}
+
+tbody tr {
+  background-color: #f2f2f2;
+  color: #1E1E1E;
 }

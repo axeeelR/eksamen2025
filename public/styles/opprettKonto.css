@@ -1,11 +1,12 @@
-<<<<<<< Updated upstream
+
 body {
   margin: 0;
   background-color: #1e1e1e;
   font-family: 'inter', sans-serif;
   font-weight: 600;
   color: #c3c3c3;
-=======
+}
+
 .knapp {
     background-color: #ffffff;
     color: #aeaeae;
@@ -18,7 +19,7 @@ body {
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
->>>>>>> Stashed changes
+
 }
 
 h1, h2, h3 {
@@ -29,7 +30,7 @@ h1, h2, h3 {
 .main-content {
   background-color: #1b1b1b;
   padding: 60px 40px;
-  margin-left: 300px;
+  margin-left: 150px;
 }
 
 .sidebar {
@@ -83,13 +84,12 @@ th {
   padding: 10px 12px;
 }
 
-<<<<<<< Updated upstream
 td {
   font-size: 8px;
   padding: 10px 12px;
   color: #84837e;
 }
-=======
+
   th {
     background-color: #f4f4f4;
     font-weight: bold;
@@ -107,13 +107,4 @@ td {
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
- }
->>>>>>> Stashed changes
-=======
- }
->>>>>>> Stashed changes
-=======
- }
->>>>>>> Stashed changes
+  }
