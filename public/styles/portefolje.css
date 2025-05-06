@@ -54,3 +54,11 @@ th, td {
     height: 300px;
     margin: auto;
 }
+
+.overiskt {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 40px;
+    padding: 20px;
+}
+
