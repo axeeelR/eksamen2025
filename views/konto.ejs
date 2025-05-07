@@ -83,6 +83,17 @@
       
         const row = document.createElement('tr');
 
+          let avsluttKnapp = '';
+          let gjennopneKnapp = '';
+
+          if(erDenLukket){
+            avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}" disabled>Konto lukket</button>`;
+            gjennopneKnapp = `<button class="gjenopne-knapp" data-konto-id="${konto.kontoID}">Gjenåpne konto</button>`;
+
+          }else{
+            avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}">Avslutt konto</button>`;
+          }
+
         row.innerHTML = `
           <td>${konto.kontoNavn}</td>
           <td>${konto.saldo}</td>
@@ -91,9 +102,8 @@
           <td>${opprettetDato}</td>
           <td class="lukket-celle"> ${lukkeDato}</td>
           <td class="status-celle">
-            <button class="avslutt-knapp" data-konto-id="${konto.kontoID}" ${erDenLukket ? 'disabled': '' }>
-              ${erDenLukket ? 'Konto lukket' : 'Avslutt konto'} </button>
-            ${erDenLukket ? `<button class="gjenopne-knapp" data-konto-id="${konto.kontoID}">Gjenåpne Konto</button>` : ''}
+            ${avsluttKnapp}
+            ${gjennopneKnapp}
             </td>
         `;
         
