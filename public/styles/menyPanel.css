@@ -1,3 +1,9 @@
+body {
+  margin: 0;
+  background-color: #1E1E1E;
+  font-family: 'Inter', sans-serif;
+}
+
 .nav-link {
   display: block;
   width: 100%;
@@ -6,7 +12,7 @@
   border-radius: 6px;
   color: #ffffff;
   text-decoration: none; /* Fjerner understrek */
-  font-size: 14px;
+  font-size: 8px;
   transition: background-color 0.3s ease;
   box-sizing: border-box;
 }
@@ -23,4 +29,9 @@ h2 {
   margin-top: 20px;
   text-align: center;
   background-color: #ef3131;
+}
+
+.sidebar {
+  font-size: 8px;
+  background-color: #1B1B19;
 }

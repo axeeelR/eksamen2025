@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mine kontoer</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/opprettKonto.css">
+  <link rel="stylesheet" href="/styles/konto.css">
   <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
+
+<h1>Mine kontoer</h1>
+
 <body>
   <%- include ('partials/menyPanel') %> 
-  <h1>Mine kontoer</h1>
   <div id="kontoContainer">
     <table>
       <thead>
@@ -29,6 +31,7 @@
       </tbody>
     </table>
     <a href="/opprettKonto"><button class="knapp">Opprett konto</button></a>
+    <a href="/indsettelse"><button class="indsettelse">Sett inn penger</button></a>
   </div>
 
   <script>
@@ -52,7 +55,7 @@
       if (!res.ok) throw new Error(data.message);
 
       if (data.length === 0) {
-        kontoTableBody.innerHTML = `<tr><td colspan="6">Du har ingen kontoer.</td></tr>`;
+        kontoTableBody.innerHTML = 'Du har ingen kontoer.';
         return;
       }
 
@@ -104,7 +107,8 @@
       .catch(err => {
       console.error('Error in PUT /lukk-konto', err);
       alert('kunne ikke lukke konto')
-    });
+      });
+    
 
     function leggTilAvsluttKnapp(){
       document.querySelectorAll('.avslutt-knapp').forEach(button => {

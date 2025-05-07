@@ -7,33 +7,141 @@
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="/styles/portefolje.css">   
     <link rel="stylesheet" href="/styles/menyPanel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <%- include ('partials/menyPanel') %>
 
+    <div class="topp">
+    <h1>Portefølje oversikt</h1>
+        <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
+    </div>
+
     <main class="main-content">
-        <h1>Portefølje</h1>
-        <p>Her kan du se din portefølje</p>
-        <div id="portefolje">
-            <% if (portefoljer && portefoljer.length > 0) { %>
-            <ul class="portefoljeOversikt">
-                <% portefoljer.forEach(p => { %>
-                    <li class="portefoljeEnkelt">
-                        <strong><%= p.navn %></strong><br>Konto: <%= p.kontoNavn %><br>Saldo: <%= p.saldo %> DKK<br>Opprettet:
-                    <% if (p.opprettelsedatoP) { %>
-                        <%= new Date(p.opprettelsedatoP).toLocaleDateString('no-NO') %>
-                        <% } else { %>
-                            Ukjent dato
-                        <% } %>
-                    </li>
-                    <% }) %>
-                </ul>
-                <% } else { %>
-                    <p>Ingen porteføljer funnet</p>
-                    <% } %>
+        <div class="oversiktSeksjon">
+            <div class="infoBokser">
+                <div class="samletVerdi">
+                    <h3>Samlet verdi</h3>
+                    <p id="samletVerdi"></p>
+                </div>
+                <div class="endringerSisteDager">
+                    <h3>Endringer siste dager</h3>
+                    <p id="endringer"></p>
+                </div>
             </div>
 
-        <a href="/opprettPortefolje"><button class="opprettKnapp">Opprett portefølje</button></a>
-    </main>
+            <!--Diagram-->
+
+            <div class="diagramChart">
+                <canvas id="myChart"></canvas>
+            </div>
+
+            <!-- tabeller -->
+        </div>
+            <div class="portefolje">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Portefølje Navn</th>
+                            <th>Bank Account</th>
+                            <th>24h Change</th>
+                            <th>Siste Handel</th>
+                            <th>Total Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="portefoljeOversikt"></tbody>
+                    </table>
+                </div>
+        </main>
+    <script>
+        const brukernavn = localStorage.getItem('brukernavn');
+
+        if (!brukernavn) {
+            alert('Du må være logget inn.');
+            window.location.href = '/login';
+        }
+
+        const labels = [];
+        const saldo = [];
+
+        fetch('/api/portefolje', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'brukernavn': brukernavn,
+            }
+        })
+
+        .then(res => res.json())
+        .then(portefoljer => {
+            const tbody = document.getElementById('portefoljeOversikt');
+
+            if (!portefoljer.length) {
+                document.getElementById('portefolje').innerHTML = '<p>Ingen porteføljer funnet</p>';
+                return;
+            }
+
+            portefoljer.forEach(portefolje => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td><button onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
+                <td>Konto: ${portefolje.kontoNavn}</td>
+                <td>Saldo: ${portefolje.saldo} DKK</td>
+                <td>Opprettet: ${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
+                    `;
+                tbody.appendChild(tr);
+
+                labels.push(portefolje.portefoljeNavn);
+                saldo.push(portefolje.saldo);
+            });
+
+        /*Donut diagram --------------------------------------*/
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Portefølje',
+                data: saldo,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 1.0)',
+                    'rgba(54, 162, 235, 1.0)',
+                    'rgba(255, 206, 86, 1.0)',
+                    'rgba(75, 192, 192, 1.0)',
+                    'rgba(153, 102, 255, 1.0)',
+                    'rgba(255, 159, 64, 1.0)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Portefølje'
+                    }
+                }
+            },
+        };
+
+        new Chart(ctx, config);
+
+        })
+        .catch(err => {
+            console.error('Error ved å hente portefoljer:', err);
+        });
+
+        function åpnePortefolje(portefoljeID) {
+        localStorage.setItem('aktivPortefoljeID', portefoljeID);
+        window.location.href = '/enkeltPortefolje';
+}
+
+    </script>
 </body>
 </html>

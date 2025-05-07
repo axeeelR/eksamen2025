@@ -1,83 +1,74 @@
-h1{
-  color: rgb(245, 7, 7);
-  font-size: 50px;
-  text-align: center;
-  margin-top: 50px;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-}
-
-button{
-  background-color: #25239c;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: 'Roboto', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: 0.3s;
-}
-
-form{
-  border-radius: 12px;
-  background-color: #f2f2f2;
-  padding: 20px;
-  margin: 20px 0;
-}
-
-button:hover{
-  background-color: #000000;
-};
-
-p{
-  color: black;
-  font-size: 20px;
-  text-align: center;
-  margin-top: 20px;
-  font-family: cursive;
-}
-
-main{
-  margin-top: 100px;
-  padding: 0 20px;
-}
-
 body {
   margin: 0;
-  padding: 0;
+  font-family: 'inter', sans-serif;
+  background-color: #1e1e1e;
+  color: #c3c3c3;
 }
 
-.home-button {
-  position: fixed; /* Holder knappen oppe i hjørnet uansett scrolling */
-  top: 20px;
-  left: 20px;
+h1 {
+  font-size: 24px;
+  color: #c3c3c3;
+  margin-right: 800px;
+}
+
+.main-content {
+  margin-left: 160px; /* plass til menyen */
+  padding: 32px;
+  max-width: 100%;
+}
+
+.knapp {
+  background-color: #242424;
+  color: #8b8b8b;
+  font-family: 'inter', sans-serif;
+  font-size: 12px;
+  position: absolute;
+  border: none;
   padding: 10px 20px;
-  background-color: #007BFF; /* Profesjonell blåfarge */
-  color: white;
-  text-decoration: none;
   border-radius: 8px;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
   transition: background-color 0.3s ease;
-  z-index: 9999; /* Sørger for at knappen er over andre elementer */
 }
 
-.home-button:hover {
-  background-color: #0056b3; /* Mørkere blå ved hover */
+.knapp:hover {
+  background-color: #484eff;
+} 
+
+.knapp {
+  top: 20px;
+  right: 30px;
 }
 
-.opprettKonto {
-  background-color: #f2f2f2;
-  color: #cdc2c2;
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  margin-left: 300px;
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #1b1b1b;
+  color: #c3c3c3;
+  font-family: 'inter', sans-serif;
+  font-size: 16px;
 }
 
 
+table {
+  width: 100%;
+  background: #1b1b1b;
+  width: 80%;
+  border-collapse: collapse;
+  margin-top: 40px;
+  font-size: 12px;
+  border-radius: 12px;
+  margin-left: 250px;
+}
+
+th {
+  padding: 16px 12px;
+  text-align: left;
+}
+
+td {
+  padding: 16px 12px;
+  text-align: left;
+}
