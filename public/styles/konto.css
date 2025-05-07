@@ -5,6 +5,12 @@ body {
   color: #c3c3c3;
 }
 
+h1 {
+  font-size: 24px;
+  color: #c3c3c3;
+  margin-right: 800px;
+}
+
 .main-content {
   margin-left: 160px; /* plass til menyen */
   padding: 32px;
