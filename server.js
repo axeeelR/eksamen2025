@@ -448,3 +448,69 @@ app.get('/handel', (req, res) => {
 app.get('/transaksjon', (req, res) => {
   res.render('transaksjon');
 });
+
+app.post('/transaksjon', async (req, res) => {
+  const { kontoID, 
+    portefoljeID, 
+    ISIN, 
+    verditype, 
+    opprettelsedatoK, 
+    verdiPapirPris, 
+    mengde, 
+    totalSum, 
+    totalGebyr 
+  } = req.body;
+
+  try{
+    const database = await getDatabase();
+
+    const konto = await database.poolconnection.request()
+      .input('portefoljeID', sql.Int, kontoID)
+      .query('SELECT kontoID FROM investApp.konto WHERE portefoljeID = @portefoljeID');
+
+      if (konto.recordset.length === 0) {
+        return res.status(404).json({ message: 'Portefølje ikke funnet' });
+      }
+      const kontoID = konto.recordset[0].kontoID;
+
+      const saldo = await database.poolconnection.request()
+      .input('kontoID', sql.Int, kontoID)
+      .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
+
+      if (type === 'kjøp') {
+        if (saldo < totalSum) {
+          return res.status(400).json({ message: 'Ikke nok penger på konto' });
+        }
+        saldo -= totalSum;
+      } else if (type === 'salg') {
+        saldo += totalSum;
+      } else {
+        return res.status(400).json({ message: 'Ugyldig type' });
+      }
+      await database.poolconnection.request()
+        .input('kontoID', sql.Int, kontoID)
+        .input('saldo', sql.Decimal(18, 2), saldo)
+        .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
+
+        await database.poolconnection.request()
+        input('kontoID', sql.Int, kontoID)
+        .input('portefoljeID', sql.Int, portefoljeID)
+        .input('ISIN', sql.VarChar(255), ISIN) 
+        .input('verditype', sql.VarChar(255), verditype)
+        input('opprettelsedatoK', sql.Date, opprettelsedatoK)
+        .input('verdiPapirPris', sql.Decimal(18, 2), verdiPapirPris)
+        .input('mengde', sql.Int, mengde)
+        .input('totalSum', sql.Decimal(18, 2), totalSum)
+        .input('totalGebyr', sql.Decimal(18, 2), totalGebyr) 
+        .query(`
+          INSERT INTO investApp.kjøpSalg 
+          (kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr)
+          VALUES (@kontoID, @portefoljeID, @ISIN, @verditype, @opprettelsedatoK, @verdiPapirPris, @mengde, @totalSum, @totalGebyr)`
+        );
+        res.status(200).json({ message: 'Handel registrert'});
+
+    } catch (error) {
+      console.error('Feil i POST /transaksjon:', error);
+      res.status(500).json({ message: 'Intern feil' });
+    }
+});
