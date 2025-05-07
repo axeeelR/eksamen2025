@@ -23,7 +23,7 @@ h1 {
 form {
   font-family: 'inter', sans-serif;
   background-color: #ffffff;
-  width: 100%;
+  width: 450px;
   flex-direction: column;
   gap: 8px;
   display: flex;
