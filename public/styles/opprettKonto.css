@@ -58,4 +58,9 @@ table {
     font-weight: bold;
   }
 
- 
+  .avslutt-knapp{
+    background-color: #000000;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    padding: 11px;
+  }

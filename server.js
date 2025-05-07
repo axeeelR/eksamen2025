@@ -329,3 +329,47 @@ app.post('/opprettPortefolje', async (req, res) => {
 app.post('/transaksjoner', async (req, res) => {
   const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
 });
+
+app.put('/lukk-konto', async (req, res) => {
+  const kontoID = req.body.kontoID;
+
+  try{
+    const database = await getDatabase();
+    const request = database.poolconnection.request();
+
+    request.input('kontoID', sql.Int, kontoID);
+    request.input('lukkedatoK', sql.DateTime, new Date()); // Setter lukkedato til nåværende dato og tid
+
+    const result = await request.query(`
+       UPDATE investApp.konto
+       SET lukkedatoK = @lukkedatoK
+        WHERE kontoID = @kontoID
+        `);
+
+       res.json({message: 'konto lukket', success: true});
+  }catch(error){
+      console.log('Error', error);
+    }
+  });
+  
+  app.put('/gjenopne-konto', async (req, res) => {
+    const kontoID = req.body.kontoID;
+  
+    try{
+      const database = await getDatabase();
+      const request = database.poolconnection.request();
+  
+      request.input('kontoID', sql.Int, kontoID);
+      request.input('lukkedatoK', sql.DateTime, null); 
+  
+      await request.query(`
+         UPDATE investApp.konto
+         SET lukkedatoK = @lukkedatoK
+          WHERE kontoID = @kontoID
+          `);
+  
+        res.json({message: 'konto gjenåpnet', success: true});
+       }catch(error){
+        console.log('Error', error);
+      }
+    });

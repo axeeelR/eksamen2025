@@ -45,7 +45,7 @@
       headers: {
         'Content-Type': 'application/json',
         'brukernavn': brukernavn,
-      }
+      },
     })
     .then(async res => {
       const data = await res.json();
@@ -57,23 +57,133 @@
       }
 
       kontoTableBody.innerHTML = '';
-      data.forEach(konto => {
+      data.forEach(konto =>{
+        const opprettetDato = konto.opprettelsedatoK
+          ? new Date(konto.opprettelsedatoK).toLocaleDateString('no-NO', {
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+          })
+          : 'Ukjent';
+
+          const lukkeDato = konto.lukkedatoK
+          ? new Date(konto.lukkedatoK).toLocaleString('no-NO', {
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+          : 'ikke lukket';
+
+          const erDenLukket = konto.lukkedatoK !== null;
+      
         const row = document.createElement('tr');
+
         row.innerHTML = `
           <td>${konto.kontoNavn}</td>
           <td>${konto.saldo}</td>
           <td>${konto.valuta}</td>
           <td>${konto.bank}</td>
-          <td>${konto.opprettelsesdatoK}</td>
-          <td>${konto.lukkedatoK || 'Ikke lukket'}</td>
+          <td>${opprettetDato}</td>
+          <td class="lukket-celle"> ${lukkeDato}</td>
+          <td class="status-celle">
+            <button class="avslutt-knapp" data-konto-id="${konto.kontoID}" ${erDenLukket ? 'disabled': '' }>
+              ${erDenLukket ? 'Konto lukket' : 'Avslutt konto'} </button>
+            ${erDenLukket ? `<button class="gjenopne-knapp" data-konto-id="${konto.kontoID}">Gjenåpne Konto</button>` : ''}
+            </td>
         `;
+        
         kontoTableBody.appendChild(row);
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      kontoTableBody.innerHTML = `<tr><td colspan="6">Feil ved henting av kontoer.</td></tr>`;
+          });
+
+          leggTilAvsluttKnapp();
+          leggTilgjenopneKnapp();
+      })
+
+      .catch(err => {
+      console.error('Error in PUT /lukk-konto', err);
+      alert('kunne ikke lukke konto')
     });
+
+    function leggTilAvsluttKnapp(){
+      document.querySelectorAll('.avslutt-knapp').forEach(button => {
+        button.addEventListener('click', () => {
+          const kontoID = button.getAttribute('data-konto-id');
+
+          fetch('/lukk-konto', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({kontoID: kontoID})
+          })
+
+          .then(res => res.json())
+          .then(data => {
+            console.log('kontoID som sendes til server:', kontoID);
+
+            const now = new Date().toLocaleString('no-NO', {
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+
+            const lukketCelle = button.closest('tr').children[5];
+            lukketCelle.textContent = now;
+
+            button.disabled = true;
+            button.textContent = 'Konto lukket';
+
+            //legg til gjenåpne knapp
+            const row = button.closest('tr');
+            const statusCelle = row.querySelector('.status-celle');
+            const nyKnapp = document.createElement('button');
+            nyKnapp.textContent = 'Gjenåpne Konto';
+            nyKnapp.classList.add('gjenåpne-knapp');
+            nyKnapp.setAttribute('data-konto-id', kontoID);
+            statusCelle.appendChild(nyKnapp);
+
+            leggTilgjenopneKnapp();//legg til event listener for gjenåpne knapp
+          });
+        });
+      });
+    }
+
+    function leggTilgjenopneKnapp(){
+    document.querySelectorAll('.gjenopne-knapp').forEach(button => {
+        button.addEventListener('click', () => {
+          const kontoID = button.getAttribute('data-konto-id');
+
+          fetch('/gjenopne-konto', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({kontoID: kontoID})
+          })
+
+          .then(res => res.json())
+          .then(() => {
+            const row = button.closest('tr');
+            row.querySelector('.lukket-celle').textContent = 'Konto gjenåpnet';
+
+            //aktivere avslutt knappen igjen
+            const avsluttKnapp = row.querySelector('.avslutt-knapp');
+            avsluttKnapp.disabled = false;
+            avsluttKnapp.textContent = 'Avslutt Konto';
+
+            //fjern gjenåpne knappen
+            button.remove();
+
+            leggTilAvsluttKnapp(); //legg til event listener for avslutt knapp igjen
+          });
+        });
+      });
+    }
+    
   </script>
 
 </body>
