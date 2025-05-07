@@ -444,3 +444,7 @@ app.get('/api/aksje/:navn', async (req, res) => {
 app.get('/handel', (req, res) => {
   res.render('handel');
 });
+
+app.get('/transaksjon', (req, res) => {
+  res.render('transaksjon');
+});
