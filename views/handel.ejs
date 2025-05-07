@@ -87,7 +87,7 @@
         body: JSON.stringify({
           brukernavn,
           portefoljeID,
-          ISIN: aksjeData.symbol, //bruker aksjedatasymbol som isin fordi  yahoo ikke har isin
+          ISIN: aksjeData.symbol, //bruker aksjedatasymbol som isin fordi yahoo ikke har isin
           verditype: aksjeData.quoteType || 'aksje',
           verdiPapirPris: aksjeData.regularMarketPrice,
           mengde,
