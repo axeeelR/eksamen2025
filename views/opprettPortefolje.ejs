@@ -7,17 +7,16 @@
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="/styles/portofolje.css">
     <link rel="stylesheet" href="/styles/opprettPortefolje.css">
-    <link rel="stylesheet" href="/styles/sentrer.css">
 </head>
 <body>
-    <main>
-    <h1>Opprett Portefølje</h1>
+    <main class="formContainer">
+    <h1>OPPRETT PORTEFØLJE</h1>
 
     <form action="/opprettPortefolje" method="POST">
         <label for="navn">PORTEFØLJE-NAVN</label>
-        <input type="text" id="navn" name="navn" required>
+        <input type="text" id="navn" name="navn" placeholder="Navn på portefølje" required>
 
-        <label for="kontoID">KONTO ID</label>
+        <label for="kontoID">VELG KONTO</label>
         <select id="kontoID" name="kontoID" required>
             <% kontoer.forEach(konto => { %>
                 <option value="<%= konto.kontoID %>"><%= konto.kontoNavn %></option>
@@ -25,7 +24,7 @@
         </select>
 
         <input type="hidden" name="brukernavn" id="brukernavnSkjult"></input>
-        <button type="submit">Opprett Portefølje</button>
+        <button type="submit" class="opprettKnapp">Opprett Portefølje</button>
     </form>
     </main>
 

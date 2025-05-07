@@ -2,14 +2,22 @@ body {
   margin: 0;
   background-color: #1E1E1E;
   font-family: 'Inter,' sans-serif;
-  color: #1E1E1E;
+  color: #c3c3c3;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 h1 {
   color: #c3c3c3;
   text-align: center;
   font-family: 'Inter,' sans-serif;
-  font-size: 40px;
+  font-size: 32px;
   margin-top: 40px;
 }
 
@@ -21,38 +29,32 @@ h1 {
 }
 
 form {
+  background-color: #1b1b1b !important;
+  padding: 32px;
+  border-radius: 12px;
   font-family: 'inter', sans-serif;
-  background-color: #ffffff;
-  width: 450px;
+  width: 100%;
+  max-width: 450px;
   flex-direction: column;
   gap: 8px;
   display: flex;
   align-items: center;
-}
-
-.form-layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 80%;
+  gap: 16px;
 }
 
 form input {
   width: 90%;
   padding: 12px;
-  margin: 12px;
   border: none;
   border-radius: 8px;
-  background-color: #ffffff;
   color: #c3c3c3;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
 }
 
 .Submit {
-  background-color: #3a3a3a;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #c3c3c3;
   padding: 14px 20px;
   margin: 8px 0;
   border: none;
@@ -61,4 +63,10 @@ form input {
   font-family: 'inter', sans-serif;
   font-size: 16px;
   border-radius: 8px;
+  width: 90%;
+}
+
+.Submit:hover {
+  background-color: #8e3e8e;
+  color: #ffffff;
 }
