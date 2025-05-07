@@ -112,7 +112,7 @@
 
     function leggTilAvsluttKnapp(){
       document.querySelectorAll('.avslutt-knapp').forEach(button => {
-        button.addEventListener('click', () => {
+        button.onclick = () => {
           const kontoID = button.getAttribute('data-konto-id');
 
           fetch('/lukk-konto', {
@@ -152,13 +152,13 @@
 
             leggTilgjenopneKnapp();//legg til event listener for gjenåpne knapp
           });
-        });
+        };
       });
     }
 
     function leggTilgjenopneKnapp(){
     document.querySelectorAll('.gjenopne-knapp').forEach(button => {
-        button.addEventListener('click', () => {
+        button.onclick = () => {
           const kontoID = button.getAttribute('data-konto-id');
 
           fetch('/gjenopne-konto', {
@@ -184,7 +184,7 @@
 
             leggTilAvsluttKnapp(); //legg til event listener for avslutt knapp igjen
           });
-        });
+        };
       });
     }
     
