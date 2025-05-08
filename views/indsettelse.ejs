@@ -28,7 +28,6 @@ const kontoValg = document.getElementById('kontoValg');
 const form = document.getElementById('innskuddsform');
 
 
-// Hent kontoer for bruker
 fetch('/api/konto', {
   headers: {
     'Content-Type': 'application/json',
@@ -40,7 +39,7 @@ fetch('/api/konto', {
   kontoer.forEach(konto => {
     const option = document.createElement('option');
     option.value = konto.kontoID;
-    option.textContent = `${konto.kontoNavn} - saldo: ${konto.saldo}`;
+    option.textContent = konto.kontoNavn + '-saldo:' + konto.saldo;
     kontoValg.appendChild(option);
   });
 })
@@ -49,7 +48,6 @@ fetch('/api/konto', {
   alert('Kunne ikke hente kontoer.');
 });
 
-// 👉 Lytt til skjemaet, ikke knappen!
 form.addEventListener('submit', function(event) {
   event.preventDefault();
 
