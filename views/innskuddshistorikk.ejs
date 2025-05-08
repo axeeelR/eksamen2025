@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innskuddshistorikk</title>
+  <link rel="stylesheet" href="/styles/handel.css">
+  <link rel="stylesheet" href="/styles/index.css">
+  <link rel="stylesheet" href="/styles/menyPanel.css">
+
+</head>
+<body>
+  <%- include('partials/menyPanel') %>
+
+  <main class="formContainer">
+    <h1>INNSKUDDSHISTORIKK</h1>
+    <label for="kontoValg">Velg konto:</label>
+    <select id="kontoValg" name="kontoID" required></select><br><br>
+    <table id="innskuddshistorikk">
+      <thead>
+        <tr>
+          <th>KontoID</th>
+          <th>Valuta</th>
+          <th>Beløp</th>
+          <th>Dato</th>
+        </tr>
+      </thead>
+      <tbody id="historikkTabell">
+
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    const brukernavn = localStorage.getItem('brukernavn');
+    const kontoValg = document.getElementById('kontoValg');
+    const historikkTabell = document.getElementById('historikkTabell');
+
+
+    fetch('/api/konto', {
+      headers: {
+        'Content-Type': 'application/json',
+        'brukernavn': brukernavn
+      }
+    })
+      .then(res => res.json())
+      .then(kontoer => {
+        kontoer.forEach(konto => {
+          const option = document.createElement('option');
+          option.value = konto.kontoID;
+          option.textContent = konto.kontoNavn + '- Saldo:' + konto.saldo;
+          kontoValg.appendChild(option);
+        });
+        });
+    
+    kontoValg.addEventListener('change', function() {
+      const kontoID = this.value;
+      
+
+    fetch('/innskuddshistorikk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ kontoID })
+      })
+      .then(res => res.json())
+      .then(historikk => {
+        historikkTabell.innerHTML = ''; 
+
+        if (historikk.length === 0) {
+          historikkTabell.innerHTML = 'Ingen innskudd funnet.';
+        }else {
+          historikk.forEach(historikk => {
+            const rad = document.createElement('tr');
+            rad.innerHTML = `
+              <td>${historikk.kontoID}</td>
+              <td>${historikk.valuta}</td>
+              <td>${historikk.verdi}</td>
+              <td>${new Date(historikk.dato_tidspunkt).toLocaleDateString()}</td>
+            `;
+            historikkTabell.appendChild(rad);
+          });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Kunne ikke hente innskuddshistorikk.');
+      });
+    });
+  </script>  
+</body>
+</html>

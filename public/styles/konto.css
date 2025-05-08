@@ -94,3 +94,25 @@ td {
   padding: 16px 12px;
   text-align: left;
 }
+
+.innskuddshistorikk {
+  background-color: #242424;
+  color: #8b8b8b;
+  font-family: 'inter', sans-serif;
+  font-size: 12px;
+  position: absolute;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.innskuddshistorikk:hover {
+  background-color: #484eff;
+} 
+
+.innskuddshistorikk {
+  top: 20px;
+  right: 150px;
+}

@@ -43,9 +43,9 @@
                     <thead>
                         <tr>
                             <th>Portefølje Navn</th>
-                            <th>Bank Account</th>
-                            <th>24h Change</th>
-                            <th>Siste Handel</th>
+                            <th>Tilhørende konto</th>
+                            <th>Saldo</th>
+                            <th>Opprettelsesdato</th>
                             <th>Total Value</th>
                         </tr>
                         </thead>
@@ -85,9 +85,9 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td><button onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
-                <td>Konto: ${portefolje.kontoNavn}</td>
-                <td>Saldo: ${portefolje.saldo} DKK</td>
-                <td>Opprettet: ${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
+                <td> ${portefolje.kontoNavn}</td>
+                <td>${portefolje.saldo} DKK</td>
+                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
                     `;
                 tbody.appendChild(tr);
 
@@ -103,12 +103,12 @@
                 label: 'Portefølje',
                 data: saldo,
                 backgroundColor: [
-                    'rgba(255, 99, 132, 1.0)',
-                    'rgba(54, 162, 235, 1.0)',
-                    'rgba(255, 206, 86, 1.0)',
-                    'rgba(75, 192, 192, 1.0)',
-                    'rgba(153, 102, 255, 1.0)',
-                    'rgba(255, 159, 64, 1.0)'
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -116,20 +116,7 @@
         const config = {
             type: 'doughnut',
             data: data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Portefølje'
-                    }
-                }
-            },
         };
-
         new Chart(ctx, config);
 
         })
