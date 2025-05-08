@@ -458,11 +458,7 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
   }
 });
 
-/*----------------------------------------------------------------- */
-
 const yahooFinance = require('yahoo-finance2').default;
-
-/*-------------------------------------------------------------------- */
 
 app.get('/api/aksje/:navn', async (req, res) => {
   const søk = req.params.navn;
@@ -647,7 +643,52 @@ app.post('/innskuddshistorikk', async (req, res) => {
   }
 });
 
-
 app.get('/innskuddshistorikk', (req, res) => {
   res.render('innskuddshistorikk');
+});
+
+app.post('/aksjeienkeltportefolje', async (req, res) => {
+  const {portefoljeID} = req.body;
+
+  if (!portefoljeID) {
+    return res.status(400).json({ message: 'PortefoljeID mangler' });
+  }
+  try {
+    const database = await getDatabase();
+    const aksjeResultat = await database.poolconnection.request()
+      .input('portefoljeID', sql.Int, portefoljeID)
+      .query(`
+        SELECT ISIN, SUM(mengde) AS totalMengde 
+        FROM investApp.transaksjon
+        WHERE portefoljeID = @portefoljeID
+        Group by ISIN
+      `);
+      
+        const aksjer = aksjeResultat.recordset;
+
+        const aksjeData = await Promise.all(
+          aksjer.map(async (aksje) => {;
+            try {
+              const markedsdata = await yahooFinance.quote(aksje.ISIN);
+              return {
+                navn: markedsdata.shortName || aksje.ISIN,
+                pris: markedsdata.regularMarketPrice,
+                endringProsent: markedsdata.regularMarketChangePercent,
+                antall: aksje.totalMengde,
+                totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
+              };
+            } catch (feil) {
+              console.error('Feil ved henting av aksjeinformasjon:', feil);
+              return null;
+            }
+          })
+        );
+        const aksjeDataFiltrert = aksjeData.filter(aksje => aksje !== null);
+        res.json(aksjeDataFiltrert);
+    
+  }
+  catch (error) {
+    console.error('Feil i POST /aksjeienkeltportefolje:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
 });

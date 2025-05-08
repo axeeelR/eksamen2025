@@ -57,7 +57,7 @@
       const kjøpAksjeKnapp = document.getElementById('kjøpAksjeKnapp');
       const historikkKnapp = document.getElementById('historikkKnapp');
       const portefoljeID = localStorage.getItem('aktivPortefoljeID');
-      const aksjeInnhold = document.getElementById('totalVerdi');
+      const aksjeInnhold = document.getElementById('aksjeInnhold');
 
       if (!portefoljeID) {
         alert("Ingen portefølje valgt.");
@@ -99,7 +99,42 @@
         window.location.href = '/handel';
       });
       // under her hentes tabellen som heter aksjer i porteføljen
-      const aksjeTabell = document.getElementById('aksjeInnhold');
+
+      fetch('/aksjeienkeltportefolje',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ portefoljeID })
+      })
+        .then(res => res.json())
+        .then(aksjer => {
+          const aksjeTabell = document.getElementById('aksjeInnhold');
+          aksjeTabell.innerHTML = '';   
+          let samletVerdi = 0;
+
+          aksjer.forEach(aksje => {
+            const rad = document.createElement('tr');
+           
+            rad.innerHTML = `
+              <td>${aksje.navn}</td>
+              <td>${aksje.antall}</td>
+              <td>${aksje.endringProsent.toFixed(2)} %</td>
+              <td>${aksje.pris.toFixed(2)} DKK</td>
+              <td>${aksje.totalVerdi.toFixed(2)} DKK</td>
+            `;
+            aksjeTabell.appendChild(rad);
+
+            samletVerdi += aksje.totalVerdi;
+          });
+          const totalVerdi2 = document.getElementById('totalVerdi');
+          if (totalVerdi2){
+            totalVerdi2.textContent = samletVerdi.toFixed(2) + ' NOK';
+          }
+        })
+        .catch(err => {
+          console.error('Feil ved henting av aksjer:', err);
+        });
     </script>
   </body>
 </html>
