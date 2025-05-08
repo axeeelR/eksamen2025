@@ -712,5 +712,3 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
     res.status(500).json({ message: 'Intern feil' });
   }
 });
-
-//404 axel er en bæsj BLBLBLBLBLBLB
