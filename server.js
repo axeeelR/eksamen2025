@@ -651,3 +651,24 @@ app.post('/innskuddshistorikk', async (req, res) => {
 app.get('/innskuddshistorikk', (req, res) => {
   res.render('innskuddshistorikk');
 });
+
+app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
+
+  try {
+    const database = await getDatabase();
+    const result = await database.poolconnection.request()
+      .input('portefoljeID', sql.Int, portefoljeID)
+      .query(`
+        SELECT ISIN, SUM(mengde * verdiPapirPris) AS totalMengde
+        FROM investApp.transaksjon
+        WHERE portefoljeID = @portefoljeID
+        GROUP BY ISIN
+      `);
+
+    res.json(result.recordset);
+  } catch (error) {
+    console.error('Feil i GET /api/portefolje/:portefoljeID/fordeling:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
+});
