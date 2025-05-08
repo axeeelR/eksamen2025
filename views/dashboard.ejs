@@ -61,8 +61,20 @@
         </section>
       </main>
     <script>
+      fetch('/api/verdiutvikling')
+        .then(response => response.json())
+        .then(data => {
+          const labels = data.samletVerdi;
+          const verdier = data.verdiutvikling;
 
-        
+          const ctx = document.getElementById('verdiGraf').getContext('2d');
+
+          const config = {
+            type
+          }
+
+
+        });
     </script>
 </body>
 </html>
