@@ -137,3 +137,9 @@ td {
     color: #c3c3c3;
     font-size: 10px;
 }
+
+#fordelingGraf {
+    max-width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
