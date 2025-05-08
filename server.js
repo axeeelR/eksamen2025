@@ -445,7 +445,6 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
     const result = await poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query('SELECT p.portefoljeNavn FROM investApp.portefolje p WHERE p.portefoljeID = @portefoljeID');
-      .query('SELECT * kontoNavn valuta FROM investApp.portefolje JOIN investApp.konto ON kontoID = kontoID WHERE portefoljeID = @portefoljeID');
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
@@ -597,6 +596,7 @@ app.get('/api/portefolje/:portefoljeID/verdi', async (req, res) => {
     console.error('FEIL i ved henting av portefoljeverdi', error);
     res.status(500).json({ message: 'feil' });
   }
+});
   
 app.get('/handelshistorikk', (req, res) => {
   res.render('handelshistorikk');
@@ -646,6 +646,7 @@ app.post('/innskuddshistorikk', async (req, res) => {
     res.status(500).json({ message: 'Intern feil' });
   }
 });
+
 
 app.get('/innskuddshistorikk', (req, res) => {
   res.render('innskuddshistorikk');
