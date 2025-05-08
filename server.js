@@ -788,6 +788,100 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
   }
 });
 
+app.post('/topp5AksjerGevinst', async (req, res) => {
+  const brukernavn = req.headers['brukernavn'];
+    try {
+      const database = await getDatabase();
+      const brukerResultat = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .query(`
+          SELECT brukerID from investApp.bruker 
+          WHERE brukernavn = @brukernavn
+        `);
+      const brukerID = brukerResultat.recordset[0].brukerID;
+      const aksjeResultat = await database.poolconnection.request()
+        .input('brukerID', sql.Int, brukerID)
+        .query(`
+          SELECT ISIN, p.portefoljeNavn, 
+          SUM(mengde) AS totalMengde,
+          SUM(t.mengde * t.verdiPapirPris) / NULLIF(SUM(t.mengde),0) AS snittKjøpspris
+          FROM investApp.transaksjon t
+          JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
+          WHERE k.brukerID = @brukerID
+          GROUP BY t.ISIN, p.portefoljeNavn
+        `);
+      const aksjer = [];
+      for (const rad of aksjeResultat.recordset) {
+        try {
+          const markedsdata = await yahooFinance.quote(rad.ISIN);
+          const pris = markedsdata.regularMarketPrice;
+          const endring = markedsdata.regularMarketChangePercent;
+
+          const gevinst = (pris - rad.snittKjøpspris) * rad.totalMengde;
+          aksjer.push({
+            navn: markedsdata.shortName || rad.ISIN,
+            portefolje: rad.portefoljeNavn,
+            gevinst: gevinst.toFixed(2),
+            endring24h: endring?.toFixed(2) || 0 
+          });
+        } catch (feil) {
+          console.error('Feil ved henting av aksjeinformasjon:', feil);
+        }
+      }
+      const top5 = aksjer.sort((a, b) => b.gevinst - a.gevinst).slice(0, 5);
+      res.json(top5); 
+   } catch (error) {
+    console.error('Feil i POST /topp5AksjerGevinst:', error);
+    res.status(500).json({ message: 'Intern feil' });
+   }
+});
+
+app.post('/topp5AksjerVerdi', async (req, res) => {
+  const brukernavn = req.headers['brukernavn'];
+    try {
+      const database = await getDatabase();
+      const brukerResultat = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .query(`
+          SELECT brukerID from investApp.bruker 
+          WHERE brukernavn = @brukernavn
+        `);
+      const brukerID = brukerResultat.recordset[0].brukerID;
+      const aksjeResultat = await database.poolconnection.request()
+        .input('brukerID', sql.Int, brukerID)
+        .query(`
+          SELECT ISIN, p.portefoljeNavn, SUM(mengde) AS totalMengde 
+          FROM investApp.transaksjon t
+          JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
+          WHERE k.brukerID = @brukerID
+          GROUP BY t.ISIN, p.portefoljeNavn
+        `);
+      const aksjer = [];
+      for (const rad of aksjeResultat.recordset) {
+        try {
+          const markedsdata = await yahooFinance.quote(rad.ISIN);
+          const pris = markedsdata.regularMarketPrice;
+          aksjer.push({
+            navn: markedsdata.shortName || rad.ISIN,
+            portefolje: rad.portefoljeNavn,
+            verdi: (pris * rad.totalMengde).toFixed(2),
+            endring24h: markedsdata.regularMarketChangePercent?.toFixed(2) || 0 
+          });
+        } catch (feil) {
+          console.error('Feil ved henting av aksjeinformasjon:', feil);
+        }
+      }
+      const top5 = aksjer.sort((a, b) => b.verdi - a.verdi).slice(0, 5);
+      res.json(top5); 
+   } catch (error) {
+    console.error('Feil i POST /topp5AksjerVerdi:', error);
+    res.status(500).json({ message: 'Intern feil' });
+   }
+}
+);
+
 
 app.listen(port, async () => {
   try {

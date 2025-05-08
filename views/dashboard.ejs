@@ -43,7 +43,12 @@
             <h3>Topp 5 aksjer etter verdi</h3>
             <table>
               <thead>
-                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+                <tr>
+                  <th>Navn</th>
+                  <th>Portefølje</th>
+                  <th>24t Endring</th>
+                  <th>Verdi</th>
+                </tr>
               </thead>
               <tbody id="aksjerVerdi"></tbody>
             </table>
@@ -53,7 +58,12 @@
             <h3>Topp 5 aksjer etter gevinst</h3>
             <table>
               <thead>
-                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+                <tr>
+                  <th>Navn</th>
+                  <th>Portefølje</th>
+                  <th>24t Endring</th>
+                  <th>Gevinst</th>
+                </tr>
               </thead>
               <tbody id="aksjerGevinst"></tbody>
             </table>
@@ -84,6 +94,106 @@
             type: 'line',
             data: data,
           }
+        });
+
+        //Topp 5 aksjer etter gevinst
+
+        const brukernavn = localStorage.getItem('brukernavn');
+        const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
+
+        fetch('/topp5AksjerGevinst', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'brukernavn': brukernavn
+            },
+         })
+
+        .then(response => response.json())
+        .then(data => { 
+          if (data.length === 0){
+            const rad = document.createElement('tr');
+            const celle = document.createElement('td');
+            celle.colSpan = 4; // Merge alle columns
+            celle.textContent = 'Ingen aksjer funnet';
+            rad.appendChild(celle);
+            topp5AksjerGevinst.appendChild(rad);
+            return;
+          }
+            data.forEach(aksje => {
+              const rad = document.createElement('tr');
+              const navn = document.createElement('td');
+              navn.textContent = aksje.navn;
+
+              const portefolje = document.createElement('td');
+              portefolje.textContent = aksje.portefolje;
+
+              const endring = document.createElement('td');
+              endring.textContent = aksje.endring24h + '%';
+              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+
+              const gevinst = document.createElement('td');
+              gevinst.textContent = aksje.gevinst + ' dkk';
+
+
+              rad.appendChild(navn);
+              rad.appendChild(portefolje);
+              rad.appendChild(endring);
+              rad.appendChild(gevinst);
+
+              topp5AksjerGevinst.appendChild(rad);
+            });
+          })
+        .catch(error => {
+          console.error('Error fetching aksjer:', error);
+        });
+
+
+        //Topp 5 aksjer etter verdi
+        const topp5AksjerVerdi = document.getElementById('aksjerVerdi');
+        fetch('/topp5AksjerVerdi', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'brukernavn': brukernavn
+            },
+         })
+        .then(response => response.json())
+        .then(data => { 
+          if (data.length === 0){
+            const rad = document.createElement('tr');
+            const celle = document.createElement('td');
+            celle.colSpan = 4; // Merge alle columns
+            celle.textContent = 'Ingen aksjer funnet';
+            rad.appendChild(celle);
+            topp5AksjerVerdi.appendChild(rad);
+            return;
+          }
+            data.forEach(aksje => {
+              const rad = document.createElement('tr');
+              const navn = document.createElement('td');
+              navn.textContent = aksje.navn;
+
+              const portefolje = document.createElement('td');
+              portefolje.textContent = aksje.portefolje;
+
+              const endring = document.createElement('td');
+              endring.textContent = aksje.endring24h + '%';
+              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+
+              const verdi = document.createElement('td');
+              verdi.textContent = aksje.verdi + ' dkk';
+
+              rad.appendChild(navn);
+              rad.appendChild(portefolje);
+              rad.appendChild(endring);
+              rad.appendChild(verdi);
+
+              topp5AksjerVerdi.appendChild(rad);
+            });
+          })
+        .catch(error => {
+          console.error('Error fetching aksjer:', error);
         });
     </script>
 </body>
