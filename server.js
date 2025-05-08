@@ -484,8 +484,15 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-app.get('/handel', (req, res) => {
-  res.render('handel');
+app.get('/handel', async (req, res) => {
+  const portefoljeIDID = req.body.kontoID;
+
+  try{
+    const database = await getDatabase();
+    const result = await database.poolconnection.request();
+  }
+
+
 });
 
 app.get('/transaksjon', (req, res) => {
