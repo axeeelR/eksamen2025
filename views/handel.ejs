@@ -45,7 +45,28 @@
   </main>
 
   <script>
-    const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+     const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+    const registrerHandelKnapp = document.querySelector('button[type="submit"]')
+
+    fetch(`/api/konto-status/${portefoljeID}`)
+      .then(res => res.json())
+      .then(data =>{
+        console.log("lukkedatoK fra server:", data);
+
+        if(data.lukkedatoK){
+          // Hvis portoføljen er lukket, så
+          registrerHandelKnapp.disabled = true;
+          registrerHandelKnapp.textContent = "Det er ikke mulig å foreta en transaksjon, når kontoen er lukket."
+        }
+        else{
+          registrerHandelKnapp.disabled = false;
+          registrerHandelKnapp.textContent = "Registrer Handel";
+        }
+      })
+      .catch(err => {
+        console.log("Klarte ikke hente kontostatus", err);
+      });
+
     const brukernavn = localStorage.getItem('brukernavn');
 
     const søkAksjeBtn = document.getElementById('søkAksje');

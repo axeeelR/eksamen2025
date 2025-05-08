@@ -19,15 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.listen(port, async () => {
-    try {
-        await getDatabase();
-        console.log('Database connection established on server startup.');
-    } catch (error) {
-        console.error('Database connection failed on server startup:', error);
-    }
-    console.log(`Server kjører på http://localhost:${port}`);
-});
+
 
 // In-memory database
 let db = [];
@@ -448,7 +440,11 @@ app.get('/api/portefolje/:id', async (req, res) => {
     const { poolconnection } = await getDatabase();
     const result = await poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
-      .query('SELECT * kontoNavn valuta FROM investApp.portefoljeJOIN investApp.konto ON kontoID = kontoID WHERE portefoljeID = @portefoljeID');
+      .query(`
+          SELECT k.kontoID, k.valuta 
+          FROM investApp.portefolje p  
+          JOIN investApp.konto k ON p.kontoID = k.kontoID 
+          WHERE p.portefoljeID = @portefoljeID`);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
@@ -484,15 +480,35 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-app.get('/handel', async (req, res) => {
-  const portefoljeIDID = req.body.kontoID;
+app.get("/handel", (req, res) => {
+  res.render("handel");
+})
+
+app.get('/api/konto-status/:portefoljeID', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
 
   try{
     const database = await getDatabase();
-    const result = await database.poolconnection.request();
+    const result = await database.poolconnection.request()
+
+    .input('portefoljeID', sql.Int, portefoljeID)
+    .query(`
+      SELECT k.kontoID, k.lukkedatoK
+      FROM investApp.portefolje p
+      JOIN investApp.konto k ON p.kontoID = k.kontoID
+      WHERE p.portefoljeID = @portefoljeID
+      `);
+
+    if(result.recordset.length === 0){
+      return res.status(404).json({ message: 'Fant verken portofølje eller konto'})
+    }
+    res.json(result.recordset[0]);
+   
+
+  } catch(err){
+    console.error(err);
+    res.status(500).json({ message:'intern feil ved henting av kontostatus'})
   }
-
-
 });
 
 app.get('/transaksjon', (req, res) => {
@@ -593,3 +609,13 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
   }
 }
 );  
+
+app.listen(port, async () => {
+  try {
+      await getDatabase();
+      console.log('Database connection established on server startup.');
+  } catch (error) {
+      console.error('Database connection failed on server startup:', error);
+  }
+  console.log(`Server kjører på http://localhost:${port}`);
+});
