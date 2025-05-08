@@ -69,11 +69,21 @@
 
           const ctx = document.getElementById('verdiGraf').getContext('2d');
 
+          const chartData = {
+            labels: labels,
+            datasets: [{
+              label: 'Verdiutvikling',
+              data: verdier,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderWidth: 1
+            }]
+          };
+
           const config = {
-            type
+            type: 'line',
+            data: data,
           }
-
-
         });
     </script>
 </body>
