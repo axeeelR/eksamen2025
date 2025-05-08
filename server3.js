@@ -19,15 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.listen(port, async () => {
-    try {
-        await getDatabase();
-        console.log('Database connection established on server startup.');
-    } catch (error) {
-        console.error('Database connection failed on server startup:', error);
-    }
-    console.log(`Server kjører på http://localhost:${port}`);
-});
+
 
 // In-memory database
 let db = [];
@@ -334,6 +326,10 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
+app.post('/transaksjoner', async (req, res) => {
+  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
+});
+
 app.put('/lukk-konto', async (req, res) => {
   const kontoID = req.body.kontoID;
 
@@ -437,14 +433,18 @@ app.get('/enkeltPortefolje', async (req, res) => {
   res.render('enkeltPortefolje');
 });
 
-app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
-  const portefoljeID = req.params.portefoljeID;
+app.get('/api/portefolje/:id', async (req, res) => {
+  const portefoljeID = req.params.id;
 
   try {
     const { poolconnection } = await getDatabase();
     const result = await poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
-      .query('SELECT p.portefoljeNavn FROM investApp.portefolje p WHERE p.portefoljeID = @portefoljeID');
+      .query(`
+          SELECT k.kontoID, k.valuta 
+          FROM investApp.portefolje p  
+          JOIN investApp.konto k ON p.kontoID = k.kontoID 
+          WHERE p.portefoljeID = @portefoljeID`);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
@@ -480,8 +480,35 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-app.get('/handel', (req, res) => {
-  res.render('handel');
+app.get("/handel", (req, res) => {
+  res.render("handel");
+})
+
+app.get('/api/konto-status/:portefoljeID', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
+
+  try{
+    const database = await getDatabase();
+    const result = await database.poolconnection.request()
+
+    .input('portefoljeID', sql.Int, portefoljeID)
+    .query(`
+      SELECT k.kontoID, k.lukkedatoK
+      FROM investApp.portefolje p
+      JOIN investApp.konto k ON p.kontoID = k.kontoID
+      WHERE p.portefoljeID = @portefoljeID
+      `);
+
+    if(result.recordset.length === 0){
+      return res.status(404).json({ message: 'Fant verken portofølje eller konto'})
+    }
+    res.json(result.recordset[0]);
+   
+
+  } catch(err){
+    console.error(err);
+    res.status(500).json({ message:'intern feil ved henting av kontostatus'})
+  }
 });
 
 app.get('/transaksjon', (req, res) => {
@@ -557,43 +584,6 @@ app.post('/transaksjon', async (req, res) => {
     }
 });
 
-/*--------------------------------------------------------------------- */
-
-app.get('/api/portefolje/:portefoljeID/verdi', async (req, res) => {
-  const portefoljeID = req.params.portefoljeID;
-
-  try {
-    const database = await getDatabase();
-    const handler =  await database.poolconnection.request()
-    .input('portefoljeID', sql.Int, portefoljeID)
-    .query(`SELECT ISIN, mengde FROM investApp.transaksjon WHERE portefoljeID = @portefoljeID`);
-
-    const aksjer = {};
-
-    handler.recordset.forEach(row => {
-      aksjer[row.ISIN] = {
-        type: row.verditype,
-      };
-      aksjer[row.ISIN].mengde = row.mengde;
-    });
-
-    let totalVerdi = 0;
-
-    for (const ISIN in aksjer) {
-      const verdiPapir = await yahooFinance.quote(ISIN);
-      const pris = verdiPapir.regularMarketPrice;
-      const mengde = aksjer[ISIN].mengde;
-      
-      totalVerdi += pris * mengde;
-    }
-
-    res.json({ totalVerdi });
-  } catch (error) {
-    console.error('FEIL i ved henting av portefoljeverdi', error);
-    res.status(500).json({ message: 'feil' });
-  }
-});
-  
 app.get('/handelshistorikk', (req, res) => {
   res.render('handelshistorikk');
 });
@@ -620,95 +610,14 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
 }
 );  
 
-app.post('/innskuddshistorikk', async (req, res) => {
-  const { kontoID } = req.body;
-  const parsedKontoID = parseInt(kontoID, 10);
-
-  if (!kontoID) {
-    return res.status(400).json({ message: 'KontoID mangler' });
-  }
-  try {  
-    const database = await getDatabase();
-    const result = await database.poolconnection.request()
-    .input('kontoID', sql.Int, parsedKontoID)
-    .query(`
-      SELECT * FROM investApp.indsettelse 
-      WHERE kontoID = @kontoID
-      ORDER by dato_tidspunkt DESC
-    `);
-    res.json(result.recordset);
-  } catch (error) {
-    console.error('Feil i POST /innskuddshistorikk:', error);
-    res.status(500).json({ message: 'Intern feil' });
-  }
-});
-
-app.get('/innskuddshistorikk', (req, res) => {
-  res.render('innskuddshistorikk');
-});
-
-app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
-  const portefoljeID = req.params.portefoljeID;
-
+app.listen(port, async () => {
   try {
-    const database = await getDatabase();
-    const result = await database.poolconnection.request()
-      .input('portefoljeID', sql.Int, portefoljeID)
-      .query(`
-        SELECT ISIN, SUM(mengde * verdiPapirPris) AS totalMengde
-        FROM investApp.transaksjon
-        WHERE portefoljeID = @portefoljeID
-        GROUP BY ISIN
-      `);
-
-    res.json(result.recordset);
+      await getDatabase();
+      console.log('Database connection established on server startup.');
   } catch (error) {
-    console.error('Feil i GET /api/portefolje/:portefoljeID/fordeling:', error);
+      console.error('Database connection failed on server startup:', error);
   }
 });
 
-app.post('/aksjeienkeltportefolje', async (req, res) => {
-  const {portefoljeID} = req.body;
-
-  if (!portefoljeID) {
-    return res.status(400).json({ message: 'PortefoljeID mangler' });
-  }
-  try {
-    const database = await getDatabase();
-    const aksjeResultat = await database.poolconnection.request()
-      .input('portefoljeID', sql.Int, portefoljeID)
-      .query(`
-        SELECT ISIN, SUM(mengde) AS totalMengde 
-        FROM investApp.transaksjon
-        WHERE portefoljeID = @portefoljeID
-        Group by ISIN
-      `);
-      
-        const aksjer = aksjeResultat.recordset;
-
-        const aksjeData = await Promise.all(
-          aksjer.map(async (aksje) => {;
-            try {
-              const markedsdata = await yahooFinance.quote(aksje.ISIN);
-              return {
-                navn: markedsdata.shortName || aksje.ISIN,
-                pris: markedsdata.regularMarketPrice,
-                endringProsent: markedsdata.regularMarketChangePercent,
-                antall: aksje.totalMengde,
-                totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
-              };
-            } catch (feil) {
-              console.error('Feil ved henting av aksjeinformasjon:', feil);
-              return null;
-            }
-          })
-        );
-        const aksjeDataFiltrert = aksjeData.filter(aksje => aksje !== null);
-        res.json(aksjeDataFiltrert);
-    
-  }
-  catch (error) {
-    console.error('Feil i POST /aksjeienkeltportefolje:', error);
-    res.status(500).json({ message: 'Intern feil' });
-  }
-});
+//404 axel er en bæsj BLBLBLBLBLBLB
+  console.log(`Server kjører på http://localhost:${port}`);
