@@ -83,7 +83,6 @@
         historikkKnapp.addEventListener('click', () => {
           window.location.href = '/handelshistorikk';
       });
-
       //Hent porteføljens totalverdi
       fetch(`/api/portefolje/${portefoljeID}/verdi`)
         .then(res => res.json())
@@ -99,6 +98,8 @@
       kjøpAksjeKnapp.addEventListener('click', () => {
         window.location.href = '/handel';
       });
+      // under her hentes tabellen som heter aksjer i porteføljen
+      const aksjeTabell = document.getElementById('aksjeInnhold');
     </script>
   </body>
 </html>
