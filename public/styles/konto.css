@@ -39,6 +39,28 @@ h1 {
   right: 30px;
 }
 
+.indsettelse {
+  background-color: #242424;
+  color: #8b8b8b;
+  font-family: 'inter', sans-serif;
+  font-size: 12px;
+  position: absolute;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.indsettelse:hover {
+  background-color: #484eff;
+} 
+
+.indsettelse {
+  top: 60px;
+  right: 30px;
+}
+
 input {
   width: 100%;
   padding: 12px;
