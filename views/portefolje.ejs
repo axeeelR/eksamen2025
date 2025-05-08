@@ -84,10 +84,11 @@
             portefoljer.forEach(portefolje => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td><button onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
+                <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
                 <td> ${portefolje.kontoNavn}</td>
                 <td>${portefolje.saldo} DKK</td>
-                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}
+                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}</td>
+                <td>${portefolje.totalValue} DKK</td>
                     `;
                 tbody.appendChild(tr);
 
