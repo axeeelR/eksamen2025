@@ -334,10 +334,6 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
-app.post('/transaksjoner', async (req, res) => {
-  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
-});
-
 app.put('/lukk-konto', async (req, res) => {
   const kontoID = req.body.kontoID;
 
@@ -449,6 +445,7 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
     const result = await poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query('SELECT p.portefoljeNavn FROM investApp.portefolje p WHERE p.portefoljeID = @portefoljeID');
+      .query('SELECT * kontoNavn valuta FROM investApp.portefolje JOIN investApp.konto ON kontoID = kontoID WHERE portefoljeID = @portefoljeID');
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
@@ -600,4 +597,56 @@ app.get('/api/portefolje/:portefoljeID/verdi', async (req, res) => {
     console.error('FEIL i ved henting av portefoljeverdi', error);
     res.status(500).json({ message: 'feil' });
   }
+  
+app.get('/handelshistorikk', (req, res) => {
+  res.render('handelshistorikk');
+});
+
+app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
+  try {
+    const portefoljeID = req.params.portefoljeID;
+
+    const database = await getDatabase();
+    const result = await database.poolconnection.request()
+      .input('portefoljeID', sql.Int, portefoljeID)
+      .query(`
+        SELECT * FROM investApp.transaksjon 
+        WHERE portefoljeID = @portefoljeID
+        ORDER by opprettelsedatoT DESC
+      `);
+
+    res.json(result.recordset);
+  }
+  catch (error) {
+    console.error('Feil i POST /api/handelshistorikk:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
+}
+);  
+
+app.post('/innskuddshistorikk', async (req, res) => {
+  const { kontoID } = req.body;
+  const parsedKontoID = parseInt(kontoID, 10); // Parse kontoID til integer
+
+  if (!kontoID) {
+    return res.status(400).json({ message: 'KontoID mangler' });
+  }
+  try {  
+    const database = await getDatabase();
+    const result = await database.poolconnection.request()
+    .input('kontoID', sql.Int, parsedKontoID)
+    .query(`
+      SELECT * FROM investApp.indsettelse 
+      WHERE kontoID = @kontoID
+      ORDER by dato_tidspunkt DESC
+    `);
+    res.json(result.recordset);
+  } catch (error) {
+    console.error('Feil i POST /innskuddshistorikk:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
+});
+
+app.get('/innskuddshistorikk', (req, res) => {
+  res.render('innskuddshistorikk');
 });

@@ -55,6 +55,7 @@
     <script>
       const portefoljeNavn = document.getElementById('portefoljeNavn');
       const kjøpAksjeKnapp = document.getElementById('kjøpAksjeKnapp');
+      const historikkKnapp = document.getElementById('historikkKnapp');
       const portefoljeID = localStorage.getItem('aktivPortefoljeID');
       const aksjeInnhold = document.getElementById('totalVerdi');
 
@@ -78,6 +79,9 @@
 
       kjøpAksjeKnapp.addEventListener('click', () => {
         window.location.href = '/handel';
+        });
+        historikkKnapp.addEventListener('click', () => {
+          window.location.href = '/handelshistorikk';
       });
 
       //Hent porteføljens totalverdi
