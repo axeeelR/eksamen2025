@@ -21,16 +21,6 @@ app.use(express.json());
 
 const yahooFinance = require('yahoo-finance2').default;
 
-app.listen(port, async () => {
-    try {
-        await getDatabase();
-        console.log('Database connection established on server startup.');
-    } catch (error) {
-        console.error('Database connection failed on server startup:', error);
-    }
-    console.log(`Server kjører på http://localhost:${port}`);
-});
-
 // In-memory database
 let db = [];
 
