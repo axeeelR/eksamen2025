@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Handelshistorikk</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/portefolje.css">
+  <link rel="stylesheet" href="/styles/enkeltPortefolje.css">
   <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
@@ -21,6 +21,7 @@
           <th>Dato</th>
           <th>Pris</th>
           <th>Mengde</th>
+          <th>Total Sum</th>
           <th>Gebyr</th>
         </tr>
       </thead>
@@ -49,6 +50,7 @@
               <td>${new Date(historikk.opprettelsedatoT).toLocaleDateString()}</td>
               <td>${historikk.verdiPapirPris}</td>
               <td>${historikk.mengde}</td>
+              <td>${historikk.totalSum}</td>
               <td>${historikk.totalGebyr}</td>
             `;
             historikkTabell.appendChild(rad);

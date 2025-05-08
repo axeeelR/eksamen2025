@@ -585,7 +585,7 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
 
 app.post('/innskuddshistorikk', async (req, res) => {
   const { kontoID } = req.body;
-  const parsedKontoID = parseInt(kontoID, 10); // Parse kontoID til integer
+  const parsedKontoID = parseInt(kontoID, 10);
 
   if (!kontoID) {
     return res.status(400).json({ message: 'KontoID mangler' });
