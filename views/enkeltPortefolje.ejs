@@ -87,7 +87,13 @@
           window.location.href = '/handelshistorikk';
       });
       //Hent porteføljens totalverdi
-      fetch(`/api/portefolje/${portefoljeID}/verdi`)
+      fetch('/api/portefolje/verdi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ portefoljeID })
+      })
         .then(res => res.json())
         .then(data => {
           document.getElementById('totalVerdi').innerHTML = `${data.totalVerdi.toFixed(2)} DKK`;
@@ -143,29 +149,38 @@
         });
 
         //Linje diagram oversikt
+      fetch('/api/portefolje/verdiutvikling',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ portefoljeID })
+      })
+        .then(res => res.json())
+        .then(data => {
+          const verdiGraf = document.getElementById('verdiGraf').getContext('2d');
 
-        const verdiGraf = document.getElementById('verdiGraf').getContext('2d');
+          const labels = data.map(entry=> entry.dato);
+          const verdier = data.map(entry => entry.verdi);
 
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-        const data = {
-          labels: labels,
-          datasets: [{
-            label: 'Verdiutvikling',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            data: [0, 10, 5, 2, 20, 30, 45],
-            fill: false,
-            tension: 0.1
-          }]
-        };
+          new Chart(verdiGraf, {
+            type: 'line',
+            data:{
+            labels: labels,
+            datasets: [{
+              label: 'Verdiutvikling',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              data: verdier,
+              fill: false,
+              tension: 0.1
+            }]
+           }
+        });
+        })
+        
 
-        const config = {
-          type: 'line',
-          data: data,
-        };
-
-        new Chart(verdiGraf, config);
-
+        //Hent aksjer i tabellen i enkeltporteføljen
       fetch('/aksjeienkeltportefolje',{
         method: 'POST',
         headers: {
