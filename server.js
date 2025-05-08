@@ -89,6 +89,11 @@ app.get('/blikunde', (req, res) => {
 
 app.post('/blikunde', async (req, res) => {
     const bruker = req.body
+
+    if (!bruker.brukernavn || !bruker.passord || !bruker.email) {
+        return res.status(400).json({ message: 'Brukernavn, passord og email må oppgis' });
+    }
+
     try{
         const database = await getDatabase();
         const request = database.poolconnection.request();
@@ -279,6 +284,10 @@ app.get('/api/portefolje', async (req, res) => {
     const { poolconnection } = await getDatabase();
     const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(
     'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID JOIN investApp.bruker b ON k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn');
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: 'Ingen porteføljer funnet for brukeren' });
+    }
     
     res.json(result.recordset);
   } catch (error) {
@@ -315,6 +324,10 @@ app.get('/opprettPortefolje', async (req, res) => {
 app.post('/opprettPortefolje', async (req, res) => {
   const { navn, kontoID } = req.body;
   const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
+
+  if (!navn || !kontoID) {
+    return res.status(400).json({ message: 'Portefoljenavn og kontoID må oppgis' });
+  }
 
   try {
     const { poolconnection } = await getDatabase();
@@ -712,3 +725,9 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
     res.status(500).json({ message: 'Intern feil' });
   }
 });
+
+//Testing ------------------------------------------------------------------------------------------
+
+module.exports = app;
+
+//--------------------------------------------------------------------------------------------------
