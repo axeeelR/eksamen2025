@@ -664,6 +664,9 @@ app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
     res.json(result.recordset);
   } catch (error) {
     console.error('Feil i GET /api/portefolje/:portefoljeID/fordeling:', error);
+  }
+});
+
 app.post('/aksjeienkeltportefolje', async (req, res) => {
   const {portefoljeID} = req.body;
 
