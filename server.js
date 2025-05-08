@@ -441,14 +441,14 @@ app.get('/enkeltPortefolje', async (req, res) => {
   res.render('enkeltPortefolje');
 });
 
-app.get('/api/portefolje/:id', async (req, res) => {
-  const portefoljeID = req.params.id;
+app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
 
   try {
     const { poolconnection } = await getDatabase();
     const result = await poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
-      .query('SELECT * kontoNavn valuta FROM investApp.portefoljeJOIN investApp.konto ON kontoID = kontoID WHERE portefoljeID = @portefoljeID');
+      .query('SELECT p.portefoljeNavn FROM investApp.portefolje p WHERE p.portefoljeID = @portefoljeID');
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
@@ -462,7 +462,11 @@ app.get('/api/portefolje/:id', async (req, res) => {
   }
 });
 
+/*----------------------------------------------------------------- */
+
 const yahooFinance = require('yahoo-finance2').default;
+
+/*-------------------------------------------------------------------- */
 
 app.get('/api/aksje/:navn', async (req, res) => {
   const søk = req.params.navn;
@@ -559,4 +563,41 @@ app.post('/transaksjon', async (req, res) => {
       console.error('Feil i POST /transaksjon:', error);
       res.status(500).json({ message: 'Intern feil' });
     }
+});
+
+/*--------------------------------------------------------------------- */
+
+app.get('/api/portefolje/:portefoljeID/verdi', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
+
+  try {
+    const database = await getDatabase();
+    const handler =  await database.poolconnection.request()
+    .input('portefoljeID', sql.Int, portefoljeID)
+    .query(`SELECT ISIN, mengde FROM investApp.transaksjon WHERE portefoljeID = @portefoljeID`);
+
+    const aksjer = {};
+
+    handler.recordset.forEach(row => {
+      aksjer[row.ISIN] = {
+        type: row.verditype,
+      };
+      aksjer[row.ISIN].mengde = row.mengde;
+    });
+
+    let totalVerdi = 0;
+
+    for (const ISIN in aksjer) {
+      const verdiPapir = await yahooFinance.quote(ISIN);
+      const pris = verdiPapir.regularMarketPrice;
+      const mengde = aksjer[ISIN].mengde;
+      
+      totalVerdi += pris * mengde;
+    }
+
+    res.json({ totalVerdi });
+  } catch (error) {
+    console.error('FEIL i ved henting av portefoljeverdi', error);
+    res.status(500).json({ message: 'feil' });
+  }
 });

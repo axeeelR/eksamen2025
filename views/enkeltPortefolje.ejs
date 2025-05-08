@@ -55,15 +55,16 @@
     <script>
       const portefoljeNavn = document.getElementById('portefoljeNavn');
       const kjøpAksjeKnapp = document.getElementById('kjøpAksjeKnapp');
-
       const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+      const aksjeInnhold = document.getElementById('totalVerdi');
 
       if (!portefoljeID) {
         alert("Ingen portefølje valgt.");
         window.location.href = '/portefolje';
       }
 
-      fetch(`/api/portefolje/${portefoljeID}`)
+      //hent porteføjens navn
+      fetch(`/api/portefolje/${portefoljeID}/info`)
         .then(res => res.json())
         .then(portefolje => {
           portefoljeNavn.textContent = portefolje.portefoljeNavn;
@@ -75,6 +76,22 @@
           window.location.href = '/portefolje';
         });
 
+      kjøpAksjeKnapp.addEventListener('click', () => {
+        window.location.href = '/handel';
+      });
+
+      //Hent porteføljens totalverdi
+      fetch(`/api/portefolje/${portefoljeID}/verdi`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('totalVerdi').innerHTML = `${data.totalVerdi.toFixed(2)} DKK`;
+        })
+        .catch(err => {
+          console.error('Feil ved henting av aksjer:', err);
+          alert("Kunne ikke hente aksjer.");
+        });
+
+      //navigasjon
       kjøpAksjeKnapp.addEventListener('click', () => {
         window.location.href = '/handel';
       });
