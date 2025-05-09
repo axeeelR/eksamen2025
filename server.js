@@ -650,11 +650,40 @@ app.post('/salg', async (req, res) => {
         return res.status(400).json({ message: 'du prøver å selge ${mengde}, men du eier bare ${beholdning} aksjer av ${ISIN}'});
       }
 
-      const saldoREsultat = await database.poolconnection.request() 
+      const saldoResultat = await database.poolconnection.request() 
         .input('kontoID', sql.int, kontoID)
-        
+        .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
+
+        let saldo = saldoResultat.recordset[0].saldo;
+        saldo += totalSum;  // Legg til salgsbeløpet til saldoen
+
+        await database.poolconnection.request()
+        .input('kontoID', sql.Int, hentetKontoID)
+        .input('saldo', sql.Decimal(18, 2), saldo)
+        .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
+
+        await database.poolconnection.request()
+        .input('kontoID', sql.Int, hentetKontoID)
+        .input('portefoljeID', sql.Int, portefoljeID)
+        .input('ISIN', sql.VarChar(255), ISIN) 
+        .input('verditype', sql.VarChar(255), verditype)
+        .input('opprettelsedatoT', sql.Date, opprettelsedatoT)
+        .input('verdiPapirPris', sql.Decimal(18, 2), verdiPapirPris)
+        .input('mengde', sql.Int, mengde)
+        .input('totalSum', sql.Decimal(18, 2), totalSum)
+        .input('totalGebyr', sql.Decimal(18, 2), totalGebyr) 
+        .query(`
+          INSERT INTO investApp.transaksjon 
+          (kontoID, portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde, totalSum, totalGebyr)
+          VALUES (@kontoID, @portefoljeID, @ISIN, @verditype, @opprettelsedatoT, @verdiPapirPris, @mengde, @totalSum, @totalGebyr)`
+        );
+
+      res.status(200).json({ message: 'Salg registrert'});
+
+      }catch(error){
+        console.error('feil i post /salg', error);
     }
-})
+});
 
 //Linjediagram enkeltportefolje
 /*--------------------------------------------------------------------- */
