@@ -274,8 +274,28 @@ app.get('/api/portefolje', async (req, res) => {
   
   try {
     const { poolconnection } = await getDatabase();
-    const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(
-    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID JOIN investApp.bruker b ON k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn');
+    const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(`
+      SELECT 
+        p.portefoljeID, 
+        p.portefoljeNavn, 
+        p.opprettelsedatoP, 
+        k.kontoNavn, 
+        k.saldo, 
+        (
+          SELECT MAX(t.opprettelsedatoT)
+          FROM investApp.transaksjon t
+          WHERE t.portefoljeID = p.portefoljeID
+        ) AS sisteHandel,
+        (
+          SELECT SUM(t.mengde * t.verdiPapirPris)
+          FROM investApp.transaksjon t
+          WHERE t.portefoljeID = p.portefoljeID
+        ) AS totalValue
+      FROM investApp.portefolje p 
+      JOIN investApp.konto k ON p.kontoID = k.kontoID 
+      JOIN investApp.bruker b ON k.brukerID = b.brukerID 
+      WHERE b.brukernavn = @brukernavn
+      `);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Ingen porteføljer funnet for brukeren' });
@@ -1010,6 +1030,41 @@ app.post('/portefolje/endringerSisteDager', async (req, res) => {
 });
 
 
+
+//------------------------------------------------------------------------------------------------
+
+app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
+  try{
+    const database = await getDatabase();
+
+    const aksjer = await database.poolconnection.request().input('portefoljeID', sql.Int, portefoljeID).query(`
+      SELECT ISIN, SUM(mengde) AS totalMengde 
+      FROM investApp.transaksjon
+      WHERE portefoljeID = @portefoljeID
+      GROUP BY ISIN
+    `);
+
+    let verdiNå = 0;
+    let verdiTidligere = 0;
+
+    for (const aksje of aksjer.recordset) {
+      const data = await yahooFinance.quote(aksje.ISIN);
+      const prisNå = data.regularMarketPrice;
+      const endringProsent = data.regularMarketChangePercent / 100;
+      const tidligerePris = prisNå / (1 + endringProsent);
+
+      verdiNå += prisNå * aksje.totalMengde;
+      verdiTidligere += tidligerePris * aksje.totalMengde;
+
+    }
+    const endring = ((verdiNå - verdiTidligere) / verdiTidligere) * 100;
+    res.json({ endring24h: endring.toFixed(2) });
+  } catch (error) {
+    console.error('Feil ved henting av endring verdi:', error);
+    res.status(500).json({ message: 'feil ved beregning' });
+  }
+});
 
 //------------------------------------------------------------------------------------------------
 app.listen(port, async () => {

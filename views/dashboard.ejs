@@ -110,11 +110,14 @@
 
               const endring = document.createElement('td');
               endring.textContent = aksje.endring24h + '%';
-              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+              if (aksje.endring24h > 0) {
+                endring.style.color = 'green';
+              } else if (aksje.endring24h < 0) {
+                endring.style.color = 'red';
+              } 
 
               const gevinst = document.createElement('td');
               gevinst.textContent = aksje.gevinst + ' dkk';
-
 
               rad.appendChild(navn);
               rad.appendChild(portefolje);
@@ -177,7 +180,11 @@
 
               const endring = document.createElement('td');
               endring.textContent = aksje.endring24h + '%';
-              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+              if (aksje.endring24h > 0) {
+                endring.style.color = 'green';
+              } else if (aksje.endring24h < 0) {
+                endring.style.color = 'red';
+              } 
 
               const verdi = document.createElement('td');
               verdi.textContent = aksje.verdi + ' dkk';

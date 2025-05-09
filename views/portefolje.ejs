@@ -9,12 +9,13 @@
     <link rel="stylesheet" href="/styles/menyPanel.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <%- include ('partials/menyPanel') %>
 
     <div class="topp">
     <h1>Portefølje oversikt</h1>
-        <a href="/opprettPortefolje" class="opprettKnapp"><button class="opprettKnapp">Opprett portefølje</button></a>
+        <a href="/opprettPortefolje" class="opprettKnapp">Opprett portefølje</a>
     </div>
 
     <main class="main-content">
@@ -45,9 +46,9 @@
                     <thead>
                         <tr>
                             <th>Portefølje Navn</th>
-                            <th>Tilhørende konto</th>
-                            <th>Saldo</th>
-                            <th>Opprettelsesdato</th>
+                            <th>Bank Account</th>
+                            <th>24h Change</th>
+                            <th>Siste handel</th>
                             <th>Total Value</th>
                         </tr>
                         </thead>
@@ -66,37 +67,56 @@
         const labels = [];
         const saldo = [];
 
-        fetch('/api/portefolje', {
+        (async () => { //starter en asynkront funksjon fordi vi skal hente data fra serveren simultant
+        
+        try {
+
+        const res = await fetch('/api/portefolje', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'brukernavn': brukernavn,
             }
-        })
+        });
 
-        .then(res => res.json())
-        .then(portefoljer => {
-            const tbody = document.getElementById('portefoljeOversikt');
+        const portefoljer = await res.json();
+        const tbody = document.getElementById('portefoljeOversikt');
 
             if (!portefoljer.length) {
                 document.getElementById('portefolje').innerHTML = '<p>Ingen porteføljer funnet</p>';
                 return;
             }
 
-            portefoljer.forEach(portefolje => {
+            for(const portefolje of portefoljer) {
+
+                let endring24h = '0.00%';
+
+                try {
+                    const response = await fetch(`/api/portefolje/${portefolje.portefoljeID}/endring24`);
+                    const endringData = await response.json();
+                    endring24h = endringData.endring24h || '0.00%';
+
+                } catch (error) {
+                    console.error('klarte ikke hente 24 timers endring', error);
+                }
+
+                const sisteHandelTekst = new Date(portefolje.sisteHandel || '').toLocaleDateString('no-NO') || 'Ingen handel';
+                const totalVerdi = portefolje.totalValue || 0;
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
-                <td> ${portefolje.kontoNavn}</td>
-                <td>${portefolje.saldo} DKK</td>
-                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString('no-NO')}</td>
-                <td>${portefolje.totalValue} DKK</td>
+                    <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
+                    <td>${portefolje.kontoNavn}</td>
+                    <td>${endring24h}</td>
+                    <td>${sisteHandelTekst}</td>
+                    <td>${totalVerdi.toFixed(2)} DKK</td>
                     `;
                 tbody.appendChild(tr);
 
                 labels.push(portefolje.portefoljeNavn);
-                saldo.push(portefolje.saldo);
-            });
+                saldo.push(totalVerdi);
+            };
+    
 
         /*Donut diagram --------------------------------------*/
         const ctx = document.getElementById('myChart').getContext('2d');
@@ -122,15 +142,15 @@
         };
         new Chart(ctx, config);
 
-        })
-        .catch(err => {
-            console.error('Error ved å hente portefoljer:', err);
-        });
+        } catch(error) {
+            console.error('Error ved å hente portefoljer:', error);
+            }
+        })();
 
         function åpnePortefolje(portefoljeID) {
         localStorage.setItem('aktivPortefoljeID', portefoljeID);
         window.location.href = '/enkeltPortefolje';
-}
+        }
 
         //endringer siste dager med 24 timer syv dager og 30 dager
         fetch('/portefolje/endringerSisteDager', {
