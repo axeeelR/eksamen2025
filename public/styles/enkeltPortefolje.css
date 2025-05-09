@@ -10,6 +10,7 @@ body {
     margin-right: 50px;
     max-width: 100%;
     padding: 32px 40px;
+    font-style: 'inter', sans-serif;
 }
 
 .toppseksjon {
@@ -23,27 +24,30 @@ body {
     font-size: 32px;
     color: #c3c3c3;
     margin: 0;
+    font-family: 'inter', sans-serif;
 }
 
 .knappcontainer {
     display: flex;
-    gap: 12px;
+    gap: 16px;
 }
 
-.knappcontainer button {
-    background-color: #1b1b1b;
-    color: #c3c3c3;
-    border: none;
+.historikkKnapp {
     font-family: 'inter', sans-serif;
-    font-size: 12px;
     border-radius: 8px;
     cursor: pointer;
-    width: 350px;
-    transition: background-color 0.3s ease;
+    border: none;
+    color: #c3c3c3;
+    font-size: 12px;
 }
 
-.knappcontainer button:hover {
-    background-color: #484eff;
+.kjøpAksjeKnapp {
+    font-family: 'inter', sans-serif;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    color: #c3c3c3;
+    font-size: 12px;
 }
 
 .verdiOgFordeling {
