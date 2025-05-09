@@ -819,6 +819,31 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
   }
 });
 
+app.get('/samlet-verdi/:brukernavn', async (req, res) => {
+  const brukernavn = req.params.brukernavn;
+
+  try{
+    const database = await getDatabase();
+    const result = await database.poolconnection.request()
+
+    .input('brukernavn', sql.NVarChar, brukernavn)
+    .query(`
+      SELECT k.valuta, SUM(t.totalSum) AS samletVerdi
+      FROM investApp.transaksjon t
+      JOIN investApp.konto k ON t.kontoID = k.kontoID
+      JOIN investApp.bruker b ON k.brukerID = b.brukerID
+      WHERE b.brukernavn = @brukernavn
+      GROUP BY k.valuta 
+      `);
+
+      res.json(result.recordset);
+
+    } catch(error) {
+      console.log(error);
+      res.status(500).json({ message: 'intern feil ved henting av samlet verdi'})
+  }
+});
+
 app.post('/topp5AksjerGevinst', async (req, res) => {
   const brukernavn = req.headers['brukernavn'];
     try {
