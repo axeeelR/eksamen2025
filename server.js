@@ -592,6 +592,7 @@ app.post('/transaksjon', async (req, res) => {
     }
 });
 
+//Linjediagram enkeltportefolje
 /*--------------------------------------------------------------------- */
 
 app.post('/api/portefolje/verdiutvikling', async (req, res) => {
@@ -633,6 +634,36 @@ app.post('/api/portefolje/verdiutvikling', async (req, res) => {
     res.status(500).json({ message: 'Intern feil' });
   }
 });
+
+//Linjediagram samlet
+//--------------------------------------------------------------------- */
+
+app.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
+  try {
+    const database = await getDatabase();
+    const result = await database.poolconnection.request().query(`
+        SELECT CAST(opprettelsedatoT AS DATE) AS dato,
+        SUM(mengde * verdiPapirPris) AS verdi
+        FROM investApp.transaksjon 
+        GROUP BY CAST(opprettelsedatoT AS DATE)
+        ORDER BY dato ASC
+        `);
+
+        const verdiHistorikk = result.recordset.map(transaksjon => ({
+          dato: transaksjon.dato,
+          verdi: transaksjon.verdi
+        }));
+
+        res.json(verdiHistorikk);
+      
+  } catch (error) {
+    console.error('Feil i GET samletverdiutvikling:', error);
+    res.status(500).json({ message: 'Intern feil' });
+  }
+});
+
+//----------------------------------------------------------------------
+
 
 app.post('/api/portefolje/verdi', async (req, res) => {
   const { portefoljeID } = req.body;
@@ -882,7 +913,7 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
 }
 );
 
-
+//------------------------------------------------------------------------------------------------
 app.listen(port, async () => {
   try {
       await getDatabase();
