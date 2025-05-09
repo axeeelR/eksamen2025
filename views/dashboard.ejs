@@ -85,6 +85,29 @@
             data: data,
           }
         });
+        
+        const brukernavn = localStorage.getItem('brukernavn');
+
+        fetch(`/samlet-verdi/${brukernavn}`)
+          .then(res => res.json())
+          .then(data => {
+            const sVerdi = document.getElementById('samletVerdi');
+
+            if(data.length === 0){
+              sVerdi.textContent = '0';
+            }
+            else{
+              sVerdi.innerHTML = data.map(item => {
+                const verdi = Number(item.samletVerdi).toFixed(2);
+                return `${verdi} ${item.valuta}`;
+            }).join('<br>');
+            }
+          })
+          .catch(error => console.error('Feil ved henting av samlet verdi', error));
+
+
+  
+
     </script>
 </body>
 </html>
