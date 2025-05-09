@@ -4,43 +4,36 @@
   <meta charset="UTF-8">
   <title>Registrer Handel</title>
   <link rel="stylesheet" href="/styles/index.css">
-  <link rel="stylesheet" href="/styles/handel.css">
+  <link rel="stylesheet" href="/styles/salg.css">
   <link rel="stylesheet" href="/styles/menyPanel.css">
 </head>
 <body>
   <%- include('partials/menyPanel') %>
 
   <main class="formContainer"> 
-    <h1>REGISTRER HANDEL</h1>
+    <h1>REGISTRER SALG</h1>
+
     <form id="handelForm">
       <div class="form-group">
-        <label for="navn">Aksje Navn:</label>
-        <input type="text" id="navn" required>
-        <button type="button" id="søkAksje">Søk</button>
+        <label for="aksjeValg">Velg aksje:</label>
+        <input type="text" id="aksjeValg" required>
       </div>
 
       <div id="aksjeInfo" style="display: none;">
         <h2 id="aksjeNavn"></h2>
-        <p>Pris: <span id="aksjePris"></span></p>
+        <p> <span id="aksjePris"></span></p>
       </div>
 
       <div class="form-group">
-        <label for="mengde">Mengde:</label>
+        <label for="beløp">Beløp:</label>
         <input type="number" id="mengde" required>
       </div>
 
       <div class="form-group">
-        <label for="gebyr">Gebyr:</label>
-        <input type="number" id="gebyr" required>
+        <p>Transaksjons settes til 0,05% av kjøps sum </p>
+        <input type="text" id="gebyr" required>
       </div>
-      <div class="form-group">
-        <label for="handelType">Type Handel:</label>
-        <select id="handelType" required>
-          <option value="kjøp">Kjøp</option>
-          <option value="salg">Salg</option>
-        </select>
-      </div>
-      <button type="submit">Registrer Handel</button>
+      <button type="submit">Bekreft salg</button>
     </form>
   </main>
 
@@ -60,26 +53,36 @@
         }
         else{
           registrerHandelKnapp.disabled = false;
-          registrerHandelKnapp.textContent = "Registrer Handel";
+          registrerHandelKnapp.textContent = "Registrer Salg";
         }
       })
       .catch(err => {
         console.log("Klarte ikke hente kontostatus", err);
       });
 
-    const brukernavn = localStorage.getItem('brukernavn');
+      const aksjeInput = document.getElementByID('aksjeValg');
+      const datalist = document.createElement('datalist');
+      datalist.id = 'aksjeListe';
+      document.body.appendChild(datalist);
+      aksjeInput.setAttribute('list', 'aksjeliste')
 
-    const søkAksjeBtn = document.getElementById('søkAksje');
-    const aksjeInfo = document.getElementById('aksjeInfo');
-    const aksjeNavn = document.getElementById('aksjeNavn');
-    const aksjePris = document.getElementById('aksjePris');
-    let aksjeData = null;
+      fetch('/aksjeienkeltportefolje', {
+        method: 'POST',
+        headers: {'Content-type': 'application/json'},
+        body: JSON.stringify({portefoljeID})
+      })
 
-    søkAksjeBtn.addEventListener('click', () => {
-      const navn = document.getElementById('navn').value.trim();
+      .then(res => res.json())
+      .then(aksjer => {
+        aksjer.forEach(aksje => {
+            const mulighet = document.createElement('mulighet');
+            mulighet.value = aksje.navn;
+            mulighet.setAttribute('data-isin', aksje.ISIN)  // Legg til ISIN som data-attributt
+            datalist.appendChild(mulighet);
+        })
+      })
 
-      if (!navn) return;
-
+    
       fetch(`/api/aksje/${navn}`) 
         .then(res => res.json()) 
         .then(data => {
@@ -92,7 +95,6 @@
           console.error(err); 
           alert("Fant ikke aksjen. Sjekk navnet."); 
         });
-    });
 
     document.getElementById('handelForm').addEventListener('submit', (handel) => {
       handel.preventDefault();
@@ -101,34 +103,7 @@
       const gebyr = parseFloat(document.getElementById('gebyr').value);
       const type = document.getElementById('handelType').value;
       const totalSum = aksjeData.regularMarketPrice * mengde;
-
-      fetch('/transaksjon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          brukernavn,
-          portefoljeID,
-          ISIN: aksjeData.symbol, //bruker aksjedatasymbol som isin fordi yahoo ikke har isin
-          verditype: aksjeData.quoteType || 'aksje',
-          verdiPapirPris: aksjeData.regularMarketPrice,
-          mengde,
-          totalSum,
-          totalGebyr: gebyr,
-          opprettelsedatoT: new Date().toISOString().split('T')[0],
-          type
-        })
-      })
-      .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        alert("Handel registrert!");
-        window.location.href = '/enkeltportefolje';
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Feil ved handel: " + err.message);
       });
-    });
   </script>
 </body>
 </html>

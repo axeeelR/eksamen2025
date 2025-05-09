@@ -18,9 +18,10 @@
   <main class="main">
     <div class="toppseksjon">
       <h1 id="portefoljeNavn">Laster portefølje...</h1>
-      <div class="knappcontainer">
-        <button id="historikkKnapp" class="historikkKnapp">HANDELS HISTORIKK</button>
-        <button id="kjøpAksjeKnapp" class="kjøpAksjeKnapp">REGISTRER HANDEL</button>
+      <div class="knappecontainer">
+        <button id="historikkKnapp">HANDELS HISTORIKK</button>
+        <button id="kjøpAksjeKnapp">REGISTRER KJØP</button>
+        <button id="selgeAksjeKnapp">REGISTRER SALG</button>
       </div>
     </div>
 
@@ -48,6 +49,7 @@
             <th>24h Endring</th>
             <th>Pris</th>
             <th>Verdi</th>
+            <th>Urealisert gevinst</th>
           </tr>
         </thead>
         <tbody id="aksjeInnhold"></tbody>
@@ -206,6 +208,7 @@
               <td>${aksje.endringProsent.toFixed(2)} %</td>
               <td>${aksje.pris.toFixed(2)} DKK</td>
               <td>${aksje.totalVerdi.toFixed(2)} DKK</td>
+              <td>${aksje.urealisertGevinst.toFixed(2)} DKK</td>
             `;
             aksjeTabell.appendChild(rad);
 
