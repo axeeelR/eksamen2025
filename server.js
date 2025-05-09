@@ -826,7 +826,7 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
     const database = await getDatabase();
     const result = await database.poolconnection.request()
 
-    .input('brukernavn', sql.NVarChar, brukernavnn)
+    .input('brukernavn', sql.NVarChar, brukernavn)
     .query(`
       SELECT k.valuta, SUM(t.totalSum) AS samletVerdi
       FROM investApp.transaksjon t
