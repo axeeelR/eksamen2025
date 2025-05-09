@@ -744,4 +744,4 @@ app.listen(port, async () => {
       console.error('Database connection failed on server startup:', error);
   }
   console.log(`Server kjører på http://localhost:${port}`);
-});
+});*/
