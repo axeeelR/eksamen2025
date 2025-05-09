@@ -124,10 +124,8 @@
         .catch(error => {
           console.error('Error fetching aksjer:', error);
         });
-        
-        const brukernavnn = localStorage.getItem('brukernavn');
 
-        fetch(`/samlet-verdi/${brukernavnn}`)
+        fetch(`/samlet-verdi/${brukernavn}`)
           .then(res => res.json())
           .then(data => {
             const sVerdi = document.getElementById('samletVerdi');

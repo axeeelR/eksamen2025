@@ -288,9 +288,6 @@ app.get('/api/portefolje', async (req, res) => {
   }
 });
 
-app.post('/transaksjoner', async (req, res) => {
-  const {kontoID, portefoljeID, ISIN, verditype, opprettelsedatoK, verdiPapirPris, mengde, totalSum, totalGebyr, transaksjonsID} = req.body
-});
 
 
 
@@ -538,8 +535,8 @@ app.post('/transaksjon', async (req, res) => {
 
   try{
     const database = await getDatabase();
-
     const kontoResultat = await database.poolconnection.request()
+
       .input('portefoljeID', sql.Int, portefoljeID)
       .query('SELECT kontoID FROM investApp.portefolje WHERE portefoljeID = @portefoljeID');
 
@@ -554,16 +551,13 @@ app.post('/transaksjon', async (req, res) => {
 
       let saldo = saldoResultat.recordset[0].saldo;
 
-      if (type === 'kjøp') {
+      
         if (saldo < totalSum) {
           return res.status(400).json({ message: 'Ikke nok penger på konto' });
         }
         saldo -= totalSum;
-      } else if (type === 'salg') {
-        saldo += totalSum;
-      } else {
-        return res.status(400).json({ message: 'Ugyldig type' });
-      }
+     
+      
       await database.poolconnection.request()
         .input('kontoID', sql.Int, hentetKontoID)
         .input('saldo', sql.Decimal(18, 2), saldo)
@@ -591,6 +585,56 @@ app.post('/transaksjon', async (req, res) => {
       res.status(500).json({ message: 'Intern feil' });
     }
 });
+
+app.get('/salg', async (req, res) => {
+  res.render('salg');
+})
+
+app.post('/salg', async (req, res) => {
+  const {
+    portefoljeID,
+    ISIN,
+    verditype,
+    opprettelsedatoT,
+    verdiPapirPris,
+    mengde,
+    totalSum,
+    totalGebyr
+  } = req.body
+
+  try{
+    const database = await getDatabase();
+    const kontoResultat = await database.poolconnection.request()
+
+    .input('portefoljeID', sql.Int, portefoljeID)
+    .query('SELECT kontoID FROM investApp.portefolje WHERE portefoljeID = @portefoljeID');
+
+    if(kontoResultat.recordset.length === 0){
+      return res.status(404).json({ message: 'portefølje ikke funnet'});
+    }
+
+    const kontoID = kontoResultat.recordset[0].kontoID;
+
+    const beholdningsResultat = await database.poolconnection.request()
+    .input('portefoljeID', sql.Int, portefoljeID)
+    .input('ISIN', sql.VarChar(255), ISIN)
+    .query(`
+      SELECT SUM(mengde) AS totalMengde
+      FROM investApp.transaksjon
+      WHERE portefoljeID = @portefoljeID AND ISIN = @ISIN
+      `)
+
+      const beholdning = beholdningsResultat.recordset[0].totalMengde;
+    
+      if(beholdning < mengde){
+        return res.status(400).json({ message: 'du prøver å selge ${mengde}, men du eier bare ${beholdning} aksjer av ${ISIN}'});
+      }
+
+      const saldoREsultat = await database.poolconnection.request() 
+        .input('kontoID', sql.int, kontoID)
+        
+    }
+})
 
 //Linjediagram enkeltportefolje
 /*--------------------------------------------------------------------- */
