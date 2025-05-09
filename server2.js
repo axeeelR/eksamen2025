@@ -1,4 +1,4 @@
-const { log } = require('console');
+/*const { log } = require('console');
 const express = require('express');
 const path = require('path');
 const usersRouter = require('./backend/routes/users.js');

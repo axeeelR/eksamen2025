@@ -6,13 +6,16 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="/styles/dashboard.css">
-    <link rel="stylesheet" href="/styles/menyPanel.css">    
+    <link rel="stylesheet" href="/styles/menyPanel.css"> 
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
-  <h1>Dashboard</h1>
-
 <body>
-    <%- include ('partials/menyPanel') %>   
+    <%- include ('partials/menyPanel') %> 
+    
+    <h1>Dashboard</h1>
     
     <main class="dashboard-innhold">
         <!-- Øverste rad med summer -->
@@ -34,7 +37,7 @@
         <!-- Verdiutvikling -->
         <section class="verdiutvikling">
           <h3>Samlet verdiutvikling</h3>
-          <div class="graf-placeholder">[Graf kommer her]</div>
+          <canvas id="verdiGraf" width="260" height="100"></canvas>
         </section>
     
         <!-- Aksjetabeller -->
@@ -43,7 +46,12 @@
             <h3>Topp 5 aksjer etter verdi</h3>
             <table>
               <thead>
-                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+                <tr>
+                  <th>Navn</th>
+                  <th>Portefølje</th>
+                  <th>24t Endring</th>
+                  <th>Verdi</th>
+                </tr>
               </thead>
               <tbody id="aksjerVerdi"></tbody>
             </table>
@@ -53,7 +61,12 @@
             <h3>Topp 5 aksjer etter gevinst</h3>
             <table>
               <thead>
-                <tr><th>Navn</th><th>Portefølje</th><th>24t Endring</th><th>Verdi</th></tr>
+                <tr>
+                  <th>Navn</th>
+                  <th>Portefølje</th>
+                  <th>24t Endring</th>
+                  <th>Gevinst</th>
+                </tr>
               </thead>
               <tbody id="aksjerGevinst"></tbody>
             </table>
@@ -61,34 +74,60 @@
         </section>
       </main>
     <script>
-      fetch('/api/verdiutvikling')
+        //Topp 5 aksjer etter gevinst
+        const brukernavn = localStorage.getItem('brukernavn');
+        const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
+
+        fetch('/topp5AksjerGevinst', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'brukernavn': brukernavn
+            },
+         })
+
         .then(response => response.json())
-        .then(data => {
-          const labels = data.samletVerdi;
-          const verdier = data.verdiutvikling;
-
-          const ctx = document.getElementById('verdiGraf').getContext('2d');
-
-          const chartData = {
-            labels: labels,
-            datasets: [{
-              label: 'Verdiutvikling',
-              data: verdier,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderWidth: 1
-            }]
-          };
-
-          const config = {
-            type: 'line',
-            data: data,
+        .then(data => { 
+          if (data.length === 0){
+            const rad = document.createElement('tr');
+            const celle = document.createElement('td');
+            celle.colSpan = 4; // Merge alle columns
+            celle.textContent = 'Ingen aksjer funnet';
+            rad.appendChild(celle);
+            topp5AksjerGevinst.appendChild(rad);
+            return;
           }
+            data.forEach(aksje => {
+              const rad = document.createElement('tr');
+              const navn = document.createElement('td');
+              navn.textContent = aksje.navn;
+
+              const portefolje = document.createElement('td');
+              portefolje.textContent = aksje.portefolje;
+
+              const endring = document.createElement('td');
+              endring.textContent = aksje.endring24h + '%';
+              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+
+              const gevinst = document.createElement('td');
+              gevinst.textContent = aksje.gevinst + ' dkk';
+
+
+              rad.appendChild(navn);
+              rad.appendChild(portefolje);
+              rad.appendChild(endring);
+              rad.appendChild(gevinst);
+
+              topp5AksjerGevinst.appendChild(rad);
+            });
+          })
+        .catch(error => {
+          console.error('Error fetching aksjer:', error);
         });
         
-        const brukernavn = localStorage.getItem('brukernavn');
+        const brukernavnn = localStorage.getItem('brukernavn');
 
-        fetch(`/samlet-verdi/${brukernavn}`)
+        fetch(`/samlet-verdi/${brukernavnn}`)
           .then(res => res.json())
           .then(data => {
             const sVerdi = document.getElementById('samletVerdi');
@@ -108,6 +147,84 @@
 
   
 
+
+
+        //Topp 5 aksjer etter verdi
+        const topp5AksjerVerdi = document.getElementById('aksjerVerdi');
+        fetch('/topp5AksjerVerdi', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'brukernavn': brukernavn
+            },
+         })
+        .then(response => response.json())
+        .then(data => { 
+          if (data.length === 0){
+            const rad = document.createElement('tr');
+            const celle = document.createElement('td');
+            celle.colSpan = 4; // Merge alle columns
+            celle.textContent = 'Ingen aksjer funnet';
+            rad.appendChild(celle);
+            topp5AksjerVerdi.appendChild(rad);
+            return;
+          }
+            data.forEach(aksje => {
+              const rad = document.createElement('tr');
+              const navn = document.createElement('td');
+              navn.textContent = aksje.navn;
+
+              const portefolje = document.createElement('td');
+              portefolje.textContent = aksje.portefolje;
+
+              const endring = document.createElement('td');
+              endring.textContent = aksje.endring24h + '%';
+              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+
+              const verdi = document.createElement('td');
+              verdi.textContent = aksje.verdi + ' dkk';
+
+              rad.appendChild(navn);
+              rad.appendChild(portefolje);
+              rad.appendChild(endring);
+              rad.appendChild(verdi);
+
+              topp5AksjerVerdi.appendChild(rad);
+            });
+          })
+        .catch(error => {
+          console.error('Error fetching aksjer:', error);
+        });
+
+
+        fetch('/api/portefolje/samletverdiutvikling')
+          .then(response => response.json())
+          .then(data => {
+            const labels = data.map(entry => entry.dato);
+            const verdier= data.map(entry => entry.verdi);
+
+            const ctx = document.getElementById('verdiGraf').getContext('2d');
+
+            const chartData = {
+              labels: labels,
+              datasets: [{
+                label: 'Verdiutvikling',
+                data: verdier,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 1,
+              }]
+            };
+            const config = {
+              type: 'line',
+              data: chartData,
+            };
+
+            new Chart(ctx, config);
+          })
+          .catch(error => {
+            console.error('Error fetching portefolje data:', error);
+          });
     </script>
 </body>
 </html>
