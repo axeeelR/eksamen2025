@@ -169,6 +169,19 @@
         .catch(err => {
             console.error('feil da ved å hente endringer:')
         });
+
+        fetch(`/samlet-verdi/${brukernavn}`)
+            .then(res => res.json())
+            .then(data => {
+                const samletVerdiMedValuta = document.getElementById('samletVerdi');
+                samletVerdiMedValuta.innerHTML = data.map(item => {
+                    const verdi = parseFloat(item.samletVerdi);
+                    const valuta = item.valuta || '';
+                    return `${verdi.toFixed(2)} ${valuta}`;
+                })
+                .join('<br>');
+            })
+            .catch(error => console.error('Feil ved henting av samlet verdi', error));
     </script>
 </body>
 </html>

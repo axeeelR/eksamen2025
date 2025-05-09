@@ -1146,6 +1146,48 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
   }
 });
 
+//Samlet verdi portefolje
+//------------------------------------------------------------------------------------------------
+app.get('/samlet-verdi/:brukernavn', async (req, res) => {
+  const brukernavn = req.params.brukernavn;
+
+  try {
+    const database = await getDatabase();
+
+    const brukerResultat = await database.poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(`
+      SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn`);
+
+    if (brukerResultat.recordset.length === 0) {
+      return res.status(404).json({ message: 'Bruker ikke funnet' });
+    }
+    const brukerID = brukerResultat.recordset[0].brukerID;
+
+    const aksjeResultat = await database.poolconnection.request().input('brukerID', sql.Int, brukerID).query(`
+      SELECT t.ISIN, SUM(t.mengde) AS totalMengde 
+      FROM investApp.transaksjon t
+      JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+      JOIN investApp.konto k ON p.kontoID = k.kontoID
+      WHERE k.brukerID = @brukerID
+      GROUP BY t.ISIN
+    `);
+    let totalVerdi = 0;
+
+    for (const aksje of aksjeResultat.recordset) {
+      try {
+        const markedsdata = await yahooFinance.quote(aksje.ISIN);
+        const pris = markedsdata.regularMarketPrice;
+        totalVerdi += pris * aksje.totalMengde;
+      } catch (feil) {
+        console.error(`Feil ved henting av aksjeinformasjon`, feil);
+      }
+    }
+    res.json({ totalVerdi: totalVerdi.toFixed(2) });
+  } catch (error) {
+    console.error(`Feil ved henting av samlet verdi`, error);
+    res.status(500).json({ message: `Intern feil` });
+  }
+});
+
 //------------------------------------------------------------------------------------------------
 app.listen(port, async () => {
   try {
