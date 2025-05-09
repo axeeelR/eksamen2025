@@ -163,7 +163,7 @@
           const labels = data.map(entry=> entry.dato);
           const verdier = data.map(entry => entry.verdi);
 
-          new Chart(verdiGraf, {
+          const chartConfig = {
             type: 'line',
             data:{
             labels: labels,
@@ -173,11 +173,14 @@
               borderColor: 'rgba(75, 192, 192, 1)',
               data: verdier,
               fill: false,
-              tension: 0.1
             }]
            }
-        });
+          };
+           new Chart(verdiGraf, chartConfig);
         })
+        .catch(error => {
+          console.error('Feil ved henting av linjegraf:', error);
+        });
         
 
         //Hent aksjer i tabellen i enkeltporteføljen
@@ -210,7 +213,7 @@
           });
           const totalVerdi2 = document.getElementById('totalVerdi');
           if (totalVerdi2){
-            totalVerdi2.textContent = samletVerdi.toFixed(2) + ' NOK';
+            totalVerdi2.textContent = samletVerdi.toFixed(2) + ' DKK';
           }
         })
         .catch(err => {
