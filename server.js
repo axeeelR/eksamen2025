@@ -274,8 +274,28 @@ app.get('/api/portefolje', async (req, res) => {
   
   try {
     const { poolconnection } = await getDatabase();
-    const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(
-    'SELECT p.portefoljeID, p.portefoljeNavn, p.opprettelsedatoP, k.kontoNavn, k.saldo FROM investApp.portefolje p JOIN investApp.konto k ON p.kontoID = k.kontoID JOIN investApp.bruker b ON k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn');
+    const result = await poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(`
+      SELECT 
+        p.portefoljeID, 
+        p.portefoljeNavn, 
+        p.opprettelsedatoP, 
+        k.kontoNavn, 
+        k.saldo, 
+        (
+          SELECT MAX(t.opprettelsedatoT)
+          FROM investApp.transaksjon t
+          WHERE t.portefoljeID = p.portefoljeID
+        ) AS sisteHandel,
+        (
+          SELECT SUM(t.mengde * t.verdiPapirPris)
+          FROM investApp.transaksjon t
+          WHERE t.portefoljeID = p.portefoljeID
+        ) AS totalValue
+      FROM investApp.portefolje p 
+      JOIN investApp.konto k ON p.kontoID = k.kontoID 
+      JOIN investApp.bruker b ON k.brukerID = b.brukerID 
+      WHERE b.brukernavn = @brukernavn
+      `);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: 'Ingen porteføljer funnet for brukeren' });
@@ -828,9 +848,12 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
     const aksjeResultat = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
-        SELECT ISIN, SUM(mengde) AS totalMengde 
-        FROM investApp.transaksjon
-        WHERE portefoljeID = @portefoljeID
+        select ISIN, sum(mengde) AS totalMengde,
+        CASE when sum(mengde *verdiPapirPris) = 0 then 0 
+        else sum( mengde * verdiPapirPris) /sum(mengde)
+        end as snittKjøpspris
+        from investApp.transaksjon
+        where portefoljeID = @portefoljeID
         Group by ISIN
       `);
       
@@ -840,12 +863,16 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
           aksjer.map(async (aksje) => {;
             try {
               const markedsdata = await yahooFinance.quote(aksje.ISIN);
+              const prisNå = markedsdata.regularMarketPrice
+              const verdi = prisNå * aksje.totalMengde;
+              const urealisert = verdi - (aksje.snittKjøpspris * aksje.totalMengde)
               return {
                 navn: markedsdata.shortName || aksje.ISIN,
                 pris: markedsdata.regularMarketPrice,
                 endringProsent: markedsdata.regularMarketChangePercent,
                 antall: aksje.totalMengde,
                 totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
+                urealisertGevinst: urealisert,
               };
             } catch (feil) {
               console.error('Feil ved henting av aksjeinformasjon:', feil);
@@ -912,12 +939,15 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
           GROUP BY t.ISIN, p.portefoljeNavn
         `);
       const aksjer = [];
+      let totalUrealisertGevinst = 0;
+
       for (const rad of aksjeResultat.recordset) {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
           const pris = markedsdata.regularMarketPrice;
 
           const gevinst = (pris - rad.snittKjøpspris) * rad.totalMengde;
+          totalUrealisertGevinst += gevinst;
           
           let endring24h;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
@@ -937,7 +967,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
         }
       }
       const top5 = aksjer.sort((a, b) => b.gevinst - a.gevinst).slice(0, 5);
-      res.json(top5); 
+      res.json({top5, totalUrealisertGevinst: totalUrealisertGevinst.toFixed(2)}); 
    } catch (error) {
     console.error('Feil i POST /topp5AksjerGevinst:', error);
     res.status(500).json({ message: 'Intern feil' });
@@ -972,11 +1002,11 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
           const pris = markedsdata.regularMarketPrice;
           let verdi = pris * rad.totalMengde;
 
-          let enrdingProsent;
+          let endringProsent;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
-            enrdingProsent = markedsdata.regularMarketChangePercent.toFixed(2);
+            endringProsent = markedsdata.regularMarketChangePercent.toFixed(2);
           } else {
-            enrdingProsent = 0;
+            endringProsent = 0;
           }
 
           aksjer.push({
@@ -997,6 +1027,95 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
    }
 }
 );
+
+app.post('/portefolje/endringerSisteDager', async (req, res) => {
+  const brukernavn = req.headers['brukernavn'];
+
+  const nå = new Date();
+  const datoer = {
+    iDag: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate()),
+    iGår: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 1),
+    syvDagerSiden: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 7),
+    trettiDagerSiden: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 30),
+  }
+
+  try {
+    const database = await getDatabase();
+    const verdier = {};
+
+    async function henteDato(nøkkel, dato){
+      const resultat = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .input('dato', sql.Date, dato)
+        .query(`
+          SELECT SUM(t.mengde * t.verdiPapirPris) AS totalVerdi
+          FROM investApp.transaksjon t
+          JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
+          JOIN investApp.bruker b ON k.brukerID = b.brukerID
+          WHERE b.brukernavn = @brukernavn AND t.opprettelsedatoT >= @dato
+        `);
+        verdier[nøkkel] = resultat.recordset[0].totalVerdi || 0;
+    }
+    await henteDato('iDag', datoer.iDag);
+    await henteDato('iGår', datoer.iGår);
+    await henteDato('syvDagerSiden', datoer.syvDagerSiden);
+    await henteDato('trettiDagerSiden', datoer.trettiDagerSiden);
+   
+    const regneUtEndringene = (starten, slutten) =>{
+      if (slutten>0) {
+        return (((starten - slutten) / slutten) * 100).toFixed(2);
+      }else {
+        return 0;
+      }
+    }
+    const endringene ={
+      sisteTjuefireTimene: regneUtEndringene(verdier.iDag, verdier.iGår),
+      sisteSyvDager: regneUtEndringene(verdier.iDag, verdier.syvDagerSiden),
+      sisteTrettiDager: regneUtEndringene(verdier.iDag, verdier.trettiDagerSiden),
+    }
+    res.json(endringene)
+  } catch (error) {
+    console.error('Feil i posten');
+  }
+});
+
+
+
+//------------------------------------------------------------------------------------------------
+
+app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
+  const portefoljeID = req.params.portefoljeID;
+  try{
+    const database = await getDatabase();
+
+    const aksjer = await database.poolconnection.request().input('portefoljeID', sql.Int, portefoljeID).query(`
+      SELECT ISIN, SUM(mengde) AS totalMengde 
+      FROM investApp.transaksjon
+      WHERE portefoljeID = @portefoljeID
+      GROUP BY ISIN
+    `);
+
+    let verdiNå = 0;
+    let verdiTidligere = 0;
+
+    for (const aksje of aksjer.recordset) {
+      const data = await yahooFinance.quote(aksje.ISIN);
+      const prisNå = data.regularMarketPrice;
+      const endringProsent = data.regularMarketChangePercent / 100;
+      const tidligerePris = prisNå / (1 + endringProsent);
+
+      verdiNå += prisNå * aksje.totalMengde;
+      verdiTidligere += tidligerePris * aksje.totalMengde;
+
+    }
+    const endring = ((verdiNå - verdiTidligere) / verdiTidligere) * 100;
+    res.json({ endring24h: endring.toFixed(2) });
+  } catch (error) {
+    console.error('Feil ved henting av endring verdi:', error);
+    res.status(500).json({ message: 'feil ved beregning' });
+  }
+});
 
 //------------------------------------------------------------------------------------------------
 app.listen(port, async () => {

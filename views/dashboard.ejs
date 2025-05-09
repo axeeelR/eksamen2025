@@ -37,7 +37,7 @@
         <!-- Verdiutvikling -->
         <section class="verdiutvikling">
           <h3>Samlet verdiutvikling</h3>
-          <canvas id="verdiGraf" width="260" height="100"></canvas>
+          <canvas id="verdiGraf"></canvas>
         </section>
     
         <!-- Aksjetabeller -->
@@ -77,7 +77,7 @@
         //Topp 5 aksjer etter gevinst
         const brukernavn = localStorage.getItem('brukernavn');
         const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
-
+        
         fetch('/topp5AksjerGevinst', {
           method: 'POST',
           headers: {
@@ -88,6 +88,9 @@
 
         .then(response => response.json())
         .then(data => { 
+
+          document.getElementById('urealisertGevinst').textContent = data.totalUrealisertGevinst + ' dkk';
+
           if (data.length === 0){
             const rad = document.createElement('tr');
             const celle = document.createElement('td');
@@ -97,7 +100,7 @@
             topp5AksjerGevinst.appendChild(rad);
             return;
           }
-            data.forEach(aksje => {
+            data.top5.forEach(aksje => {
               const rad = document.createElement('tr');
               const navn = document.createElement('td');
               navn.textContent = aksje.navn;
@@ -107,11 +110,14 @@
 
               const endring = document.createElement('td');
               endring.textContent = aksje.endring24h + '%';
-              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+              if (aksje.endring24h > 0) {
+                endring.style.color = 'green';
+              } else if (aksje.endring24h < 0) {
+                endring.style.color = 'red';
+              } 
 
               const gevinst = document.createElement('td');
               gevinst.textContent = aksje.gevinst + ' dkk';
-
 
               rad.appendChild(navn);
               rad.appendChild(portefolje);
@@ -135,17 +141,12 @@
             }
             else{
               sVerdi.innerHTML = data.map(item => {
-                const verdi = Number(item.samletVerdi).toFixed(2);
+                const verdi = Number(item.samletVerdi).toFixed(2); 
                 return `${verdi} ${item.valuta}`;
             }).join('<br>');
             }
           })
           .catch(error => console.error('Feil ved henting av samlet verdi', error));
-
-
-  
-
-
 
         //Topp 5 aksjer etter verdi
         const topp5AksjerVerdi = document.getElementById('aksjerVerdi');
@@ -177,7 +178,11 @@
 
               const endring = document.createElement('td');
               endring.textContent = aksje.endring24h + '%';
-              endring.style.color = aksje.endring24h > 0 ? 'green' : 'red';
+              if (aksje.endring24h > 0) {
+                endring.style.color = 'green';
+              } else if (aksje.endring24h < 0) {
+                endring.style.color = 'red';
+              } 
 
               const verdi = document.createElement('td');
               verdi.textContent = aksje.verdi + ' dkk';
