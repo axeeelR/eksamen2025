@@ -23,7 +23,7 @@
     "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {
-    "chai": "^4.3.7",
+    "chai": "^4.5.0",
     "chai-http": "^4.3.0",
     "mocha": "^11.2.2"
   }
