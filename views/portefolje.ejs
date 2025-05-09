@@ -107,10 +107,10 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
-                    <td>${portefolje.kontoNavn}</td>
+                    <td>${portefolje.bank}</td>
                     <td>${endring24h}</td>
                     <td>${sisteHandelTekst}</td>
-                    <td>${totalVerdi.toFixed(2)} DKK</td>
+                    <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
                     `;
                 tbody.appendChild(tr);
 
