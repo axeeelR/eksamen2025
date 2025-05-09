@@ -977,6 +977,60 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
 }
 );
 
+app.post('/portefolje/endringerSisteDager', async (req, res) => {
+  const brukernavn = req.headers['brukernavn'];
+
+  const nå = new Date();
+  const datoer = {
+    iDag: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate()),
+    iGår: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 1),
+    syvDagerSiden: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 7),
+    trettiDagerSiden: new Date(nå.getFullYear(), nå.getMonth(), nå.getDate() - 30),
+  }
+
+  try {
+    const database = await getDatabase();
+    const verdier = {};
+
+    async function henteDato(nøkkel, dato){
+      const resultat = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .input('dato', sql.Date, dato)
+        .query(`
+          SELECT SUM(t.mengde * t.verdiPapirPris) AS totalVerdi
+          FROM investApp.transaksjon t
+          JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
+          JOIN investApp.bruker b ON k.brukerID = b.brukerID
+          WHERE b.brukernavn = @brukernavn AND t.opprettelsedatoT >= @dato
+        `);
+        verdier[nøkkel] = resultat.recordset[0].totalVerdi || 0;
+    }
+    await henteDato('iDag', datoer.iDag);
+    await henteDato('iGår', datoer.iGår);
+    await henteDato('syvDagerSiden', datoer.syvDagerSiden);
+    await henteDato('trettiDagerSiden', datoer.trettiDagerSiden);
+   
+    const regneUtEndringene = (starten, slutten) =>{
+      if (slutten>0) {
+        return (((starten - slutten) / slutten) * 100).toFixed(2);
+      }else {
+        return 0;
+      }
+    }
+    const endringene ={
+      sisteTjuefireTimene: regneUtEndringene(verdier.iDag, verdier.iGår),
+      sisteSyvDager: regneUtEndringene(verdier.iDag, verdier.syvDagerSiden),
+      sisteTrettiDager: regneUtEndringene(verdier.iDag, verdier.trettiDagerSiden),
+    }
+    res.json(endringene)
+  } catch (error) {
+    console.error('Feil i posten');
+  }
+});
+
+
+
 //------------------------------------------------------------------------------------------------
 
 app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
