@@ -77,7 +77,7 @@
         //Topp 5 aksjer etter gevinst
         const brukernavn = localStorage.getItem('brukernavn');
         const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
-
+        
         fetch('/topp5AksjerGevinst', {
           method: 'POST',
           headers: {
@@ -88,6 +88,9 @@
 
         .then(response => response.json())
         .then(data => { 
+
+          document.getElementById('urealisertGevinst').textContent = data.totalUrealisertGevinst + ' dkk';
+
           if (data.length === 0){
             const rad = document.createElement('tr');
             const celle = document.createElement('td');
@@ -97,7 +100,7 @@
             topp5AksjerGevinst.appendChild(rad);
             return;
           }
-            data.forEach(aksje => {
+            data.top5.forEach(aksje => {
               const rad = document.createElement('tr');
               const navn = document.createElement('td');
               navn.textContent = aksje.navn;

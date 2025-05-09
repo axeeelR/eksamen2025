@@ -843,12 +843,15 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
           GROUP BY t.ISIN, p.portefoljeNavn
         `);
       const aksjer = [];
+      let totalUrealisertGevinst = 0;
+
       for (const rad of aksjeResultat.recordset) {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
           const pris = markedsdata.regularMarketPrice;
 
           const gevinst = (pris - rad.snittKjøpspris) * rad.totalMengde;
+          totalUrealisertGevinst += gevinst;
           
           let endring24h;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
@@ -868,7 +871,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
         }
       }
       const top5 = aksjer.sort((a, b) => b.gevinst - a.gevinst).slice(0, 5);
-      res.json(top5); 
+      res.json({top5, totalUrealisertGevinst: totalUrealisertGevinst.toFixed(2)}); 
    } catch (error) {
     console.error('Feil i POST /topp5AksjerGevinst:', error);
     res.status(500).json({ message: 'Intern feil' });
@@ -903,11 +906,11 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
           const pris = markedsdata.regularMarketPrice;
           let verdi = pris * rad.totalMengde;
 
-          let enrdingProsent;
+          let endringProsent;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
-            enrdingProsent = markedsdata.regularMarketChangePercent.toFixed(2);
+            endringProsent = markedsdata.regularMarketChangePercent.toFixed(2);
           } else {
-            enrdingProsent = 0;
+            endringProsent = 0;
           }
 
           aksjer.push({
