@@ -872,14 +872,21 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
           const pris = markedsdata.regularMarketPrice;
-          const endring = markedsdata.regularMarketChangePercent;
 
           const gevinst = (pris - rad.snittKjøpspris) * rad.totalMengde;
+          
+          let endring24h;
+          if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
+            endring24h = markedsdata.regularMarketChangePercent.toFixed(2);
+          }else {
+            endring24h = 0;
+          }
+
           aksjer.push({
             navn: markedsdata.shortName || rad.ISIN,
             portefolje: rad.portefoljeNavn,
             gevinst: gevinst.toFixed(2),
-            endring24h: endring?.toFixed(2) || 0 
+            endring24h: endring24h,
           });
         } catch (feil) {
           console.error('Feil ved henting av aksjeinformasjon:', feil);
@@ -919,11 +926,20 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
           const pris = markedsdata.regularMarketPrice;
+          let verdi = pris * rad.totalMengde;
+
+          let enrdingProsent;
+          if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
+            enrdingProsent = markedsdata.regularMarketChangePercent.toFixed(2);
+          } else {
+            enrdingProsent = 0;
+          }
+
           aksjer.push({
             navn: markedsdata.shortName || rad.ISIN,
             portefolje: rad.portefoljeNavn,
             verdi: (pris * rad.totalMengde).toFixed(2),
-            endring24h: markedsdata.regularMarketChangePercent?.toFixed(2) || 0 
+            endring24h: endringProsent
           });
         } catch (feil) {
           console.error('Feil ved henting av aksjeinformasjon:', feil);

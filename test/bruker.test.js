@@ -9,7 +9,7 @@ describe('Brukeropprettelse', () => {
         const res = await chai.request(app)
         .post('/blikunde')
         .send({
-            brukernavn: `testbruker12345`,
+            brukernavn: `testbruker123456`,
             passord: `testpassord`,
             email: `nymail@gmail.com`
         });
