@@ -804,9 +804,12 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
     const aksjeResultat = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
-        SELECT ISIN, SUM(mengde) AS totalMengde 
-        FROM investApp.transaksjon
-        WHERE portefoljeID = @portefoljeID
+        select ISIN, sum(mengde) AS totalMengde,
+        CASE when sum(mengde *verdiPapirPris) = 0 then 0 
+        else sum( mengde * verdiPapirPris) /sum(mengde)
+        end as snittKjøpspris
+        from investApp.transaksjon
+        where portefoljeID = @portefoljeID
         Group by ISIN
       `);
       
@@ -816,12 +819,16 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
           aksjer.map(async (aksje) => {;
             try {
               const markedsdata = await yahooFinance.quote(aksje.ISIN);
+              const prisNå = markedsdata.regularMarketPrice
+              const verdi = prisNå * aksje.totalMengde;
+              const urealisert = verdi - (aksje.snittKjøpspris * aksje.totalMengde)
               return {
                 navn: markedsdata.shortName || aksje.ISIN,
                 pris: markedsdata.regularMarketPrice,
                 endringProsent: markedsdata.regularMarketChangePercent,
                 antall: aksje.totalMengde,
                 totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
+                urealisertGevinst: urealisert,
               };
             } catch (feil) {
               console.error('Feil ved henting av aksjeinformasjon:', feil);

@@ -48,6 +48,7 @@
             <th>24h Endring</th>
             <th>Pris</th>
             <th>Verdi</th>
+            <th>Urealisert gevinst</th>
           </tr>
         </thead>
         <tbody id="aksjeInnhold"></tbody>
@@ -206,6 +207,7 @@
               <td>${aksje.endringProsent.toFixed(2)} %</td>
               <td>${aksje.pris.toFixed(2)} DKK</td>
               <td>${aksje.totalVerdi.toFixed(2)} DKK</td>
+              <td>${aksje.urealisertGevinst.toFixed(2)} DKK</td>
             `;
             aksjeTabell.appendChild(rad);
 
