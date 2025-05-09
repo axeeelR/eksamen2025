@@ -140,17 +140,12 @@
             }
             else{
               sVerdi.innerHTML = data.map(item => {
-                const verdi = Number(item.samletVerdi).toFixed(2);
+                const verdi = Number(item.samletVerdi).toFixed(2); 
                 return `${verdi} ${item.valuta}`;
             }).join('<br>');
             }
           })
           .catch(error => console.error('Feil ved henting av samlet verdi', error));
-
-
-  
-
-
 
         //Topp 5 aksjer etter verdi
         const topp5AksjerVerdi = document.getElementById('aksjerVerdi');
