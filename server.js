@@ -498,7 +498,17 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 
   const aksjeData = await yahooFinance.quote(førsteTreff.symbol); // Hent detaljer
-  res.json(aksjeData);
+
+  const iDag = new Date();
+  const ettÅrSiden = new Date();
+  ettÅrSiden.setFullYear(iDag.getFullYear() - 1);
+  const historikk = await yahooFinance.historical(førsteTreff.symbol, {
+    period1: ettÅrSiden,
+    period2: iDag,
+    interval: '1wk'
+    });
+
+  res.json({...aksjeData, historikk});
 
 } catch (error) {
   console.error('Feil i aksjesøk:', error);
