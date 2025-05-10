@@ -504,9 +504,6 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-app.get('/handel', (req, res) => {
-  res.render('handel');
-});
 
 app.get('/api/konto-status/:portefoljeID', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
@@ -536,11 +533,11 @@ app.get('/api/konto-status/:portefoljeID', async (req, res) => {
 });
 
 
-app.get('/transaksjon', (req, res) => {
-  res.render('transaksjon');
+app.get('/kjop', (req, res) => {
+  res.render('kjop');
 });
 
-app.post('/transaksjon', async (req, res) => {
+app.post('/kjop', async (req, res) => {
   const { 
     portefoljeID, 
     ISIN, 
@@ -572,10 +569,10 @@ app.post('/transaksjon', async (req, res) => {
       let saldo = saldoResultat.recordset[0].saldo;
 
       
-        if (saldo < totalSum) {
+        if (saldo < totalSum + totalGebyr) {
           return res.status(400).json({ message: 'Ikke nok penger på konto' });
         }
-        saldo -= totalSum;
+        saldo -= (totalSum + totalGebyr); // trekker fra totale summen og gebyr fra saldoen
      
       
       await database.poolconnection.request()
@@ -598,10 +595,10 @@ app.post('/transaksjon', async (req, res) => {
           (kontoID, portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde, totalSum, totalGebyr)
           VALUES (@kontoID, @portefoljeID, @ISIN, @verditype, @opprettelsedatoT, @verdiPapirPris, @mengde, @totalSum, @totalGebyr)`
         );
-        res.status(200).json({ message: 'Handel registrert'});
+        res.status(200).json({ message: 'Kjøp registrert'});
 
     } catch (error) {
-      console.error('Feil i POST /transaksjon:', error);
+      console.error('Feil i transaksjon');
       res.status(500).json({ message: 'Intern feil' });
     }
 });
