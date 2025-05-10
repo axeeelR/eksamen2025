@@ -281,6 +281,8 @@ app.get('/api/portefolje', async (req, res) => {
         p.opprettelsedatoP, 
         k.kontoNavn, 
         k.saldo, 
+        k.bank,
+        k.valuta,
         (
           SELECT MAX(t.opprettelsedatoT)
           FROM investApp.transaksjon t
@@ -496,7 +498,17 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 
   const aksjeData = await yahooFinance.quote(førsteTreff.symbol); // Hent detaljer
-  res.json(aksjeData);
+
+  const iDag = new Date();
+  const ettÅrSiden = new Date();
+  ettÅrSiden.setFullYear(iDag.getFullYear() - 1);
+  const historikk = await yahooFinance.historical(førsteTreff.symbol, {
+    period1: ettÅrSiden,
+    period2: iDag,
+    interval: '1wk'
+    });
+
+  res.json({...aksjeData, historikk});
 
 } catch (error) {
   console.error('Feil i aksjesøk:', error);
@@ -504,9 +516,6 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-app.get('/handel', (req, res) => {
-  res.render('handel');
-});
 
 app.get('/api/konto-status/:portefoljeID', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
@@ -536,11 +545,11 @@ app.get('/api/konto-status/:portefoljeID', async (req, res) => {
 });
 
 
-app.get('/transaksjon', (req, res) => {
-  res.render('transaksjon');
+app.get('/kjop', (req, res) => {
+  res.render('kjop');
 });
 
-app.post('/transaksjon', async (req, res) => {
+app.post('/kjop', async (req, res) => {
   const { 
     portefoljeID, 
     ISIN, 
@@ -572,10 +581,10 @@ app.post('/transaksjon', async (req, res) => {
       let saldo = saldoResultat.recordset[0].saldo;
 
       
-        if (saldo < totalSum) {
+        if (saldo < totalSum + totalGebyr) {
           return res.status(400).json({ message: 'Ikke nok penger på konto' });
         }
-        saldo -= totalSum;
+        saldo -= (totalSum + totalGebyr); // trekker fra totale summen og gebyr fra saldoen
      
       
       await database.poolconnection.request()
@@ -598,10 +607,10 @@ app.post('/transaksjon', async (req, res) => {
           (kontoID, portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde, totalSum, totalGebyr)
           VALUES (@kontoID, @portefoljeID, @ISIN, @verditype, @opprettelsedatoT, @verdiPapirPris, @mengde, @totalSum, @totalGebyr)`
         );
-        res.status(200).json({ message: 'Handel registrert'});
+        res.status(200).json({ message: 'Kjøp registrert'});
 
     } catch (error) {
-      console.error('Feil i POST /transaksjon:', error);
+      console.error('Feil i transaksjon');
       res.status(500).json({ message: 'Intern feil' });
     }
 });
@@ -1139,7 +1148,14 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
 
     }
     const endring = ((verdiNå - verdiTidligere) / verdiTidligere) * 100;
-    res.json({ endring24h: endring.toFixed(2) });
+    let label;
+    if (endring > 0) {
+      label = `+${endring.toFixed(2)}%`;
+    } else if (endring < 0) {
+      label = `${endring.toFixed(2)}%`;
+    }
+
+    res.json({ endring24h: label });
   } catch (error) {
     console.error('Feil ved henting av endring verdi:', error);
     res.status(500).json({ message: 'feil ved beregning' });
