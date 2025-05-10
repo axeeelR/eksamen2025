@@ -15,39 +15,49 @@
 
     <form id="handelForm">
       <div class="form-group">
-        <label for="aksjeValg">Velg aksje:</label>
-        <input type="text" id="aksjeValg" required>
+        <label for="aksjeListe">Velg en aksje:</label>
+        <select id="aksjeListe" name="aksje" required>
+        <option value="">Velg en aksje</option>
+        </select>
       </div>
 
       <div id="aksjeInfo" style="display: none;">
-        <h2 id="aksjeNavn"></h2>
-        <p> <span id="aksjePris"></span></p>
+        <h2 id="aksjeNavn">Informasjon om aksjen</h2>
+        <p>Du har: <span id="aksjePris"></span> Aksjer</p>
       </div>
 
       <div class="form-group">
-        <label for="beløp">Beløp:</label>
-        <input type="number" id="mengde" required>
+        <label for="mengde">Salgs beløpet:</label>
+        <input type="number" id="mengde" name="mengde" required>
       </div>
 
       <div class="form-group">
-        <p>Transaksjons settes til 0,05% av kjøps sum </p>
-        <input type="text" id="gebyr" required>
+        <p>Transaksjonskostnad: 0,05% av salgs beløpet </p>
       </div>
+
       <button type="submit">Bekreft salg</button>
     </form>
   </main>
 
   <script>
-    const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+    const portefoljeID = parseInt(localStorage.getItem('aktivPortefoljeID'));
+
     const registrerHandelKnapp = document.querySelector('button[type="submit"]')
+
+    
+      const aksjeInfo = document.getElementById('aksjeInfo');
+      const aksjeNavn = document.getElementById('aksjeNavn');
+      const aksjePris = document.getElementById('aksjePris');
+      const aksjeInput = document.getElementById('aksjeListe');
+      let aksjeData = null;
 
     fetch(`/api/konto-status/${portefoljeID}`)
       .then(res => res.json())
       .then(data =>{
         console.log("lukkedatoK fra server:", data);
 
+        // Hvis portoføljen er lukket, så skal det ikke være mulig å foreta en transaksjon
         if(data.lukkedatoK){
-          // Hvis portoføljen er lukket, så
           registrerHandelKnapp.disabled = true;
           registrerHandelKnapp.textContent = "Det er ikke mulig å foreta en transaksjon, når kontoen er lukket."
         }
@@ -60,14 +70,10 @@
         console.log("Klarte ikke hente kontostatus", err);
       });
 
-      const aksjeInput = document.getElementByID('aksjeValg');
-      const datalist = document.createElement('datalist');
-      datalist.id = 'aksjeListe';
-      document.body.appendChild(datalist);
-      aksjeInput.setAttribute('list', 'aksjeliste')
 
+      // For å hente aksjene som brueren eier
       fetch('/aksjeienkeltportefolje', {
-        method: 'POST',
+        method: 'POST', 
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify({portefoljeID})
       })
@@ -75,12 +81,21 @@
       .then(res => res.json())
       .then(aksjer => {
         aksjer.forEach(aksje => {
-            const mulighet = document.createElement('mulighet');
-            mulighet.value = aksje.navn;
-            mulighet.setAttribute('data-isin', aksje.ISIN)  // Legg til ISIN som data-attributt
-            datalist.appendChild(mulighet);
-        })
+            const option = document.createElement('option');
+            option.value = aksje.navn;
+            option.textContent = aksje.navn;
+            aksjeInput.appendChild(option);
+        });
       })
+      .catch(error => {
+        console.error('feil ved henting av de aksjene brukeren eier', error);
+      });
+
+      aksjeInput.addEventListener('change', () => {
+        const navn = aksjeInput.value;
+        if(navn === ''){
+            return
+        }
 
     
       fetch(`/api/aksje/${navn}`) 
@@ -95,15 +110,64 @@
           console.error(err); 
           alert("Fant ikke aksjen. Sjekk navnet."); 
         });
-
+    });
     document.getElementById('handelForm').addEventListener('submit', (handel) => {
       handel.preventDefault();
 
+      if(!aksjeData || !aksjeData.symbol) {
+        console.error("aksjedataen er ugyldig", aksjeData);
+        alert("du må velge en aksje du eier for å kunne registrere salget");
+        return;
+      }
+
       const mengde = parseFloat(document.getElementById('mengde').value);
-      const gebyr = parseFloat(document.getElementById('gebyr').value);
-      const type = document.getElementById('handelType').value;
       const totalSum = aksjeData.regularMarketPrice * mengde;
+      const gebyr = parseFloat((totalSum * 0.0005).toFixed(2));
+      const dato = new Date().toISOString().split('T')[0];
+      const pris = aksjeData.regularMarketPrice;
+
+      if(isNaN(mengde) || mengde <= 0){
+        alert("du må skrive inn et gyldig antall aksjer");
+        return;
+      }
+
+
+     
+
+
+      fetch('/salg', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            portefoljeID,
+            ISIN: aksjeData.symbol, //bruker aksjedatasymbol som isin fordi yahoo ikke har isin
+            verditype: 'Aksje salg',
+            opprettelsedatoT: dato,
+            verdiPapirPris: pris,
+            mengde,
+            totalSum,
+            totalGebyr: gebyr
+        })
+      })
+      .then(async res => {
+        try{
+        const data = await res.json();
+        if (!res.ok) {
+            console.error('feil med serveren', data);
+            throw new Error(data.message);
+        }
+        alert("salget ble registrert!");
+        window.location.href = '/enkeltportefolje';
+      } catch(err) {
+        console.error('feil når responsen skla behandles', err);
+        alert("kan ikke lese svaret fra serveren" );
+        }
+      })
+        .catch(err => {
+            console.error('feil med fetchingen av salget', err);
+            alert("Feil ved salg: " + err.message);
       });
+    });
   </script>
 </body>
 </html>
