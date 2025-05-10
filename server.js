@@ -653,10 +653,10 @@ app.post('/salg', async (req, res) => {
       WHERE portefoljeID = @portefoljeID AND ISIN = @ISIN
       `)
 
-      const beholdning = beholdningsResultat.recordset[0].totalMengde;
+      const beholdning = beholdningsResultat.recordset[0].totalMengde || 0;
     
       if(beholdning < mengde){
-        return res.status(400).json({ message: 'du prøver å selge ${mengde}, men du eier bare ${beholdning} aksjer av ${ISIN}'});
+        return res.status(400).json({ message: `du prøver å selge ${mengde}, men du eier bare ${beholdning} aksjer av ${ISIN}`});
       }
 
       const saldoResultat = await database.poolconnection.request() 
@@ -664,6 +664,9 @@ app.post('/salg', async (req, res) => {
         .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
 
         let saldo = saldoResultat.recordset[0].saldo;
+        if(saldo === null || saldo === undefined){
+          saldo = 0; 
+        }
         saldo += totalSum;  // Legg til salgsbeløpet til saldoen
 
         await database.poolconnection.request()
