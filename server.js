@@ -281,6 +281,8 @@ app.get('/api/portefolje', async (req, res) => {
         p.opprettelsedatoP, 
         k.kontoNavn, 
         k.saldo, 
+        k.bank,
+        k.valuta,
         (
           SELECT MAX(t.opprettelsedatoT)
           FROM investApp.transaksjon t
@@ -1136,7 +1138,14 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
 
     }
     const endring = ((verdiNå - verdiTidligere) / verdiTidligere) * 100;
-    res.json({ endring24h: endring.toFixed(2) });
+    let label;
+    if (endring > 0) {
+      label = `+${endring.toFixed(2)}%`;
+    } else if (endring < 0) {
+      label = `${endring.toFixed(2)}%`;
+    }
+
+    res.json({ endring24h: label });
   } catch (error) {
     console.error('Feil ved henting av endring verdi:', error);
     res.status(500).json({ message: 'feil ved beregning' });
