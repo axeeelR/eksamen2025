@@ -15,7 +15,7 @@
 <body>
     <%- include ('partials/menyPanel') %> 
     
-    <h1>Dashboard</h1>
+    <h1 id="dashboardOverskrift"></h1>
     
     <main class="dashboard-innhold">
         <!-- Øverste rad med summer -->
@@ -58,7 +58,7 @@
           </div>
     
           <div class="aksjetabell">
-            <h3>Topp 5 aksjer etter gevinst</h3>
+            <h3>Topp 5 aksjer etter urealisert gevinst</h3>
             <table>
               <thead>
                 <tr>
@@ -74,7 +74,6 @@
         </section>
       </main>
     <script>
-        //Topp 5 aksjer etter gevinst
         const brukernavn = localStorage.getItem('brukernavn');
         const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
         
@@ -90,7 +89,15 @@
         .then(data => { 
 
           document.getElementById('urealisertGevinst').textContent = data.totalUrealisertGevinst + ' dkk';
-
+          
+          const realisert = document.getElementById('realisertGevinst')
+          if (data.totalRealisertGevinst.length === 0){
+            realisert.textContent = '--'
+          } else {
+            realisert.innerHTML = data.totalRealisertGevinst.map(item =>{
+              return `${item.gevinst} ${item.valuta}`
+            }).join('<br>')
+          }
           if (data.length === 0){
             const rad = document.createElement('tr');
             const celle = document.createElement('td');
@@ -228,6 +235,12 @@
           .catch(error => {
             console.error('Error fetching portefolje data:', error);
           });
+
+    
+          if(brukernavn){
+        const overskrift = document.getElementById('dashboardOverskrift')
+        overskrift.textContent = `Dashboard for ${brukernavn}`
+      }
     </script>
 </body>
 </html>

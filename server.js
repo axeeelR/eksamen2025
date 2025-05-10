@@ -627,8 +627,6 @@ app.post('/salg', async (req, res) => {
     opprettelsedatoT,
     verdiPapirPris,
     mengde,
-    totalSum,
-    totalGebyr
   } = req.body
 
   try{
@@ -638,49 +636,58 @@ app.post('/salg', async (req, res) => {
     .input('portefoljeID', sql.Int, portefoljeID)
     .query('SELECT kontoID FROM investApp.portefolje WHERE portefoljeID = @portefoljeID');
 
-    if(kontoResultat.recordset.length === 0){
-      return res.status(404).json({ message: 'portefølje ikke funnet'});
-    }
-
     const kontoID = kontoResultat.recordset[0].kontoID;
 
     const beholdningsResultat = await database.poolconnection.request()
     .input('portefoljeID', sql.Int, portefoljeID)
     .input('ISIN', sql.VarChar(255), ISIN)
     .query(`
-      SELECT SUM(mengde) AS totalMengde
-      FROM investApp.transaksjon
-      WHERE portefoljeID = @portefoljeID AND ISIN = @ISIN
+      select sum(mengde) as totalMengde,
+      sum(mengde *verdiPapirPris)/ nullif(sum(mengde), 0) as snittpris
+      from investApp.transaksjon
+      where portefoljeID = @portefoljeID and ISIN = @ISIN
       `)
 
-      const beholdning = beholdningsResultat.recordset[0].totalMengde;
+      const beholdning = beholdningsResultat.recordset[0].totalMengde || 0;
+      const snittpris = beholdningsResultat.recordset[0].snittpris
     
       if(beholdning < mengde){
-        return res.status(400).json({ message: 'du prøver å selge ${mengde}, men du eier bare ${beholdning} aksjer av ${ISIN}'});
+        return res.status(400).json({ message: `du prøver å selge ${mengde}, men du har bare ${beholdning} aksjer av ${ISIN}`});
       }
 
+      const totalSalgsveri = verdiPapirPris * mengde
+      const gebyr = parseFloat((totalSalgsveri*0.0005).toFixed(2))
+      const realisertGevinst = (verdiPapirPris - snittpris) * mengde;
+
       const saldoResultat = await database.poolconnection.request() 
-        .input('kontoID', sql.int, kontoID)
+        .input('kontoID', sql.Int, kontoID)
         .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
 
         let saldo = saldoResultat.recordset[0].saldo;
-        saldo += totalSum;  // Legg til salgsbeløpet til saldoen
+        saldo += totalSalgsveri - gebyr;  // Legg til salgsbeløpet til saldoen
 
         await database.poolconnection.request()
-        .input('kontoID', sql.Int, hentetKontoID)
+        .input('kontoID', sql.Int, kontoID)
         .input('saldo', sql.Decimal(18, 2), saldo)
         .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
 
+        let faktiskeMengden;
+        if (verditype === 'salg'){
+          faktiskeMengden = -Math.abs(mengde);
+        } else {
+          faktiskeMengden = Math.abs(mengde);
+          }
+      
         await database.poolconnection.request()
-        .input('kontoID', sql.Int, hentetKontoID)
+        .input('kontoID', sql.Int, kontoID)
         .input('portefoljeID', sql.Int, portefoljeID)
         .input('ISIN', sql.VarChar(255), ISIN) 
         .input('verditype', sql.VarChar(255), verditype)
         .input('opprettelsedatoT', sql.Date, opprettelsedatoT)
         .input('verdiPapirPris', sql.Decimal(18, 2), verdiPapirPris)
-        .input('mengde', sql.Int, mengde)
-        .input('totalSum', sql.Decimal(18, 2), totalSum)
-        .input('totalGebyr', sql.Decimal(18, 2), totalGebyr) 
+        .input('mengde', sql.Int, faktiskeMengden)
+        .input('totalSum', sql.Decimal(18, 2), totalSalgsveri)
+        .input('totalGebyr', sql.Decimal(18, 2), gebyr) 
         .query(`
           INSERT INTO investApp.transaksjon 
           (kontoID, portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde, totalSum, totalGebyr)
@@ -955,8 +962,10 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
 
 app.post('/topp5AksjerGevinst', async (req, res) => {
   const brukernavn = req.headers['brukernavn'];
+
     try {
       const database = await getDatabase();
+
       const brukerResultat = await database.poolconnection.request()
         .input('brukernavn', sql.VarChar(255), brukernavn)
         .query(`
@@ -964,6 +973,8 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
           WHERE brukernavn = @brukernavn
         `);
       const brukerID = brukerResultat.recordset[0].brukerID;
+
+      //her hentes aksjer og beregnes urealisert gevinst
       const aksjeResultat = await database.poolconnection.request()
         .input('brukerID', sql.Int, brukerID)
         .query(`
@@ -1004,9 +1015,36 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
           console.error('Feil ved henting av aksjeinformasjon:', feil);
         }
       }
+
+      const realisertGevinstResultat = await database.poolconnection.request()
+      .input('brukerID', sql.Int, brukerID)
+      .query(`
+        select k.valuta,
+        sum(case when t.mengde < 0then t.totalSum
+        else 0 end) AS samletSalgsverdi,
+        sum(case when t.mengde < 0 then t.totalSum -
+        (abs(t.mengde)* t.verdiPapirPris) else 0 end) AS realisertGevinst
+        from investApp.transaksjon t
+        join investApp.portefolje p on t.portefoljeID = p.portefoljeID
+        join investApp.konto k on p.kontoID = k.kontoID
+        where k.brukerID = @brukerID
+        group by k.valuta
+        `
+      );
+      const realiserteGevinster = realisertGevinstResultat.recordset.map(r =>({
+        valuta: r.valuta,
+        gevinst: Number(r.realisertGevinst).toFixed(2)
+      }))
+
       const top5 = aksjer.sort((a, b) => b.gevinst - a.gevinst).slice(0, 5);
-      res.json({top5, totalUrealisertGevinst: totalUrealisertGevinst.toFixed(2)}); 
-   } catch (error) {
+      
+      res.json({
+        top5, 
+        totalUrealisertGevinst: totalUrealisertGevinst.toFixed(2),
+        totalRealisertGevinst: realiserteGevinster
+   })
+
+  } catch (error) {
     console.error('Feil i POST /topp5AksjerGevinst:', error);
     res.status(500).json({ message: 'Intern feil' });
    }
