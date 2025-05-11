@@ -1,3 +1,4 @@
+
 //Konfigurasjon og de ulike avhengighetene
 const express = require('express');
 const path = require('path');
@@ -65,6 +66,8 @@ app.post('/login', async(req, res) => {
 app.get('/logout', (req, res) => {  
     res.redirect('/logout');
 });
+
+/**---------------------------- */
 
 //viser skjema for ny bruker
 app.get('/blikunde', (req, res) => {
