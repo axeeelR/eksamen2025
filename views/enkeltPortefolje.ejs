@@ -50,6 +50,7 @@
             <th>Pris</th>
             <th>Verdi</th>
             <th>Urealisert gevinst</th>
+            <th>GAK</th>
           </tr>
         </thead>
         <tbody id="aksjeInnhold"></tbody>
@@ -224,6 +225,7 @@
               <td>${aksje.pris.toFixed(2)} DKK</td>
               <td>${aksje.totalVerdi.toFixed(2)} DKK</td>
               <td>${aksje.urealisertGevinst.toFixed(2)} DKK</td>
+              <td>${aksje.snittKjøpspris.toFixed(2)} DKK</td>
             `;
             aksjeTabell.appendChild(rad);
 
