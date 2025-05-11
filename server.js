@@ -310,39 +310,47 @@ app.get('/api/portefolje', async (req, res) => {
   }
 });
 
-
-
-
-app.get('/opprettPortefolje', async (req, res) => {
-  const brukernavn = req.query.brukernavn; // Hent brukernavn fra query-parameter
-  
-  try {
-    const database = await getDatabase();
-    const request = database.poolconnection.request();
-    request.input('brukernavn', sql.VarChar(255), brukernavn);
-
-    const result = await request.query(`SELECT k.kontoID, k.kontoNavn, k.saldo FROM investApp.konto k JOIN investApp.bruker b on k.brukerID = b.brukerID WHERE b.brukernavn = @brukernavn`);
-    const kontoer = result.recordset;
-
-    console.log('Kontoer hentet fra databasen:', kontoer); //debug
-    res.render('opprettPortefolje', { kontoer });
-  } catch (error) {
-    console.error('FEIL i GET /opprettPortefolje:', error);
-    res.status(500).send('Noe er feil');
-  }
-});
+app.get('/opprettPortefolje', (req, res) => {
+  res.render('opprettPortefolje')
+})
 
 app.post('/opprettPortefolje', async (req, res) => {
-  const { navn, kontoID } = req.body;
+  const { navn, kontoID, brukernavn } = req.body;
   const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
 
-  if (!navn || !kontoID) {
+  if (!navn || !kontoID || !brukernavn) {
     return res.status(400).json({ message: 'Portefoljenavn og kontoID må oppgis' });
   }
 
   try {
-    const { poolconnection } = await getDatabase();
-    await poolconnection.request()
+    const database = await getDatabase();
+
+    const brukerResultatet = await database.poolconnection.request()
+    .input('brukernavn', sql.VarChar(255), brukernavn)
+    .query(` 
+      SELECT brukerID
+      FROM investApp.bruker
+      WHERE brukernavn = @brukernavn
+      `);
+      const brukerID = brukerResultatet.recordset[0].brukerID
+
+      //her skal det verifiseres at kontoen faktisk hører til brukeren
+      const kontoResultatet = await database.poolconnection.request()
+      .input('kontoID', sql.Int, kontoID)
+      .input('brukerID', sql.Int, brukerID)
+      .query(`
+        SELECT kontoID
+        FROM investApp.konto
+        WHERE kontoID = @kontoID
+        AND brukerID = @brukerID
+        `);
+
+        if (kontoResultatet.recordset.length === 0) {
+          return res.status(404).json({ message: 'denne kontoen hører ikke til brukeren' 
+          })
+        };
+
+    await database.poolconnection.request()
     .input('portefoljeNavn', sql.VarChar(255), navn)
     .input('kontoID', sql.Int, kontoID)
     .input('opprettelsedatoP', sql.Date, dato)
@@ -351,8 +359,8 @@ app.post('/opprettPortefolje', async (req, res) => {
       VALUES (@portefoljeNavn, @kontoID, @opprettelsedatoP)
     `);
 
-    res.redirect('/portefolje?brukernavn=' + req.body.brukernavn); // Redirect to portefolje page with brukernavn as query parameter
-} catch (error) {
+    res.status(201).json({message: 'porteføle opprettet'})
+ } catch (error) {
     console.error('Feil i POST /opprettPortefolje:', error);
     res.status(500).send(error.message);
   }
