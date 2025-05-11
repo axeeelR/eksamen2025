@@ -10,13 +10,28 @@
     </nav>
 
 <script>
-  const logoutLink = document.getElementById('logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', () => {
-      localStorage.clear();
-      window.location.href = '/';
-    });
+class Logout{
+  constructor(buttonId) {
+    this.button = document.getElementById(buttonId);
   }
+  init() {
+    if(this.button) {
+      this.button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        this.logout();
+      });
+    } 
+  }
+  logout(){
+    localStorage.clear();
+    window.location.href = '/';
+  }
+}
+
+const logout = new Logout('logout');
+logout.init();
 </script>
 
 </aside>
+
+ 
