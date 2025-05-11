@@ -46,6 +46,7 @@
                             <th>24h Change</th>
                             <th>Siste handel</th>
                             <th>Total Value</th>
+                            <th>Tilhørende konto</th>
                         </tr>
                         </thead>
                         <tbody id="portefoljeOversikt"></tbody>
@@ -113,6 +114,7 @@
                 <td>${endring24h}</td>
                 <td>${sisteHandelTekst}</td>
                 <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
+                <td>${portefolje.kontoNavn}</td>
                 `;
             tbody.appendChild(tr);
 
