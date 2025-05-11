@@ -1,11 +1,9 @@
-const { log } = require('console');
 const express = require('express');
 const path = require('path');
-const usersRouter = require('./backend/routes/users.js');
-
 const { getDatabase } = require('./backend/database/instance.js');
 const { VarChar } = require('mssql');
 const sql = require('mssql'); // Importer hele mssql-biblioteket
+const yahooFinance = require('yahoo-finance2').default;
 
 const app = express();
 const port = 3000;
@@ -19,16 +17,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const yahooFinance = require('yahoo-finance2').default;
 
-// In-memory database
-let db = [];
-
-// Routes
-app.use('/users', usersRouter);
 
 app.get('/', (req, res) => {
-    res.render('index', { db });
+    res.render('index');
 });
 
 app.get('/login', (req, res) => {
@@ -68,10 +60,8 @@ app.post('/login', async(req, res) => {
     }
 });
 
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/login');
-    });
+app.get('/logout', (req, res) => {  
+    res.redirect('/login');
 });
 
 app.get('/blikunde', (req, res) => {
