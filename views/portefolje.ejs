@@ -32,15 +32,10 @@
                     <p id="endringer30dager"></p>
                 </div>
             </div>
-
-            <!--Diagram-->
-
             <div class="diagramChart">
                 <h3>Portefølje fordeling</h3>
                 <canvas id="myChart"></canvas>
             </div>
-
-            <!-- tabeller -->
         </div>
             <div class="portefolje">
                 <table>
@@ -51,13 +46,16 @@
                             <th>24h Change</th>
                             <th>Siste handel</th>
                             <th>Total Value</th>
+                            <th>Tilhørende konto</th>
                         </tr>
                         </thead>
                         <tbody id="portefoljeOversikt"></tbody>
                     </table>
                 </div>
-        </main>
-    <script>
+            </main>
+        <script>
+
+        //henter brukernavn fra localStorage
         const brukernavn = localStorage.getItem('brukernavn');
 
         if (!brukernavn) {
@@ -65,13 +63,14 @@
             window.location.href = '/login';
         }
 
+        //arrays for å kunne hente og vise selve portefølje overiskten
         const labels = [];
         const saldo = [];
 
         (async () => { //starter en asynkront funksjon fordi vi skal hente data fra serveren simultant
         
         try {
-
+        //hent alle porteføler for den innloggete brukeren
         const res = await fetch('/api/portefolje', {
             method: 'GET',
             headers: {
@@ -83,43 +82,49 @@
         const portefoljer = await res.json();
         const tbody = document.getElementById('portefoljeOversikt');
 
-            if (!portefoljer.length) {
-                document.getElementById('portefolje').innerHTML = '<p>Ingen porteføljer funnet</p>';
-                return;
+        //dersom ingen porteføljer finnes
+        if (!portefoljer.length) {
+            document.getElementById('portefolje').innerHTML = '<p>Ingen porteføljer funnet</p>';
+            return;
+        }
+
+        //Gå gjennom hver enkelt portefølje og legg dem inn i tabellen
+        for(const portefolje of portefoljer) {
+            let endring24h = '0.00%'; //standarverdi hvis vi ikke klarer å hente noe
+
+            try {
+                //hent endringer i verdi for de siste 24 timer
+                const response = await fetch(`/api/portefolje/${portefolje.portefoljeID}/endring24`);
+                const endringData = await response.json();
+                endring24h = endringData.endring24h || '0.00%';
+
+            } catch (error) {
+                console.error('klarte ikke hente 24 timers endring', error);
             }
 
-            for(const portefolje of portefoljer) {
+            //konverterer dato for sist handel til norsk datoformat
+            const sisteHandelTekst = new Date(portefolje.sisteHandel || '').toLocaleDateString('no-NO') || 'Ingen handel';
+            const totalVerdi = portefolje.totalValue || 0;
 
-                let endring24h = '0.00%';
+            //oppretter ny tabellrad
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
+                <td>${portefolje.bank}</td>
+                <td>${endring24h}</td>
+                <td>${sisteHandelTekst}</td>
+                <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
+                <td>${portefolje.kontoNavn}</td>
+                `;
+            tbody.appendChild(tr);
 
-                try {
-                    const response = await fetch(`/api/portefolje/${portefolje.portefoljeID}/endring24`);
-                    const endringData = await response.json();
-                    endring24h = endringData.endring24h || '0.00%';
-
-                } catch (error) {
-                    console.error('klarte ikke hente 24 timers endring', error);
-                }
-
-                const sisteHandelTekst = new Date(portefolje.sisteHandel || '').toLocaleDateString('no-NO') || 'Ingen handel';
-                const totalVerdi = portefolje.totalValue || 0;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><button class="åpnePortefolje"onclick="åpnePortefolje(${portefolje.portefoljeID})">${portefolje.portefoljeNavn}</button></td>
-                    <td>${portefolje.bank}</td>
-                    <td>${endring24h}</td>
-                    <td>${sisteHandelTekst}</td>
-                    <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
-                    `;
-                tbody.appendChild(tr);
-
-                labels.push(portefolje.portefoljeNavn);
-                saldo.push(totalVerdi);
-            };
+            //legger til data i diagrammet
+            labels.push(portefolje.portefoljeNavn);
+            saldo.push(totalVerdi);
+        };
     
 
-        /*Donut diagram --------------------------------------*/
+        //doughnut diagram med Chart.js
         const ctx = document.getElementById('myChart').getContext('2d');
         const data = {
             labels: labels,
@@ -141,48 +146,51 @@
             type: 'doughnut',
             data: data,
         };
-        new Chart(ctx, config);
+        new Chart(ctx, config); //får opp diagrammet
 
         } catch(error) {
-            console.error('Error ved å hente portefoljer:', error);
-            }
-        })();
-
-        function åpnePortefolje(portefoljeID) {
-        localStorage.setItem('aktivPortefoljeID', portefoljeID);
-        window.location.href = '/enkeltPortefolje';
+            console.error('Error ved å hente portefoljer', error);
         }
+    })();
 
-        //endringer siste dager med 24 timer syv dager og 30 dager
-        fetch('/portefolje/endringerSisteDager', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'brukernavn': brukernavn,
-            }
-        })
+    //funksjon for å åpne en spesefikk portefølje
+    function åpnePortefolje(portefoljeID) {
+    localStorage.setItem('aktivPortefoljeID', portefoljeID); //lagrer ID
+    window.location.href = '/enkeltPortefolje'; //navigeres videre til enkeltPortfølje siden
+    }
+
+    //endringer siste dager med 24 timer syv dager og 30 dager
+    fetch('/portefolje/endringerSisteDager', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'brukernavn': brukernavn,
+        }
+      })
         .then(res => res.json())
         .then(data => {
-            document.getElementById('endring24timer').textContent = `Endring siste 24 timer: ${data.sisteTjuefireTimene} %`;
-            document.getElementById('endringer7dager').textContent = `Endring siste 7 dager: ${data.sisteSyvDager} %`;
-            document.getElementById('endringer30dager').textContent = `Endring siste 30 dager: ${data.sisteTrettiDager} %`;
-        })
-        .catch(err => {
-            console.error('feil da ved å hente endringer:')
-        });
+            //fyller inn tekst på siden som brukeren kan se
+           document.getElementById('endring24timer').textContent = `Endring siste 24 timer: ${data.sisteTjuefireTimene} %`;
+           document.getElementById('endringer7dager').textContent = `Endring siste 7 dager: ${data.sisteSyvDager} %`;
+           document.getElementById('endringer30dager').textContent = `Endring siste 30 dager: ${data.sisteTrettiDager} %`;
+      })
+      .catch(err => {
+        console.error('feil da ved å hente endringer')
+      });
 
-        fetch(`/samlet-verdi/${brukernavn}`)
-            .then(res => res.json())
-            .then(data => {
-                const samletVerdiMedValuta = document.getElementById('samletVerdi');
-                samletVerdiMedValuta.innerHTML = data.map(item => {
-                    const verdi = parseFloat(item.samletVerdi);
-                    const valuta = item.valuta || '';
-                    return `${verdi.toFixed(2)} ${valuta}`;
-                })
-                .join('<br>');
+    //henter samlet verdi fra backend for brukeren porteføljer
+    fetch(`/samlet-verdi/${brukernavn}`)
+        .then(res => res.json())
+        .then(data => {
+            const samletVerdiMedValuta = document.getElementById('samletVerdi');
+            samletVerdiMedValuta.innerHTML = data.map(item => {
+                const verdi = parseFloat(item.samletVerdi);
+                const valuta = item.valuta || '';
+                return `${verdi.toFixed(2)} ${valuta}`;
             })
-            .catch(error => console.error('Feil ved henting av samlet verdi', error));
+            .join('<br>');
+        })
+        .catch(error => console.error('Feil ved henting av samlet verdi', error));
     </script>
 </body>
 </html>

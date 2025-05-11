@@ -24,7 +24,7 @@ describe('Brukeropprettelse', () => {
         expect(res.body.message).to.equal('Bruker registrert');
     });
 
-    // Test for å opprette en bruker med eksisterende brukernavn
+    // Test for å opprette en bruker med manglende brukeren
     it('skal returnere 400 hvis brukernavn mangler', async () => {
         const res = await chai.request(app)
         .post('/blikunde')

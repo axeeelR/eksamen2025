@@ -31,32 +31,41 @@
   
 </body>
 <script>
+  //Setter knappen til id med 'submitbutton'
   const submitbutton = document.getElementById('submitbutton');
   
+  //legger til en click eventlistener på knappen
   submitbutton.addEventListener('click', function(event) {
-    event.preventDefault(); 
+    event.preventDefault(); //forhindrer standar adtferd for knappen
+
+    //henter verdier fra inputfeltene
     const brukernavn = document.getElementById('brukernavn').value;
     const passord = document.getElementById('passord').value;
-    console.log(brukernavn, passord)
+    console.log(brukernavn, passord) //logger i konsollen
    
+    //sender en POST request til server med brukernavn og passord
     fetch('/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json' //forteller av vi sender json
       },
       body: JSON.stringify({
         brukernavn: brukernavn,
         passord: passord
       })
     })
+    //svaret fra severen behandles
     .then(async response => {
         if (!response.ok) {
+          //hvis feil, kast feilmelding
         return response.json().then(data => { 
           throw new Error(data.message); 
         });
     }
-    return response.json();
+    return response.json(); //returner dataen hvis OK
     })
+
+    //ved vellykket innlogging
     .then(data => {
     console.log('Innlogging vellykket:', data);
     localStorage.setItem('brukernavn', brukernavn); // Lagre brukernavnet i localStorage
@@ -64,7 +73,7 @@
   })
   .catch(error => {
     console.error('Error:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: 'error i serveren' });
   });
 });
 </script>

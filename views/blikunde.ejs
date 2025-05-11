@@ -30,14 +30,17 @@
 <script>
   const submitbutton = document.getElementById('submitbutton'); 
   
+  //event listener aktiveres ved klikk på registrer bruker
   submitbutton.addEventListener('click', function(event) {
-    event.preventDefault(); 
+    event.preventDefault(); //forhindrer sideoppdatering
     
+    //henter verdier fra de ulike input feltene
     const brukernavn = document.getElementById('brukernavn').value;
     const passord = document.getElementById('passord').value;
     const email = document.getElementById('email').value;
-    console.log(brukernavn, passord, email)
+    console.log(brukernavn, passord, email) // Debug for å vise verdier i konsollen
    
+    //Sender en POST request til server med json data
     fetch('/blikunde', {
       method: 'POST',
       headers: {
@@ -51,18 +54,19 @@
     })
     .then(response => {
       if (!response.ok) {
+        //Hvis serveren returnerer en feilmelding skal den kastes videre
       return response.json().then(data => {
         throw new Error(data.message);
         });
       } 
-      return response.json();
+      return response.json(); //fortsett hvis alt er ok
     })
     .then(data => {
       console.log('Kunde opprettet:', data);
       alert('Kunde opprettet! Du kan nå logge inn.');
       window.location.href = '/login'; // Gå til innloggingssiden
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error', error)); //Logg feilen
       alert(error.message); // Viser feilmeldingen fra serveren
     });
 </script>

@@ -40,13 +40,17 @@
   </main>
 
   <script>
+    //henter porteføljeID og brukernavn fra localStorage
     const portefoljeID = localStorage.getItem('aktivPortefoljeID');
+    const brukernavn = localStorage.getItem('brukernavn');
+
     const registrerHandelKnapp = document.querySelector('button[type="submit"]')
 
+    //henter kontostatus, hvis konto er lukket, deaktiver knappen
     fetch(`/api/konto-status/${portefoljeID}`)
       .then(res => res.json())
       .then(data =>{
-        console.log("lukkedatoK fra server:", data);
+        console.log('lukkedatoK fra server', data);
 
         if(data.lukkedatoK){
           // Hvis portoføljen er lukket, så
@@ -62,19 +66,19 @@
         console.log("Klarte ikke hente kontostatus", err);
       });
 
-    const brukernavn = localStorage.getItem('brukernavn');
-
+      //elementer relatert til aksjene som blir vist
     const søkAksjeBtn = document.getElementById('søkAksje');
     const aksjeInfo = document.getElementById('aksjeInfo');
     const aksjeNavn = document.getElementById('aksjeNavn');
     const aksjePris = document.getElementById('aksjePris');
-    let aksjeData = null;
+    let aksjeData = null; //brukes senere for å lagre søkt akjseinfo
 
+    //brukeren trykker på søk
     søkAksjeBtn.addEventListener('click', () => {
       const navn = document.getElementById('navn').value.trim();
-
       if (!navn) return;
 
+      //henter akskjeinformasjon og vis det
       fetch(`/api/aksje/${navn}`) 
         .then(res => res.json()) 
         .then(data => {
@@ -83,6 +87,7 @@
           aksjePris.textContent = `${data.regularMarketPrice} ${data.currency}`; 
           aksjeInfo.style.display = 'block'; 
 
+          //lag graf basert på historiske priser
           const labels = data.historikk.map(p => new Date(p.date).toLocaleDateString())
           const priser = data.historikk.map(p => p.close);
 
@@ -106,6 +111,7 @@
         });
     });
 
+    //brukeren sender inn skjema/registrere kjøpet
     document.getElementById('handelForm').addEventListener('submit', (handel) => {
       handel.preventDefault();
 
@@ -118,6 +124,7 @@
       const totalSum = aksjeData.regularMarketPrice * mengde;
       const gebyr = totalSum * 0.005; // 0.5% gebyr
 
+      //send POST request til backend for å kunne registrere kjøpet
       fetch('/kjop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -138,7 +145,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         alert("Kjøp registrert!");
-        window.location.href = '/enkeltportefolje';
+        window.location.href = '/enkeltportefolje'; //sender tilbake til porteføljeoveriskten
       })
       .catch(err => {
         console.error(err);

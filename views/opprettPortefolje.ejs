@@ -26,39 +26,41 @@
     </main>
 
     <script>
+        //henter brukernavn fra localStorage
         const brukernavn = localStorage.getItem('brukernavn');
 
+        //henter kontoer fra backend og legger de til i select
         fetch('api/konto',{
             headers: {'brukernavn': brukernavn}
         })
 
         .then (response => response.json())
         .then(kontoer => {
-            const velg = document.getElementById('kontoID');
+            const velg = document.getElementById('kontoID'); //reff droipbox
             kontoer.forEach(konto =>{
             const valg = document.createElement('option');
-            valg.value = konto.kontoID;
-            valg.textContent = konto.kontoNavn;
-            velg.appendChild(valg);
-            })
+            valg.value = konto.kontoID; //verdi som sendes
+            valg.textContent = konto.kontoNavn; //teksten som vises
+            velg.appendChild(valg); //legges til i listen
+            });
         })
         .catch(error => {
         console.error('Feil da du skulle velge konto')
     });
     
-        
         const submitbutton = document.getElementById('opprettKnapp');
         submitbutton.addEventListener('click', function(event) {
-            event.preventDefault();
+            event.preventDefault(); //forhindrer standar skjemainsending
 
             const navn = document.getElementById('navn').value;
             const kontoID = document.getElementById('kontoID').value;
 
             if (!navn || !kontoID) {
-                alert('Vennligst fyll ut alle felt.');
+                alert('Vennligst fyll ut alle felt');
                 return;
             }
 
+            //sender dataen som json til server
             fetch('/opprettPortefolje', {
                 method: 'POST',
                 headers: {
@@ -72,15 +74,17 @@
             })
             .then(async res => {
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.message);
+                if (!res.ok) throw new Error(data.message); //vis feilmelding ved feil
                 alert('Portefølje opprettet:')
-                window.location.href = '/portefolje';
+                window.location.href = '/portefolje'; //gå til portefølje siden
             })
             .catch(error => {
-                console.error('Error:', error);
-            alert(error.message)
+                console.error('Error', error);
+                alert(error.message) //viser feilmeldingen til brukeren
             });
         });
+
+        //legger brukernavnet til i det skjulte feltet 
         document.getElementById('brukernavnSkjult').value = brukernavn;
     </script>
 </body>

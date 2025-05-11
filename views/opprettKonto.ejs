@@ -34,13 +34,13 @@
       <button type="submit" id="submitbutton" class="Submit">Opprett Konto</button>
   </form>
 <script>
-  const submitbutton = document.getElementById('submitbutton');
-  
-  const brukernavn = localStorage.getItem('brukernavn');
+  const submitbutton = document.getElementById('submitbutton'); //referer til send kanppen
+  const brukernavn = localStorage.getItem('brukernavn'); //henter lagret brukernavn fra nettleseren
   
   submitbutton.addEventListener('click', function(event) {
-    event.preventDefault(); 
+    event.preventDefault(); //hindrer siden fra å laste på nytt
 
+    //henter verdier fra input feltene
     const kontoNavn = document.getElementById('kontoNavn').value;
     const opprettelsedatoK = document.getElementById('opprettelsedatoK').value;
     const valuta = document.getElementById('valuta').value;
@@ -53,12 +53,11 @@
       return;
     }
 
-    // console.log(brukernavn, kontoNavn, opprettelsesdatoK, bank, saldo, lukkedatoK, valuta);
-   
+    //sender dataen til server via fetch
     fetch('/opprettKonto', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json', //forteller at vi sender json
 
       },
       body: JSON.stringify({
@@ -70,19 +69,22 @@
         valuta: valuta
       })
     })
+    //behandler svaret fra serveren
     .then(async res => {
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message);
-  alert("Konto opprettet!");
-})
-.then(() => {
-  window.location.href = `/dashboard?brukernavn=${brukernavn}`;
-})
-.catch(err => {
-  console.error(err);
-  alert(err.message);
+      const data = await res.json();
+      if (!res.ok) 
+      throw new Error(data.message); //hvis feil gi ny feilmelding
+      alert('Konto opprettet!');
+    })
+    .then(() => {
+      window.location.href = `/dashboard?brukernavn=${brukernavn}`; //sender brukeren til dashboardet
+    })
+    //feilmelding
+    .catch(error => {
+      console.error(error);
+      alert(error.message);
+    });
   });
-});
 </script>
 </body>
 </html>

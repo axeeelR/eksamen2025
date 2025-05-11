@@ -25,26 +25,28 @@
           <th>Dato</th>
         </tr>
       </thead>
-      <tbody id="historikkTabell">
-
-      </tbody>
+      <tbody id="historikkTabell"></tbody>
     </table>
   </main>
 
   <script>
+    //Henter brukernavn fra localStorage (fra login)
     const brukernavn = localStorage.getItem('brukernavn');
+
+    //henter referanser til dropdown og tabell
     const kontoValg = document.getElementById('kontoValg');
     const historikkTabell = document.getElementById('historikkTabell');
 
-
+    //henter kontoer som tilhører brukeren
     fetch('/api/konto', {
       headers: {
         'Content-Type': 'application/json',
-        'brukernavn': brukernavn
+        'brukernavn': brukernavn //sender brukernavn til header
       }
     })
       .then(res => res.json())
       .then(kontoer => {
+        //legger til kontoene som option i dropdown
         kontoer.forEach(konto => {
           const option = document.createElement('option');
           option.value = konto.kontoID;
@@ -53,10 +55,11 @@
         });
         });
     
+        //brukeren velger en konto fra listen
     kontoValg.addEventListener('change', function() {
       const kontoID = this.value;
       
-
+      //henter innskudshistorikk fra valgt konto
     fetch('/innskuddshistorikk', {
         method: 'POST',
         headers: {
@@ -66,11 +69,12 @@
       })
       .then(res => res.json())
       .then(historikk => {
-        historikkTabell.innerHTML = ''; 
+        historikkTabell.innerHTML = ''; //tømmer tabell
 
         if (historikk.length === 0) {
-          historikkTabell.innerHTML = 'Ingen innskudd funnet.';
+          historikkTabell.innerHTML = 'Ingen innskudd funnet';
         }else {
+          //fyller ut tabellen med rader
           historikk.forEach(historikk => {
             const rad = document.createElement('tr');
             rad.innerHTML = `
@@ -85,7 +89,7 @@
       })
       .catch(err => {
         console.error(err);
-        alert('Kunne ikke hente innskuddshistorikk.');
+        alert('Kunne ikke hente innskuddshistorikk');
       });
     });
   </script>  

@@ -41,38 +41,37 @@
   </main>
 
   <script>
+    //henter porteføljeID som ble valgt tidligere fra localStorage
     const portefoljeID = parseInt(localStorage.getItem('aktivPortefoljeID'));
 
+    //referanser til de ulike HTML elementene
     const registrerHandelKnapp = document.querySelector('button[type="submit"]')
-    
-      const aksjeInfo = document.getElementById('aksjeInfo');
-      const aksjeNavn = document.getElementById('aksjeNavn');
-      const aksjePris = document.getElementById('aksjePris');
-      const aksjeInput = document.getElementById('aksjeListe');
-      const aksjeBeholdning = document.getElementById('aksjeBeholdning');
-      let aksjeData = null;
+    const aksjeInfo = document.getElementById('aksjeInfo');
+    const aksjeNavn = document.getElementById('aksjeNavn');
+    const aksjePris = document.getElementById('aksjePris');
+    const aksjeInput = document.getElementById('aksjeListe');
+    const aksjeBeholdning = document.getElementById('aksjeBeholdning');
+    let aksjeData = null; //kal holde aksjedataen som hentes senere
 
+    //henter status på kontoen om den er lukket
     fetch(`/api/konto-status/${portefoljeID}`)
       .then(res => res.json())
       .then(data =>{
-        console.log("lukkedatoK fra server:", data);
-
+        console.log('lukkedatoK fra server', data);
         // Hvis portoføljen er lukket, så skal det ikke være mulig å foreta en transaksjon
         if(data.lukkedatoK){
           registrerHandelKnapp.disabled = true;
-          registrerHandelKnapp.textContent = "Det er ikke mulig å foreta en transaksjon, når kontoen er lukket."
+          registrerHandelKnapp.textContent = 'Det er ikke mulig å foreta en transaksjon, når kontoen er lukket.'
         } else {
           registrerHandelKnapp.disabled = false;
-          registrerHandelKnapp.textContent = "Bekrefter salg";
+          registrerHandelKnapp.textContent = 'Bekrefter salg';
           }
         })
       .catch(err => {
-        console.log("Klarte ikke hente kontostatus", err);
+        console.log('Klarte ikke hente kontostatus', err);
     });
-
-
-      // For å hente aksjene som brueren eier
-      fetch('/aksjeienkeltportefolje', {
+     // For å hente aksjene som brueren eier
+    fetch('/aksjeienkeltportefolje', {
         method: 'POST', 
         headers: {'Content-type': 'application/json'},
         body: JSON.stringify({portefoljeID})
@@ -80,6 +79,7 @@
 
       .then(res => res.json())
       .then(aksjer => {
+        //fyller listen med aksjer
         aksjer.forEach(aksje => {
             const option = document.createElement('option');
             option.value = aksje.navn;
@@ -92,14 +92,15 @@
           const navn = aksjeInput.value;
           if (!navn) return;
     
+      //henter markedsinfor for aksjene
       fetch(`/api/aksje/${navn}`) 
         .then(res => res.json()) 
         .then(data => {
-          aksjeData = data; 
+          aksjeData = data; //lagrer dataen globalt
           aksjeNavn.textContent = data.shortName;  
           aksjePris.textContent = `${data.regularMarketPrice} ${data.currency}`; 
         
-
+        //henter akjsebeholdningen igjen for å kunne se hvor mange aksjer brukeren har
         fetch('/aksjeienkeltportefolje', {
           method: 'POST',
           headers: {'Content-type': 'application/json'},
@@ -111,24 +112,23 @@
 
           if (valgt){
             aksjeBeholdning.textContent = valgt.antall;
-          }else {
+          } else {
             aksjeBeholdning.textContent = 0;
           }
-
-          aksjeInfo.style.display = 'block';
-          });
-       })
-       .catch(err => {
-       console.log("Klarte ikke hente aksjeinfo");
-       });
+          aksjeInfo.style.display = 'block'; //vis info boksen
+        });
+      })
+      .catch(err => {
+          console.log('Klarte ikke hente aksjeinfo');
       });
+  });
 
     document.getElementById('handelForm').addEventListener('submit', (handel) => {
-      handel.preventDefault();
+      handel.preventDefault(); //forhindrer standar skjemainsendig fra å skje
 
       if(!aksjeData || !aksjeData.symbol) {
-        console.error("aksjedataen er ugyldig", aksjeData);
-        alert("du må velge en aksje du eier for å kunne registrere salget");
+        console.error('aksjedataen er ugyldig', aksjeData);
+        alert('du må velge en aksje du eier for å kunne registrere salget');
         return;
       }
 
@@ -137,10 +137,11 @@
       const pris = aksjeData.regularMarketPrice;
 
       if(isNaN(mengde) || mengde <= 0){
-        alert("du må skrive inn et gyldig antall aksjer");
+        alert('du må skrive inn et gyldig antall aksjer');
         return;
       }
 
+      //sender en POST Request til backend for å registrere selve salget
       fetch('/salg', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -159,13 +160,13 @@
         throw new Error(error.message);
       }
       alert('Salget ble gjennomført')
-      window.location.href = '/enkeltportefolje'
+      window.location.href = '/enkeltportefolje'; //navigeres tilbake til portefølje
     })
       .catch(feil =>{
-        console.log('feil under salget')
-        alert("Du prøvde å selge flere aksjer enn du har i beholdningen")
+        console.log('feil under salget');
+        alert('Du prøvde å selge flere aksjer enn du har i beholdningen');
       })
-    })
+    });
   </script>
 </body>
 </html>
