@@ -821,9 +821,12 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
     const result = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
-        SELECT * FROM investApp.transaksjon 
-        WHERE portefoljeID = @portefoljeID
-        ORDER by opprettelsedatoT DESC
+        SELECT t.*, k.kontoNavn 
+        From investApp.transaksjon t
+        JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+        JOIN investApp.konto k ON t.kontoID = k.kontoID
+        WHERE t.portefoljeID = @portefoljeID
+        ORDER by t.opprettelsedatoT DESC
       `);
 
     res.json(result.recordset);
@@ -832,8 +835,7 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
     console.error('Feil i POST /api/handelshistorikk:', error);
     res.status(500).json({ message: 'Intern feil' });
   }
-}
-);  
+});  
 
 app.post('/innskuddshistorikk', async (req, res) => {
   const { kontoID } = req.body;
