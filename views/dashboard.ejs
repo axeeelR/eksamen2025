@@ -74,9 +74,12 @@
         </section>
       </main>
     <script>
+      //henter brukernavn fra localStorage for å bruke senere
         const brukernavn = localStorage.getItem('brukernavn');
+        //refferanse til tabellen for top 5 aksjer etter uralisert gevinst
         const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
         
+        //hent og vis topp 5 aksjer etter gevinst
         fetch('/topp5AksjerGevinst', {
           method: 'POST',
           headers: {
@@ -87,9 +90,10 @@
 
         .then(response => response.json())
         .then(data => { 
-
+          //Viser urealisert gevinst
           document.getElementById('urealisertGevinst').textContent = data.totalUrealisertGevinst + ' dkk';
           
+          //viser realisert gevinst per valuta eller "--" hvis ingen finnes
           const realisert = document.getElementById('realisertGevinst')
           if (data.totalRealisertGevinst.length === 0){
             realisert.textContent = '--'
@@ -98,6 +102,8 @@
               return `${item.gevinst} ${item.valuta}`
             }).join('<br>')
           }
+
+          //hvis ingen aksjer finnes, hvis tom melding
           if (data.length === 0){
             const rad = document.createElement('tr');
             const celle = document.createElement('td');
@@ -107,6 +113,8 @@
             topp5AksjerGevinst.appendChild(rad);
             return;
           }
+
+          //fyll tabellen med aksjer
             data.top5.forEach(aksje => {
               const rad = document.createElement('tr');
               const navn = document.createElement('td');
@@ -115,6 +123,7 @@
               const portefolje = document.createElement('td');
               portefolje.textContent = aksje.portefolje;
 
+              //fargekoding
               const endring = document.createElement('td');
               endring.textContent = aksje.endring24h + '%';
               if (aksje.endring24h > 0) {
@@ -124,20 +133,23 @@
               } 
 
               const gevinst = document.createElement('td');
-              gevinst.textContent = aksje.gevinst + ' dkk';
+              gevinst.textContent = aksje.gevinst;
 
+              //Legger til celler i raden
               rad.appendChild(navn);
               rad.appendChild(portefolje);
               rad.appendChild(endring);
               rad.appendChild(gevinst);
 
+              //egger til raden i tabellen
               topp5AksjerGevinst.appendChild(rad);
             });
           })
         .catch(error => {
-          console.error('Error fetching aksjer:', error);
+          console.error('Error ved fetching av aksjer', error);
         });
 
+        //hent samlet verdi for brukeren porteføljer basert på per valuta
         fetch(`/samlet-verdi/${brukernavn}`)
           .then(res => res.json())
           .then(data => {
@@ -192,7 +204,7 @@
               } 
 
               const verdi = document.createElement('td');
-              verdi.textContent = aksje.verdi + ' dkk';
+              verdi.textContent = aksje.verdi;
 
               rad.appendChild(navn);
               rad.appendChild(portefolje);
@@ -203,41 +215,47 @@
             });
           })
         .catch(error => {
-          console.error('Error fetching aksjer:', error);
+          console.error('Error ved fetching av aksjer', error);
         });
 
-
+        //henter data for samlet verdiutvikling og tegner linjediagram
         fetch('/api/portefolje/samletverdiutvikling')
-          .then(response => response.json())
+          .then(response => response.json()) //gjør om svaret til json
           .then(data => {
+            //lager en liste med verdier
             const labels = data.map(entry => entry.dato);
             const verdier= data.map(entry => entry.verdi);
 
+            //finner canvas elementet og gjør klart for å tegne graf
             const ctx = document.getElementById('verdiGraf').getContext('2d');
 
+            //setter opp grafens data og utseende
             const chartData = {
               labels: labels,
               datasets: [{
                 label: 'Verdiutvikling',
                 data: verdier,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)', //farge på linjen
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', //bakgrunnsfarge
                 borderWidth: 1,
               }]
             };
+
+            //konfigurerer og tegner grafen
             const config = {
               type: 'line',
               data: chartData,
             };
 
+            //lagre linjediagrammet på nettsiden
             new Chart(ctx, config);
           })
           .catch(error => {
-            console.error('Error fetching portefolje data:', error);
+            console.error('Error ved fetching av portefoljedataen', error);
           });
 
-    
-          if(brukernavn){
+          //Setter overskriften med brukernavn dersom man er logget inn
+      if(brukernavn){
         const overskrift = document.getElementById('dashboardOverskrift')
         overskrift.textContent = `Dashboard for ${brukernavn}`
       }

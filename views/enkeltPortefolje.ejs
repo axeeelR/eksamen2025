@@ -58,14 +58,17 @@
   </main>
 </body>
     <script>
+      //Henter HTML elementer vi trenger
       const portefoljeNavn = document.getElementById('portefoljeNavn');
       const kjøpAksjeKnapp = document.getElementById('kjøpAksjeKnapp');
+      const selgeAksjeKnapp = document.getElementById('selgeAksjeKnapp');
       const historikkKnapp = document.getElementById('historikkKnapp');
       const portefoljeID = localStorage.getItem('aktivPortefoljeID');
       const aksjeInnhold = document.getElementById('aksjeInnhold');
 
+      //hvis ingen portefølje er valgt, send brukeren tilbake til overiskten
       if (!portefoljeID) {
-        alert("Ingen portefølje valgt.");
+        alert('Ingen portefølje valgt');
         window.location.href = '/portefolje';
       }
 
@@ -78,20 +81,22 @@
         })
         .catch(err => {
           console.error('Feil ved henting av portefølje:', err);
-          alert("Kunne ikke hente porteføljeinformasjon.");
+          alert('Kunne ikke hente porteføljeinformasjon');
           window.location.href = '/portefolje';
         });
 
+        //navigasjon til kjøp salg og historikk
         selgeAksjeKnapp.addEventListener('click', () => {
         window.location.href = '/salg';
         });
 
-      kjøpAksjeKnapp.addEventListener('click', () => {
+        kjøpAksjeKnapp.addEventListener('click', () => {
         window.location.href = '/handel';
         });
         historikkKnapp.addEventListener('click', () => {
           window.location.href = '/handelshistorikk';
       });
+
       //Hent porteføljens totalverdi
       fetch('/api/portefolje/verdi', {
         method: 'POST',
@@ -105,8 +110,8 @@
           document.getElementById('totalVerdi').innerHTML = `${data.totalVerdi.toFixed(2)} DKK`;
         })
         .catch(err => {
-          console.error('Feil ved henting av aksjer:', err);
-          alert("Kunne ikke hente aksjer.");
+          console.error('Feil ved henting av aksjer', err);
+          alert('Kunne ikke hente aksjer');
         });
 
       //navigasjon
@@ -158,10 +163,6 @@
           new Chart(doughnutCtx, doughnutConfig)
         });
 
-
-        
-
-
         //Linje diagram oversikt
         //Henter verdiutvikling for porteføljen
       fetch('/api/portefolje/verdiutvikling',{
@@ -196,7 +197,7 @@
            new Chart(verdiGraf, chartConfig); //Lager diagrammet med Chart.js
         })
         .catch(error => {
-          console.error('Feil ved henting av linjegraf:', error); //Logger feil
+          console.error('Feil ved henting av linjegrafem', error); //Logger feil
         });
         
 
@@ -211,7 +212,7 @@
         .then(res => res.json())
         .then(aksjer => {
           const aksjeTabell = document.getElementById('aksjeInnhold');
-          aksjeTabell.innerHTML = '';   
+          aksjeTabell.innerHTML = ''; //tømmer tabellen først
           let samletVerdi = 0;
 
           aksjer.forEach(aksje => {
@@ -229,13 +230,15 @@
 
             samletVerdi += aksje.totalVerdi;
           });
+
+          //oppdaterer totalverdi under doughnut grafen
           const totalVerdi2 = document.getElementById('totalVerdi');
           if (totalVerdi2){
             totalVerdi2.textContent = samletVerdi.toFixed(2) + ' DKK';
           }
         })
         .catch(err => {
-          console.error('Feil ved henting av aksjer:', err);
+          console.error('Feil ved henting av aksjer', err);
         });
     </script>
   </body>

@@ -30,19 +30,22 @@
   </form>
 </div>
 <script>
+  //henter brukernavn lagret i localStorage
 const brukernavn = localStorage.getItem('brukernavn');
 const kontoValg = document.getElementById('kontoValg');
 const form = document.getElementById('innskuddsform');
 
-
+//henter alle kontoer for innlogget bruker
 fetch('/api/konto', {
   headers: {
     'Content-Type': 'application/json',
-    'brukernavn': brukernavn
+    'brukernavn': brukernavn //brukernavn sendes som header
   }
 })
 .then(res => res.json())
 .then(kontoer => {
+
+  //for hver konto lagres et nytt option element i dropdown menyen
   kontoer.forEach(konto => {
     const option = document.createElement('option');
     option.value = konto.kontoID;
@@ -55,18 +58,22 @@ fetch('/api/konto', {
   alert('Kunne ikke hente kontoer.');
 });
 
+//ser etter insendig av skjerma
 form.addEventListener('submit', function(event) {
-  event.preventDefault();
+  event.preventDefault(); //hindrer siden i å laste inn på nytt
 
+  //henter verdiene fra skjemaet
   const kontoID = document.getElementById('kontoValg').value;
   const valuta = document.getElementById('valuta').value;
   const verdi = document.getElementById('verdi').value;
 
+  // sjekker at ingen felt er tomme
   if (!kontoID || !valuta || !verdi) {
     alert('Alle feltene må være fylt inn');
     return;
   }
 
+  //sender POST request til serveren for å registrere innskuddet
   fetch('/indsettelse', {
     method: 'POST',
     headers: {
@@ -81,16 +88,15 @@ form.addEventListener('submit', function(event) {
   })
   .then(async res => {
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+    if (!res.ok) throw new Error(data.message); //håndterer feilmeldinger fra server
     alert('Innskudd registrert!');
-    window.location.href = '/dashboard';
+    window.location.href = '/dashboard'; //sender bruker til dashboard etter vellykket innskudd
   })
   .catch(err => {
-    console.error(err);
-    alert('Feil:' + err.message);
+    console.error(error);
+    alert('Feil' + error);
   });
 });
   </script>
-  
 </body>
 </html>

@@ -32,23 +32,23 @@
           <th>Konto status</th>
         </tr>
       </thead>
-      <tbody id="kontoTableBody">
-        <!-- Kontoene vil bli lagt til her dynamisk -->
-      </tbody>
+      <tbody id="kontoTableBody"></tbody>
     </table>
     <div class="Knapper">
     </div>
   </div>
-
   <script>
+    //henter brukernavn og referanse til tabellen
     const brukernavn = localStorage.getItem('brukernavn');
     const kontoTableBody = document.getElementById('kontoTableBody');
 
+    //sjekker om brukeren er logget inn
     if (!brukernavn) {
       alert('Du må være logget inn.');
       window.location.href = '/login';
     }
 
+    //henter alle kontoene til brukeren
     fetch('/api/konto', {
       method: 'GET',
       headers: {
@@ -66,40 +66,51 @@
       }
 
       kontoTableBody.innerHTML = '';
+
+      //for hver konto, sett opp en rad i tabellen
       data.forEach(konto =>{
-        const opprettetDato = konto.opprettelsedatoK
-          ? new Date(konto.opprettelsedatoK).toLocaleDateString('no-NO', {
+        let opprettetDato;
+        if (konto.opprettelsedatoK) {
+          opprettetDato = Date(konto.opprettelsedatoK).toLocaleDateString('no-NO', {
             day: '2-digit', 
             month: '2-digit', 
             year: 'numeric' 
-          })
-          : 'Ukjent';
+          });
+        } else {
+          opprettetDato = 'Ukjent';
+        }
 
-          const lukkeDato = konto.lukkedatoK
-          ? new Date(konto.lukkedatoK).toLocaleString('no-NO', {
+        //formaterer lukketdato hvis den ikke finnes
+        let lukkeDato;
+        if (konto.lukkedatoK) {
+          lukkeDato = new Date(konto.lukkedatoK).toLocaleDateString('no-NO', {
             day: '2-digit', 
             month: '2-digit', 
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
           })
-          : 'ikke lukket';
+        } else {
+          lukkeDato = 'ikke lukket'
+        }
 
-          const erDenLukket = konto.lukkedatoK !== null;
-      
+        const erDenLukket = konto.lukkedatoK !== null;
+        //lager rad for hver konto
         const row = document.createElement('tr');
 
-          let avsluttKnapp = '';
-          let gjennopneKnapp = '';
+        //Knappene endrer seg ut ifra gitt status
+        let avsluttKnapp = '';
+        let gjennopneKnapp = '';
 
-          if(erDenLukket){
-            avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}" disabled>Konto lukket</button>`;
-            gjennopneKnapp = `<button class="gjenopne-knapp" data-konto-id="${konto.kontoID}">Gjenåpne konto</button>`;
+        if(erDenLukket){
+          avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}" disabled>Konto lukket</button>`;
+          gjennopneKnapp = `<button class="gjenopne-knapp" data-konto-id="${konto.kontoID}">Gjenåpne konto</button>`;
 
-          }else{
-            avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}">Avslutt konto</button>`;
-          }
+        } else {
+          avsluttKnapp = `<button class="avslutt-knapp" data-konto-id="${konto.kontoID}">Avslutt konto</button>`;
+        }
 
+        //setter innholdet inn i raden
         row.innerHTML = `
           <td>${konto.kontoNavn}</td>
           <td>${konto.saldo}</td>
@@ -116,6 +127,7 @@
         kontoTableBody.appendChild(row);
           });
 
+          //aktiverer knappene
           leggTilAvsluttKnapp();
           leggTilgjenopneKnapp();
       })
@@ -125,24 +137,27 @@
       alert('kunne ikke lukke konto')
       });
     
-
     function leggTilAvsluttKnapp(){
+      //går gjennom alle knapper med klassen.avslutt-knapp
       document.querySelectorAll('.avslutt-knapp').forEach(button => {
+        //legg til klikk event på hver knapp
         button.onclick = () => {
           const kontoID = button.getAttribute('data-konto-id');
 
+          //sender forespørselen til server for å lukke kontoen
           fetch('/lukk-konto', {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({kontoID: kontoID})
+            body: JSON.stringify({kontoID: kontoID}) //sender kontoID i body
           })
 
           .then(res => res.json())
           .then(data => {
             console.log('kontoID som sendes til server:', kontoID);
 
+            //lager dato og klokkeslett for når kontoen ble lukket
             const now = new Date().toLocaleString('no-NO', {
               day: '2-digit', 
               month: '2-digit', 
@@ -151,9 +166,11 @@
               minute: '2-digit',
             });
 
+            //oppdaterer tabellen, setter lukkedato til den riktige cellen
             const lukketCelle = button.closest('tr').children[5];
             lukketCelle.textContent = now;
 
+            //slår av knappen
             button.disabled = true;
             button.textContent = 'Konto lukket';
 
@@ -173,6 +190,7 @@
     }
 
     function leggTilgjenopneKnapp(){
+      //går gjennom alle knapper med klassen .gjenopne-knapp
     document.querySelectorAll('.gjenopne-knapp').forEach(button => {
         button.onclick = () => {
           const kontoID = button.getAttribute('data-konto-id');
@@ -188,6 +206,8 @@
           .then(res => res.json())
           .then(() => {
             const row = button.closest('tr');
+
+            //oppdaterer teskt i den lukkete cellen
             row.querySelector('.lukket-celle').textContent = 'Konto gjenåpnet';
 
             //aktivere avslutt knappen igjen
@@ -203,8 +223,6 @@
         };
       });
     }
-    
   </script>
-
 </body>
 </html>

@@ -27,24 +27,26 @@
           <th>Konto</th>
         </tr>
       </thead>
-      <tbody id="historikkTabell">
-        <!-- Data vil bli fylt inn her -->
-      </tbody>
+      <tbody id="historikkTabell"></tbody>
     </table>
   </main>
 
   <script>
+    //henter portefølje id lagret i localStorge
     const portefoljeID = localStorage.getItem('aktivPortefoljeID');
     
+    //gjør et kall til serveren for å hente handelshistorikken for de valgte porteføljene
     fetch(`/api/handelshistorikk/${portefoljeID}`)
-      .then(res => res.json())
+      .then(res => res.json()) //gjør responsen lesbar som json
       .then(data => {
-        const historikkTabell = document.getElementById('historikkTabell');
+        const historikkTabell = document.getElementById('historikkTabell'); // tabellen som skal fylles med data
 
+        //hvis det ikke finnes noen handler, vis medling
         if (data.length === 0) {
-          rad.innerHTML = 'Ingen handler funnet.';
+          rad.innerHTML = 'Ingen handler funnet';
         } 
           
+        //går gjennom hver rad i historikken og lager en HTML rad for tabellen
         data.forEach(historikk => {
             const rad = document.createElement('tr');
             rad.innerHTML = `
@@ -57,13 +59,13 @@
               <td>${historikk.totalGebyr}</td>
               <td>${historikk.kontoNavn}</td>
             `;
-            historikkTabell.appendChild(rad);
+            historikkTabell.appendChild(rad); //legger raden til i tabellen
           });
       })
       .catch(error => {
-        console.error('Error fetching handelshistorikk:', error);
+        //feilmelding hvis noe går galt
+        console.error('Error ved fetching av handelshistorikk', error);
       });
   </script>
-  
 </body>
 </html>
