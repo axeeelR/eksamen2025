@@ -795,6 +795,7 @@ app.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
         ORDER BY dato ASC
         `);
 
+        //omstrukturerer resultatet til ønsket format for visning i linjediagrammet
         const verdiHistorikk = result.recordset.map(transaksjon => ({
           dato: transaksjon.dato,
           verdi: transaksjon.verdi
@@ -809,11 +810,13 @@ app.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
 });
 
 //----------------------------------------------------------------------
-//Returner Nåværende samlet markedsverdi
+//Returner Nåværende samlet markedsverdi av alle aksjer i en spesefikk portefølje
 app.post('/api/portefolje/verdi', async (req, res) => {
   const { portefoljeID } = req.body;
   try {
     const database = await getDatabase();
+
+    //henter aksjene og total mengde i porteføljen
     const result = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
@@ -826,6 +829,7 @@ app.post('/api/portefolje/verdi', async (req, res) => {
       const aksjer = result.recordset;
       let totalVerdi = 0;
 
+      //For hver aksje: hent sanntidskurs og regn ut verdi
       for (const aksje of aksjer) {
         try {
           const markedsdata = await yahooFinance.quote(aksje.ISIN);
@@ -845,10 +849,12 @@ app.post('/api/portefolje/verdi', async (req, res) => {
   }
 });
   
+//Viser frontend siden for brukerens handelshistorikk
 app.get('/handelshistorikk', (req, res) => {
   res.render('handelshistorikk');
 });
 
+//Returnerer alle transaksjoner for en gitt portefølje, vises i tabellen
 app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
   try {
     const portefoljeID = req.params.portefoljeID;
@@ -873,9 +879,10 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
   }
 });  
 
+//Returnerer en gitt kontos innskudd/uttak
 app.post('/innskuddshistorikk', async (req, res) => {
   const { kontoID } = req.body;
-  const parsedKontoID = parseInt(kontoID, 10);
+  const parsedKontoID = parseInt(kontoID, 10); //sikrer at ID er et tall
 
   if (!kontoID) {
     return res.status(400).json({ message: 'KontoID mangler' });
@@ -896,10 +903,12 @@ app.post('/innskuddshistorikk', async (req, res) => {
   }
 });
 
+//Viser frontendvisningen av innskudsshistorikken
 app.get('/innskuddshistorikk', (req, res) => {
   res.render('innskuddshistorikk');
 });
 
+//Returnerer aksjefordelingen for en portefølje som kan brukes til doughnut charten
 app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
 
@@ -921,6 +930,7 @@ app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
 });
 
 //-------------------------------------------------------------------------------------
+//Returnerer aksjer i en gitt portefølje med sanntidspris, verdi og urealisert gevinst
 app.post('/aksjeienkeltportefolje', async (req, res) => {
   const {portefoljeID} = req.body;
 
@@ -929,6 +939,8 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
   }
   try {
     const database = await getDatabase();
+
+    //Henter ISIN og beregner snittprisen per aksje i porteføljen
     const aksjeResultat = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
@@ -943,6 +955,7 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
       
         const aksjer = aksjeResultat.recordset;
 
+        //Hente markedsdata og kalkulerer urealisert gevinst for hver aksje
         const aksjeData = await Promise.all(
           aksjer.map(async (aksje) => {;
             try {
@@ -964,6 +977,8 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
             }
           })
         );
+
+        //Filtrer ut eventuelle nullverdier (feil i API)
         const aksjeDataFiltrert = aksjeData.filter(aksje => aksje !== null);
         res.json(aksjeDataFiltrert);
     
@@ -974,13 +989,15 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
   }
 });
 
+//Returnerer samlet markedsverdi, per valuta for alle aksjer brukeren eier
 app.get('/samlet-verdi/:brukernavn', async (req, res) => {
   const brukernavn = req.params.brukernavn;
 
   try{
     const database = await getDatabase();
-    const result = await database.poolconnection.request()
 
+    //Summerer total verdi av alle transaksjoner gruppert på valuta
+    const result = await database.poolconnection.request()
     .input('brukernavn', sql.NVarChar, brukernavn)
     .query(`
       SELECT k.valuta, SUM(t.totalSum) AS samletVerdi
@@ -999,12 +1016,14 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
   }
 });
 
+//Returnerer topp 5 aksjer med høyest urealisertgevinst og summerer total gevinst
 app.post('/topp5AksjerGevinst', async (req, res) => {
   const brukernavn = req.headers['brukernavn'];
 
     try {
       const database = await getDatabase();
 
+      //Hent brukerID fra brukernavn
       const brukerResultat = await database.poolconnection.request()
         .input('brukernavn', sql.VarChar(255), brukernavn)
         .query(`
@@ -1013,7 +1032,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
         `);
       const brukerID = brukerResultat.recordset[0].brukerID;
 
-      //her hentes aksjer og beregnes urealisert gevinst
+     //Beregner snittpris og beholdning per aksje for brukeren
       const aksjeResultat = await database.poolconnection.request()
         .input('brukerID', sql.Int, brukerID)
         .query(`
@@ -1029,6 +1048,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
       const aksjer = [];
       let totalUrealisertGevinst = 0;
 
+      //For hver aksje skal den hente sanntidspris og beregne urealisert gevinst
       for (const rad of aksjeResultat.recordset) {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
@@ -1037,6 +1057,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
           const gevinst = (pris - rad.snittKjøpspris) * rad.totalMengde;
           totalUrealisertGevinst += gevinst;
           
+          //Håndterer endring i prosent (kan være null)
           let endring24h;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
             endring24h = markedsdata.regularMarketChangePercent.toFixed(2);
@@ -1055,26 +1076,30 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
         }
       }
 
+      //hent realisert gevinst for brukeren
       const realisertGevinstResultat = await database.poolconnection.request()
-      .input('brukerID', sql.Int, brukerID)
-      .query(`
-        select k.valuta,
-        sum(case when t.mengde < 0then t.totalSum
-        else 0 end) AS samletSalgsverdi,
-        sum(case when t.mengde < 0 then t.totalSum -
-        (abs(t.mengde)* t.verdiPapirPris) else 0 end) AS realisertGevinst
-        from investApp.transaksjon t
-        join investApp.portefolje p on t.portefoljeID = p.portefoljeID
-        join investApp.konto k on p.kontoID = k.kontoID
-        where k.brukerID = @brukerID
-        group by k.valuta
-        `
-      );
+        .input('brukerID', sql.Int, brukerID)
+        .query(`
+          select k.valuta,
+          sum(case when t.mengde < 0then t.totalSum
+          else 0 end) AS samletSalgsverdi,
+          sum(case when t.mengde < 0 then t.totalSum -
+          (abs(t.mengde)* t.verdiPapirPris) else 0 end) AS realisertGevinst
+          from investApp.transaksjon t
+          join investApp.portefolje p on t.portefoljeID = p.portefoljeID
+          join investApp.konto k on p.kontoID = k.kontoID
+          where k.brukerID = @brukerID
+          group by k.valuta
+          `
+        );
+
+      //Formaterer realisert gevinst til et nummer
       const realiserteGevinster = realisertGevinstResultat.recordset.map(r =>({
         valuta: r.valuta,
         gevinst: Number(r.realisertGevinst).toFixed(2)
       }))
 
+      //sorterer aksjer etter urealisert gevinst og finner topp 5 
       const top5 = aksjer.sort((a, b) => b.gevinst - a.gevinst).slice(0, 5);
       
       res.json({
@@ -1089,10 +1114,14 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
    }
 });
 
+//------------------------------------------------------------------------------------------------------
+//Returnerer topp 5 aksjer målt etter høyest markedsverdi for en spesefikk bruker
 app.post('/topp5AksjerVerdi', async (req, res) => {
   const brukernavn = req.headers['brukernavn'];
     try {
       const database = await getDatabase();
+
+      //Hent brukerID for å koble opp mot riktige porteføljer
       const brukerResultat = await database.poolconnection.request()
         .input('brukernavn', sql.VarChar(255), brukernavn)
         .query(`
@@ -1100,6 +1129,8 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
           WHERE brukernavn = @brukernavn
         `);
       const brukerID = brukerResultat.recordset[0].brukerID;
+
+      //henter aksjer til brukeren med total mengde per ISIN
       const aksjeResultat = await database.poolconnection.request()
         .input('brukerID', sql.Int, brukerID)
         .query(`
@@ -1111,12 +1142,15 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
           GROUP BY t.ISIN, p.portefoljeNavn
         `);
       const aksjer = [];
+
+      //For hver aksje blir hentes sanntidsverdi og beregner verdien
       for (const rad of aksjeResultat.recordset) {
         try {
           const markedsdata = await yahooFinance.quote(rad.ISIN);
           const pris = markedsdata.regularMarketPrice;
           let verdi = pris * rad.totalMengde;
 
+          //Henter eventuelle endringer i prosent for siste 24 timene
           let endringProsent;
           if (markedsdata.regularMarketChangePercent !== undefined && markedsdata.regularMarketChangePercent !== null) {
             endringProsent = markedsdata.regularMarketChangePercent.toFixed(2);
@@ -1134,15 +1168,17 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
           console.error('Feil ved henting av aksjeinformasjon:', feil);
         }
       }
+
+      //Returnerer de fem mest verdifulle aksjene
       const top5 = aksjer.sort((a, b) => b.verdi - a.verdi).slice(0, 5);
       res.json(top5); 
    } catch (error) {
     console.error('Feil i POST /topp5AksjerVerdi:', error);
     res.status(500).json({ message: 'Intern feil' });
    }
-}
-);
+});
 
+//Returnerer prosentvis endring i brukerensPorteføljeverdi  over 24 timer, 7 og 30 dager
 app.post('/portefolje/endringerSisteDager', async (req, res) => {
   const brukernavn = req.headers['brukernavn'];
 
@@ -1158,6 +1194,7 @@ app.post('/portefolje/endringerSisteDager', async (req, res) => {
     const database = await getDatabase();
     const verdier = {};
 
+    //Henter total porteføljeverdifra og med en gitt dato
     async function henteDato(nøkkel, dato){
       const resultat = await database.poolconnection.request()
         .input('brukernavn', sql.VarChar(255), brukernavn)
@@ -1177,6 +1214,7 @@ app.post('/portefolje/endringerSisteDager', async (req, res) => {
     await henteDato('syvDagerSiden', datoer.syvDagerSiden);
     await henteDato('trettiDagerSiden', datoer.trettiDagerSiden);
    
+    //beregner prosentvis endring emllom to datoer
     const regneUtEndringene = (starten, slutten) =>{
       if (slutten>0) {
         return (((starten - slutten) / slutten) * 100).toFixed(2);
@@ -1184,6 +1222,8 @@ app.post('/portefolje/endringerSisteDager', async (req, res) => {
         return 0;
       }
     }
+
+    //Returnerer endringer for de tre tidsperiodene
     const endringene ={
       sisteTjuefireTimene: regneUtEndringene(verdier.iDag, verdier.iGår),
       sisteSyvDager: regneUtEndringene(verdier.iDag, verdier.syvDagerSiden),
@@ -1195,15 +1235,13 @@ app.post('/portefolje/endringerSisteDager', async (req, res) => {
   }
 });
 
-
-
-//------------------------------------------------------------------------------------------------
-
+//Returnerer prosentvis endring for en spesefikk protefølje siste 24t
 app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
   try{
     const database = await getDatabase();
 
+    //Hent total mengde per aksje i porteføljen
     const aksjer = await database.poolconnection.request().input('portefoljeID', sql.Int, portefoljeID).query(`
       SELECT ISIN, SUM(mengde) AS totalMengde 
       FROM investApp.transaksjon
@@ -1214,6 +1252,7 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
     let verdiNå = 0;
     let verdiTidligere = 0;
 
+    //Beregn makedsverdi før og etter for hver aksje
     for (const aksje of aksjer.recordset) {
       const data = await yahooFinance.quote(aksje.ISIN);
       const prisNå = data.regularMarketPrice;
@@ -1224,6 +1263,7 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
       verdiTidligere += tidligerePris * aksje.totalMengde;
 
     }
+    //regn ut total prosentvis endring
     const endring = ((verdiNå - verdiTidligere) / verdiTidligere) * 100;
     let label;
     if (endring > 0) {
@@ -1239,14 +1279,14 @@ app.get('/api/portefolje/:portefoljeID/endring24', async (req, res) => {
   }
 });
 
-//Samlet verdi portefolje
-//------------------------------------------------------------------------------------------------
+//Returnerer samlet nåverdi av alle aksjene brukeren eier
 app.get('/samlet-verdi/:brukernavn', async (req, res) => {
   const brukernavn = req.params.brukernavn;
 
   try {
     const database = await getDatabase();
 
+    //Henter brukerID
     const brukerResultat = await database.poolconnection.request().input('brukernavn', sql.VarChar(255), brukernavn).query(`
       SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn`);
 
@@ -1255,6 +1295,7 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
     }
     const brukerID = brukerResultat.recordset[0].brukerID;
 
+    //Henter mengde per ISIN som brukeren eier
     const aksjeResultat = await database.poolconnection.request().input('brukerID', sql.Int, brukerID).query(`
       SELECT t.ISIN, SUM(t.mengde) AS totalMengde 
       FROM investApp.transaksjon t
@@ -1265,6 +1306,7 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
     `);
     let totalVerdi = 0;
 
+    //Kalkuler total verdi basert på sanntidskursen
     for (const aksje of aksjeResultat.recordset) {
       try {
         const markedsdata = await yahooFinance.quote(aksje.ISIN);
@@ -1281,7 +1323,7 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
   }
 });
 
-//------------------------------------------------------------------------------------------------
+//Starter serveren og etablere dataforbidnelsen
 app.listen(port, async () => {
   try {
       await getDatabase();
@@ -1291,8 +1333,5 @@ app.listen(port, async () => {
   }
   console.log(`Server kjører på http://localhost:${port}`);
 });
-//Testing ------------------------------------------------------------------------------------------
 
 module.exports = app;
-
-//--------------------------------------------------------------------------------------------------
