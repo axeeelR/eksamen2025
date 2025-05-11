@@ -1,3 +1,4 @@
+//Konfigurasjon og de ulike avhengighetene
 const express = require('express');
 const path = require('path');
 const { getDatabase } = require('./backend/database/instance.js');
@@ -8,33 +9,34 @@ const yahooFinance = require('yahoo-finance2').default;
 const app = express();
 const port = 3000;
 
-// View engine setup
+//ordner slik at view engine kan bruke ejs og fastsetter view- og public-mapper
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware
+//Middleware for å kunne lese body innhold i ulike POST-requests
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-
+//Viser index siden
 app.get('/', (req, res) => {
     res.render('index');
 });
 
+//Viser login siden
 app.get('/login', (req, res) => {
     // console.log("GET mottat")
     res.render('login');
 });
 
-
+//Logger inn brukeren ved å verifisere brukernavn og passord i databasen
 app.post('/login', async(req, res) => {
     const bruker = req.body
     try{
-        const database = await getDatabase();
-        const request = database.poolconnection.request();
+        const database = await getDatabase(); //Etablerer database koblingen (brukes også gjentagende nedover i koden)
+        const request = database.poolconnection.request(); //Lager en ny SQL-request
 
+        //Setter parametre og kjører en SELECT spørring som verfiiserer innloggingen av brukeren
         request.input('brukernavn', VarChar(255), bruker.brukernavn);
         request.input('passord', VarChar(255), bruker.passord);
         const result = await request.query(`
@@ -43,7 +45,7 @@ app.post('/login', async(req, res) => {
             `)
         console.log(result)
 
-
+        //Hvis ingen treff = ugyldig login
         if(result.recordset.length === 0){
             console.log("Feil brukernavn eller passord:")
             return res.status(401).json({ message: 'Feil brukernavn eller passord' });
@@ -56,22 +58,20 @@ app.post('/login', async(req, res) => {
 
     } catch (error) {
         console.error('Error in POST /login:', error);
-        res.status(500).json('Internal Server Error');
+        res.status(500).json('Error i serveren');
     }
 });
 
-app.get('/logout', (req, res) => {  
-    res.redirect('/login');
-});
-
+//viser skjema for ny bruker
 app.get('/blikunde', (req, res) => {
     res.render('blikunde');
 });
 
-
+//Oppretter ny bruker i databasen
 app.post('/blikunde', async (req, res) => {
     const bruker = req.body
 
+    //Sjekker at alle felt er med 
     if (!bruker.brukernavn || !bruker.passord || !bruker.email) {
         return res.status(400).json({ message: 'Brukernavn, passord og email må oppgis' });
     }
@@ -86,11 +86,13 @@ app.post('/blikunde', async (req, res) => {
             WHERE brukernavn = @brukernavn
         `);
 
+        //sjekker om brukernavnet allerede finnes
         if (checkResult.recordset.length > 0) {
             console.log("Brukernavn er allerede i bruk:", bruker.brukernavn);
             return res.status(400).json({ message: 'Brukernavn er allerede i bruk' });
         }
         
+        //Setter inn en ny bruker
         const insertRequest = database.poolconnection.request();
         insertRequest.input('brukernavn', VarChar(255), bruker.brukernavn);
         insertRequest.input('passord', VarChar(255), bruker.passord);
@@ -101,8 +103,7 @@ app.post('/blikunde', async (req, res) => {
             `)
         console.log(result)
 
-        
-
+        //sjekker at indsendinger faktisk har skjedd
         if(result.rowsAffected[0] <= 0){
             console.log("Kontoen din ble ikke lagt til")
             return res.status(500).json({ message: 'Kunne ikke opprette bruker' });
@@ -117,12 +118,15 @@ app.post('/blikunde', async (req, res) => {
     }
 }); 
 
+//----------------------------------------------------------------------------------------
+//Viser kontosiden i frontend
 app.get('/konto', (req, res) => {
     res.render('konto');
 });
 
+//API endepunkt som returnerer alle kontoer tilknyttet den innloggete brukeren
 app.get('/api/konto', async (req, res) => {
-    const brukernavn = req.headers['brukernavn']; 
+    const brukernavn = req.headers['brukernavn']; //Hent brukernavn fra header
     console.log('Brukernavn mottatt fra headers:', brukernavn); // Logg brukernavn
     if (!brukernavn) {
       console.error('Ingen brukernavn mottatt i headers.');
@@ -132,7 +136,7 @@ app.get('/api/konto', async (req, res) => {
     try {
       const database = await getDatabase();
   
-      // Hent brukerID først
+      // Hent brukerID basert på bruker ideen
       const brukerResult = await database.poolconnection.request()
         .input('brukernavn', sql.VarChar(255), brukernavn)
         .query('SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn');
@@ -143,7 +147,7 @@ app.get('/api/konto', async (req, res) => {
   
       const brukerID = brukerResult.recordset[0].brukerID;
   
-      // Hent kontoene
+      // Hent alle kontoer som tilhører brukerID
       const kontoResult = await database.poolconnection.request()
         .input('brukerID', sql.Int, brukerID)
         .query('SELECT * FROM investApp.konto WHERE brukerID = @brukerID');
@@ -155,14 +159,14 @@ app.get('/api/konto', async (req, res) => {
     }
   });
 
-
+//Enepunkt for å bytte passord for en bruker
 app.post('/byttepassord', async (req, res) => {
     const { brukernavn, oldPassord, newPassord } = req.body;
     try {
       const database = await getDatabase();
       const request = database.poolconnection.request();
   
-      // Verify old password
+      // verifiserer at gammelt passord stemmer
       request.input('brukernavn', VarChar(255), brukernavn);
       request.input('oldPassord', VarChar(255), oldPassord);
       const verifyResult = await request.query(`
@@ -174,7 +178,7 @@ app.post('/byttepassord', async (req, res) => {
         return res.status(400).json({ message: 'Old password is incorrect' });
       }
   
-      // Update to new password
+      //Oppdaterer til nytt passord
       const updateRequest = database.poolconnection.request();
       updateRequest.input('brukernavn', VarChar(255), brukernavn);
       updateRequest.input('newPassord', VarChar(255), newPassord);
@@ -195,20 +199,21 @@ app.post('/byttepassord', async (req, res) => {
     }
   });
   
-  app.get('/byttepassord', (req, res) => {
-    res.render('byttepassord');
-  });
+//Viser passordbytte siden
+app.get('/byttepassord', (req, res) => {
+  res.render('byttepassord');
+});
   
-
+//Oppretter en ny konto og knytter den til en eksisterende konto
 app.post('/opprettKonto', async (req, res) => {
     try{
       const {kontoNavn, opprettelsedatoK, saldo, bank, valuta, brukernavn} = req.body
-        const database = await getDatabase();
+      const database = await getDatabase();
 
-        const brukerResult = await database.poolconnection.request()
-
-      .input('brukernavn', sql.VarChar(255), brukernavn)
-      .query('SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn');
+      //Hent brukerID basert på brukernavn
+      const brukerResult = await database.poolconnection.request()
+        .input('brukernavn', sql.VarChar(255), brukernavn)
+        .query('SELECT brukerID FROM investApp.bruker WHERE brukernavn = @brukernavn');
 
     if (brukerResult.recordset.length === 0) {
       return res.status(404).json({ message: 'Bruker ikke funnet' });
@@ -216,16 +221,17 @@ app.post('/opprettKonto', async (req, res) => {
 
     const brukerID = brukerResult.recordset[0].brukerID;
 
-    //formatere datoene til YYYY-MM-DD
+    //formatere datoene til riktig format
     const formattedOpprettelsedatoK = new Date(opprettelsedatoK).toISOString().split('T')[0];
         
+        //sett inn ny konto i databasen
         const insertRequest = database.poolconnection.request();
         insertRequest.input('kontoNavn', sql.VarChar(255), kontoNavn);
         insertRequest.input('opprettelsedatoK', sql.Date, formattedOpprettelsedatoK);
         insertRequest.input('saldo', sql.BigInt, saldo);
         insertRequest.input('bank', sql.VarChar(255), bank);
         insertRequest.input('valuta', sql.VarChar(255), valuta);
-        insertRequest.input('brukerID', sql.Int, brukerID); // Bruk sql.Int for integer
+        insertRequest.input('brukerID', sql.Int, brukerID); 
 
         const result = await insertRequest.query(`
             INSERT INTO investApp.konto (kontoNavn, saldo, opprettelsedatoK, bank, valuta, brukerID) 
@@ -247,18 +253,23 @@ app.post('/opprettKonto', async (req, res) => {
     }
 });
 
+//------------------------------------------------------------------------------------------------------------
+//viser siden for å opprette en ny konto
 app.get('/opprettKonto', (req, res) => {
     res.render('opprettKonto');
 });
 
+//viser dashboard siden
 app.get('/dashboard', (req, res) => {
     res.render('dashboard');
 });
 
+//viser oversikten over porteføljene
 app.get('/portefolje', (req, res) => {
     res.render('portefolje');
 });
 
+//API endepunkt som alle porteføljer tilhørende en bruker
 app.get('/api/portefolje', async (req, res) => {
   const brukernavn = req.headers['brukernavn']; // Hent brukernavn fra query-parameter
   
@@ -300,10 +311,12 @@ app.get('/api/portefolje', async (req, res) => {
   }
 });
 
+//Viser skejma for å opprette en ny portefølje
 app.get('/opprettPortefolje', (req, res) => {
   res.render('opprettPortefolje')
 })
 
+//oppretter en ny portefølje i databasen
 app.post('/opprettPortefolje', async (req, res) => {
   const { navn, kontoID, brukernavn } = req.body;
   const dato = new Date().toISOString().split('T')[0]; // Formater dato til YYYY-MM-DD
@@ -315,6 +328,7 @@ app.post('/opprettPortefolje', async (req, res) => {
   try {
     const database = await getDatabase();
 
+    //Verifiserer at brukeren finnes
     const brukerResultatet = await database.poolconnection.request()
     .input('brukernavn', sql.VarChar(255), brukernavn)
     .query(` 
@@ -340,6 +354,7 @@ app.post('/opprettPortefolje', async (req, res) => {
           })
         };
 
+    //Oppretter ny portefølje
     await database.poolconnection.request()
     .input('portefoljeNavn', sql.VarChar(255), navn)
     .input('kontoID', sql.Int, kontoID)
@@ -356,6 +371,7 @@ app.post('/opprettPortefolje', async (req, res) => {
   }
 });
 
+//setter lukkedato for en konto (brukes altså til å stenge kontoen)
 app.put('/lukk-konto', async (req, res) => {
   const kontoID = req.body.kontoID;
 
@@ -378,6 +394,7 @@ app.put('/lukk-konto', async (req, res) => {
     }
   });
   
+  //Fjerner lukkedatoen for å kunne gjenåpne konto
   app.put('/gjenopne-konto', async (req, res) => {
     const kontoID = req.body.kontoID;
   
@@ -386,7 +403,7 @@ app.put('/lukk-konto', async (req, res) => {
       const request = database.poolconnection.request();
   
       request.input('kontoID', sql.Int, kontoID);
-      request.input('lukkedatoK', sql.DateTime, null); 
+      request.input('lukkedatoK', sql.DateTime, null); //Null = gjengåpne
   
       await request.query(`
          UPDATE investApp.konto
@@ -400,16 +417,19 @@ app.put('/lukk-konto', async (req, res) => {
       }
     });
 
+//viser innskuddsiden
 app.get('/indsettelse', async (req, res) => {
   res.render('indsettelse');
 });
 
+//Registrerer innskudd eller uttsak og oppdaterer saldoen til brukern
 app.post('/indsettelse', async (req, res) => {
   const { kontoID, valuta, verdi, type } = req.body;
 
   try {
     const { poolconnection } = await getDatabase();
 
+    //hent den nåværende saldoen
     const saldoResult = await poolconnection.request()
       .input('kontoID', sql.Int, kontoID)
       .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
@@ -421,6 +441,7 @@ app.post('/indsettelse', async (req, res) => {
     let saldo = saldoResult.recordset[0].saldo;
     const beløp = parseFloat(verdi);
 
+    //oppdaterer saldo baert på innskudd og uttak
     if (type === 'innskudd') {
       saldo += beløp;
     } else if (type === 'uttak') {
@@ -430,11 +451,13 @@ app.post('/indsettelse', async (req, res) => {
       return res.status(400).json({ message: 'Ugyldig type' });
     }
 
+    //Oppdaterer saldo i databasen
     await poolconnection.request()
       .input('kontoID', sql.Int, kontoID)
       .input('saldo', sql.Decimal(18, 2), saldo)
       .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
 
+    //Logg transaksjonen i tabellen "indsettelse"
     await poolconnection.request()
       .input('kontoID', sql.Int, kontoID)
       .input('valuta', sql.VarChar(10), valuta)
@@ -456,10 +479,13 @@ app.post('/indsettelse', async (req, res) => {
   }
 });
 
+//--------------------------------------------------------------------------------------------------------
+//viser visningen for en enkelt portefølje i applikasjonen
 app.get('/enkeltPortefolje', async (req, res) => {
   res.render('enkeltPortefolje');
 });
 
+//API endepunkt fo å kunne hente navnet å en spesefikk portefølje basert på ID
 app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
 
@@ -476,6 +502,7 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
       return res.status(404).json({ message: 'Portefølje ikke funnet' });
     }
 
+    //Returnerer navnet på porteføljen som JSON
     res.json(result.recordset[0]);
 
   } catch (error) {
@@ -484,10 +511,12 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
   }
 });
 
+//API endepunkt for å søke opp oh hente sanntidsdata + historikk om en aksje
 app.get('/api/aksje/:navn', async (req, res) => {
   const søk = req.params.navn;
 
   try {
+    //søk etter aksje med Yahoo finance sitt søke-API
   const result = await yahooFinance.search(søk); // Søk etter aksje
   const førsteTreff = result.quotes?.[0]
 
@@ -495,17 +524,20 @@ app.get('/api/aksje/:navn', async (req, res) => {
     return res.status(404).json({ message: 'Ingen treff funnet for søket' });
   }
 
-  const aksjeData = await yahooFinance.quote(førsteTreff.symbol); // Hent detaljer
+  //hent aksjens nåværende markedsdata
+  const aksjeData = await yahooFinance.quote(førsteTreff.symbol);
 
+  //hent ukentlig historikk for siste år
   const iDag = new Date();
   const ettÅrSiden = new Date();
   ettÅrSiden.setFullYear(iDag.getFullYear() - 1);
   const historikk = await yahooFinance.historical(førsteTreff.symbol, {
     period1: ettÅrSiden,
     period2: iDag,
-    interval: '1wk'
+    interval: '1wk'//intervall på en uke
     });
 
+    //kombinerer nåværende aksjedata med historikk for så å returnere det
   res.json({...aksjeData, historikk});
 
 } catch (error) {
@@ -514,7 +546,7 @@ app.get('/api/aksje/:navn', async (req, res) => {
   }
 });
 
-
+//API endepunkt for å hente status for en konto tilknytttet en spesefikk portefølje
 app.get('/api/konto-status/:portefoljeID', async (req, res) => {
   const portefoljeID = req.params.portefoljeID;
 
@@ -533,35 +565,32 @@ app.get('/api/konto-status/:portefoljeID', async (req, res) => {
     if(result.recordset.length === 0){
       return res.status(404).json({ message: 'Fant verken portofølje eller konto'})
     }
+    //Returnerer kontoens ID og eventuell lukkedato (dette for å vite om konto er aktiv eller ikke)
     res.json(result.recordset[0]);
    
-
   } catch(err){
     console.error(err);
     res.status(500).json({ message:'intern feil ved henting av kontostatus'})
   }
 });
 
-
+//rute som viser kjøpsskjemaet i applikasjonen
 app.get('/kjop', (req, res) => {
   res.render('kjop');
 });
 
+//----------------------------------------------------------------------------------------------------
+//kjøp av aksjer, registrerer en ny transaksjon og trekker penger fra kontoen
 app.post('/kjop', async (req, res) => {
   const { 
-    portefoljeID, 
-    ISIN, 
-    verditype, 
-    opprettelsedatoT, 
-    verdiPapirPris, 
-    mengde, 
-    totalSum, 
-    totalGebyr,
+    portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde, totalSum, totalGebyr,
     type 
   } = req.body;
 
   try{
     const database = await getDatabase();
+
+    //hent kontoID som er knyttet til portefølje
     const kontoResultat = await database.poolconnection.request()
 
       .input('portefoljeID', sql.Int, portefoljeID)
@@ -572,25 +601,27 @@ app.post('/kjop', async (req, res) => {
       }
       const hentetKontoID = kontoResultat.recordset[0].kontoID;
 
+      //Hent saldo for kontoen
       const saldoResultat = await database.poolconnection.request()
       .input('kontoID', sql.Int, hentetKontoID)
       .query('SELECT saldo FROM investApp.konto WHERE kontoID = @kontoID');
 
       let saldo = saldoResultat.recordset[0].saldo;
 
-      
+      //Sjekker om det er nok penger på kontoen
         if (saldo < totalSum + totalGebyr) {
           return res.status(400).json({ message: 'Ikke nok penger på konto' });
         }
         saldo -= (totalSum + totalGebyr); // trekker fra totale summen og gebyr fra saldoen
      
-      
+      //Oppdater saldoen i databasen
       await database.poolconnection.request()
         .input('kontoID', sql.Int, hentetKontoID)
         .input('saldo', sql.Decimal(18, 2), saldo)
         .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
 
-        await database.poolconnection.request()
+      //Registrer kjøpstransaksjonen i transasksjonsmodellen
+      await database.poolconnection.request()
         .input('kontoID', sql.Int, hentetKontoID)
         .input('portefoljeID', sql.Int, portefoljeID)
         .input('ISIN', sql.VarChar(255), ISIN) 
@@ -613,29 +644,29 @@ app.post('/kjop', async (req, res) => {
     }
 });
 
+//Viser salgsskjema
 app.get('/salg', async (req, res) => {
   res.render('salg');
 })
 
+//Registrerer salgstransaksjonen
 app.post('/salg', async (req, res) => {
   const {
-    portefoljeID,
-    ISIN,
-    verditype,
-    opprettelsedatoT,
-    verdiPapirPris,
-    mengde,
+    portefoljeID, ISIN, verditype, opprettelsedatoT, verdiPapirPris, mengde,
   } = req.body
 
   try{
     const database = await getDatabase();
+
+    //Hent konto tilhørende portefølje
     const kontoResultat = await database.poolconnection.request()
 
-    .input('portefoljeID', sql.Int, portefoljeID)
-    .query('SELECT kontoID FROM investApp.portefolje WHERE portefoljeID = @portefoljeID');
+      .input('portefoljeID', sql.Int, portefoljeID)
+      .query('SELECT kontoID FROM investApp.portefolje WHERE portefoljeID = @portefoljeID');
 
     const kontoID = kontoResultat.recordset[0].kontoID;
 
+    //Beregn beholdning og snittpris for aksjen som skal selges
     const beholdningsResultat = await database.poolconnection.request()
     .input('portefoljeID', sql.Int, portefoljeID)
     .input('ISIN', sql.VarChar(255), ISIN)
@@ -649,10 +680,12 @@ app.post('/salg', async (req, res) => {
       const beholdning = beholdningsResultat.recordset[0].totalMengde || 0;
       const snittpris = beholdningsResultat.recordset[0].snittpris
     
+      //Ikke tillat salg av flere aksjer enn man eier
       if(beholdning < mengde){
         return res.status(400).json({ message: `du prøver å selge ${mengde}, men du har bare ${beholdning} aksjer av ${ISIN}`});
       }
 
+      //Beregner verdi og gevinst
       const totalSalgsveri = verdiPapirPris * mengde
       const gebyr = parseFloat((totalSalgsveri*0.0005).toFixed(2))
       const realisertGevinst = (verdiPapirPris - snittpris) * mengde;
@@ -664,18 +697,21 @@ app.post('/salg', async (req, res) => {
         let saldo = saldoResultat.recordset[0].saldo;
         saldo += totalSalgsveri - gebyr;  // Legg til salgsbeløpet til saldoen
 
+        //Legg tl salgsbeløpet til saldoen
         await database.poolconnection.request()
         .input('kontoID', sql.Int, kontoID)
         .input('saldo', sql.Decimal(18, 2), saldo)
         .query('UPDATE investApp.konto SET saldo = @saldo WHERE kontoID = @kontoID');
 
+        //mengden lagres negativt hvis det er salg
         let faktiskeMengden;
         if (verditype === 'salg'){
           faktiskeMengden = -Math.abs(mengde);
         } else {
           faktiskeMengden = Math.abs(mengde);
           }
-      
+        
+        //Registrer salget i transaksjonstabellen
         await database.poolconnection.request()
         .input('kontoID', sql.Int, kontoID)
         .input('portefoljeID', sql.Int, portefoljeID)
@@ -701,11 +737,13 @@ app.post('/salg', async (req, res) => {
 
 //Linjediagram enkeltportefolje
 /*--------------------------------------------------------------------- */
-
+//Returnerer verdiutviklingen over tid en spesefikk portefølje
 app.post('/api/portefolje/verdiutvikling', async (req, res) => {
   const { portefoljeID } = req.body;
   try {
     const database = await getDatabase();
+
+    //Henter alle transaksjoner for porteføljen, sorterer de deretter etter dato
     const result = await database.poolconnection.request()
       .input('portefoljeID', sql.Int, portefoljeID)
       .query(`
@@ -715,6 +753,7 @@ app.post('/api/portefolje/verdiutvikling', async (req, res) => {
         ORDER BY opprettelsedatoT DESC
         `);
 
+        //Grupperer transaksjoner per dato og summerer total verdi for den dagen
         const transaksjoner = result.recordset;
         const dagligVerdiutvikling = {};
 
@@ -728,15 +767,15 @@ app.post('/api/portefolje/verdiutvikling', async (req, res) => {
       }
       dagligVerdiutvikling[dato] += mengde * verdiPapirPris;
       }
+
+      //Returnerer ferdig strukturert historikk til frontend
       const verdiHistorikk = Object.keys(dagligVerdiutvikling)
       .sort()
-      .map(dato => ({
-        dato,
-        verdi: dagligVerdiutvikling[dato],
-    }));
-  res.json(verdiHistorikk);
+      .map(dato => ({ dato, verdi: dagligVerdiutvikling[dato],}));
+    
+    res.json(verdiHistorikk);
   }
-  catch (error) {
+    catch (error) {
     console.error('Feil i POST /api/portefolje/verdiutvikling:', error);
     res.status(500).json({ message: 'Intern feil' });
   }
@@ -744,7 +783,7 @@ app.post('/api/portefolje/verdiutvikling', async (req, res) => {
 
 //Linjediagram samlet
 //--------------------------------------------------------------------- */
-
+//Returnerer samlet verdiutvikling for alle transaksjoner i systemet (alle brukere)
 app.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
   try {
     const database = await getDatabase();
@@ -770,8 +809,7 @@ app.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
 });
 
 //----------------------------------------------------------------------
-
-
+//Returner Nåværende samlet markedsverdi
 app.post('/api/portefolje/verdi', async (req, res) => {
   const { portefoljeID } = req.body;
   try {
@@ -882,6 +920,7 @@ app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
   }
 });
 
+//-------------------------------------------------------------------------------------
 app.post('/aksjeienkeltportefolje', async (req, res) => {
   const {portefoljeID} = req.body;
 
