@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "mocha",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "eksamen": "npm install && node app.js"
   },
   "repository": {
     "type": "git",
