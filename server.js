@@ -10,7 +10,7 @@ const app = express();
 const port = 3000;
 
 //ordner slik at view engine kan bruke ejs og fastsetter view- og public-mapper
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -52,12 +52,12 @@ app.post('/login', async(req, res) => {
         }
 
         console.log(req.body);
-        console.log("Innlogging vellykket", bruker.brukernavn);
+        console.log('Innlogging vellykket', bruker.brukernavn);
 
         res.status(200).json({ message: 'Innlogging vellykket' });
 
     } catch (error) {
-        console.error('Error in POST /login:', error);
+        console.error('Error i POST login', error);
         res.status(500).json('Error i serveren');
     }
 });
@@ -92,7 +92,7 @@ app.post('/blikunde', async (req, res) => {
 
         //sjekker om brukernavnet allerede finnes
         if (checkResult.recordset.length > 0) {
-            console.log("Brukernavn er allerede i bruk:", bruker.brukernavn);
+            console.log('Brukernavn er allerede i bruk', bruker.brukernavn);
             return res.status(400).json({ message: 'Brukernavn er allerede i bruk' });
         }
         
@@ -109,16 +109,16 @@ app.post('/blikunde', async (req, res) => {
 
         //sjekker at indsendinger faktisk har skjedd
         if(result.rowsAffected[0] <= 0){
-            console.log("Kontoen din ble ikke lagt til")
+            console.log('Kontoen din ble ikke lagt til')
             return res.status(500).json({ message: 'Kunne ikke opprette bruker' });
         }
         console.log(req.body);
-        console.log("Ny bruker registrert:", bruker.brukernavn);
+        console.log('Ny bruker registrert', bruker.brukernavn);
         res.status(201).json({ message: 'Bruker registrert' });
 
     } catch (error) {
-        console.error('Error in POST /blikunde:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Error i POST blikunde', error);
+        res.status(500).send('server error');
     }
 }); 
 
@@ -131,9 +131,9 @@ app.get('/konto', (req, res) => {
 //API endepunkt som returnerer alle kontoer tilknyttet den innloggete brukeren
 app.get('/api/konto', async (req, res) => {
     const brukernavn = req.headers['brukernavn']; //Hent brukernavn fra header
-    console.log('Brukernavn mottatt fra headers:', brukernavn); // Logg brukernavn
+    console.log('Brukernavn mottatt fra headers', brukernavn); // Logg brukernavn
     if (!brukernavn) {
-      console.error('Ingen brukernavn mottatt i headers.');
+      console.error('Ingen brukernavn mottatt i headers');
       return res.status(401).json({ message: 'Ikke logget inn' });
     }
   
@@ -158,8 +158,8 @@ app.get('/api/konto', async (req, res) => {
   
       res.json(kontoResult.recordset);
     } catch (error) {
-      console.error('Error in GET /api/konto:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
+      console.error('Error i GET /api/konto', error);
+      res.status(500).json({ message: 'error api konto' });
     }
   });
 
@@ -179,7 +179,7 @@ app.post('/byttepassord', async (req, res) => {
       `);
   
       if (verifyResult.recordset.length === 0) {
-        return res.status(400).json({ message: 'Old password is incorrect' });
+        return res.status(400).json({ message: 'gammelt passord er feil' });
       }
   
       //Oppdaterer til nytt passord
@@ -193,13 +193,13 @@ app.post('/byttepassord', async (req, res) => {
       `);
   
       if (updateResult.rowsAffected[0] === 0) {
-        return res.status(500).json({ message: 'Failed to update password' });
+        return res.status(500).json({ message: 'klarte ikke oppdatere passord' });
       }
   
-      res.status(200).json({ message: 'Password updated successfully' });
+      res.status(200).json({ message: 'passord oppdatert' });
     } catch (error) {
-      console.error('Error in POST /change-password:', error);
-      res.status(500).send('Internal Server Error');
+      console.error('Error i POST /byttepassord', error);
+      res.status(500).send('error');
     }
   });
   
@@ -244,16 +244,16 @@ app.post('/opprettKonto', async (req, res) => {
         console.log(result)
 
          if(result.rowsAffected[0] === 0){
-            console.log("Kontoen din ble ikke opprettet")
+            console.log('Kontoen din ble ikke opprettet')
             return res.status(500).json({ message: 'Kunne ikke opprette konto' });
         }
         console.log(req.body);
-        console.log("Ny konto registrert:", kontoNavn);
+        console.log('Ny konto registrert', kontoNavn);
         res.status(201).json({ message: 'Konto opprettet' });
 
     } catch (error) {
-        console.error('Error in POST /opprettKonto:', error);
-        res.status(500).json({message:'Internal Server Error'});
+        console.error('Error i POST /opprettKonto:', error);
+        res.status(500).json({message:'error'});
     }
 });
 
@@ -310,7 +310,7 @@ app.get('/api/portefolje', async (req, res) => {
     
     res.json(result.recordset);
   } catch (error) {
-    console.error('FEIL i GET /portefolje:', error);
+    console.error('FEIL i GET /portefolje', error);
     res.status(500).json({message:'Kunne ikke hente porteføljer'});
   }
 });
@@ -354,8 +354,7 @@ app.post('/opprettPortefolje', async (req, res) => {
         `);
 
         if (kontoResultatet.recordset.length === 0) {
-          return res.status(404).json({ message: 'denne kontoen hører ikke til brukeren' 
-          })
+          return res.status(404).json({ message: 'denne kontoen hører ikke til brukeren'})
         };
 
     //Oppretter ny portefølje
@@ -370,7 +369,7 @@ app.post('/opprettPortefolje', async (req, res) => {
 
     res.status(201).json({message: 'porteføle opprettet'})
  } catch (error) {
-    console.error('Feil i POST /opprettPortefolje:', error);
+    console.error('Feil i POST /opprettPortefolje', error);
     res.status(500).send(error.message);
   }
 });
@@ -478,7 +477,7 @@ app.post('/indsettelse', async (req, res) => {
     res.status(200).json({ message: 'Transaksjon registrert', nySaldo: saldo });
 
   } catch (error) {
-    console.error('Feil i POST /indsettelse:', error);
+    console.error('Feil i POST /indsettelse', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });
@@ -510,7 +509,7 @@ app.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
     res.json(result.recordset[0]);
 
   } catch (error) {
-    console.error('Feil i GET /api/portefolje/:id:', error);
+    console.error('Feil i GET /api/portefolje/:id', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });
@@ -735,12 +734,11 @@ app.post('/salg', async (req, res) => {
       res.status(200).json({ message: 'Salg registrert'});
 
       }catch(error){
-        console.error('feil i post /salg', error);
+        console.error('feil i POST /salg', error);
     }
 });
 
 //Linjediagram enkeltportefolje
-/*--------------------------------------------------------------------- */
 //Returnerer verdiutviklingen over tid en spesefikk portefølje
 app.post('/api/portefolje/verdiutvikling', async (req, res) => {
   const { portefoljeID } = req.body;
@@ -780,7 +778,7 @@ app.post('/api/portefolje/verdiutvikling', async (req, res) => {
     res.json(verdiHistorikk);
   }
     catch (error) {
-    console.error('Feil i POST /api/portefolje/verdiutvikling:', error);
+    console.error('Feil i POST /api/portefolje/verdiutvikling', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });
@@ -848,7 +846,7 @@ app.post('/api/portefolje/verdi', async (req, res) => {
   res.json({ totalVerdi });
   }
   catch (error) {
-    console.error('Feil i POST /api/portefolje/verdi:', error);
+    console.error('Feil i POST /api/portefolje/verdi', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });
@@ -878,7 +876,7 @@ app.get('/api/handelshistorikk/:portefoljeID', async (req, res) => {
     res.json(result.recordset);
   }
   catch (error) {
-    console.error('Feil i POST /api/handelshistorikk:', error);
+    console.error('Feil i POST /api/handelshistorikk', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });  
@@ -929,7 +927,7 @@ app.get('/api/portefolje/:portefoljeID/fordeling', async (req, res) => {
 
     res.json(result.recordset);
   } catch (error) {
-    console.error('Feil i GET /api/portefolje/:portefoljeID/fordeling:', error);
+    console.error('Feil i GET /api/portefolje/:portefoljeID/fordeling', error);
   }
 });
 
@@ -988,7 +986,7 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
     
   }
   catch (error) {
-    console.error('Feil i POST /aksjeienkeltportefolje:', error);
+    console.error('Feil i POST /aksjeienkeltportefolje', error);
     res.status(500).json({ message: 'Intern feil' });
   }
 });
@@ -1075,8 +1073,8 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
             gevinst: gevinst.toFixed(2),
             endring24h: endring24h,
           });
-        } catch (feil) {
-          console.error('Feil ved henting av aksjeinformasjon:', feil);
+        } catch (error) {
+          console.error('Feil ved henting av aksjeinformasjon:', error);
         }
       }
 
@@ -1113,7 +1111,7 @@ app.post('/topp5AksjerGevinst', async (req, res) => {
    })
 
   } catch (error) {
-    console.error('Feil i POST /topp5AksjerGevinst:', error);
+    console.error('Feil i POST /topp5AksjerGevinst', error);
     res.status(500).json({ message: 'Intern feil' });
    }
 });
@@ -1169,7 +1167,7 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
             endring24h: endringProsent
           });
         } catch (feil) {
-          console.error('Feil ved henting av aksjeinformasjon:', feil);
+          console.error('Feil ved henting av aksjeinformasjon', feil);
         }
       }
 
@@ -1177,7 +1175,7 @@ app.post('/topp5AksjerVerdi', async (req, res) => {
       const top5 = aksjer.sort((a, b) => b.verdi - a.verdi).slice(0, 5);
       res.json(top5); 
    } catch (error) {
-    console.error('Feil i POST /topp5AksjerVerdi:', error);
+    console.error('Feil i POST /topp5AksjerVerdi', error);
     res.status(500).json({ message: 'Intern feil' });
    }
 });
@@ -1317,13 +1315,13 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
         const pris = markedsdata.regularMarketPrice;
         totalVerdi += pris * aksje.totalMengde;
       } catch (feil) {
-        console.error(`Feil ved henting av aksjeinformasjon`, feil);
+        console.error('Feil ved henting av aksjeinformasjon', feil);
       }
     }
     res.json({ totalVerdi: totalVerdi.toFixed(2) });
   } catch (error) {
-    console.error(`Feil ved henting av samlet verdi`, error);
-    res.status(500).json({ message: `Intern feil` });
+    console.error('Feil ved henting av samlet verdi', error);
+    res.status(500).json({ message: 'Intern feil' });
   }
 });
 
@@ -1331,9 +1329,9 @@ app.get('/samlet-verdi/:brukernavn', async (req, res) => {
 app.listen(port, async () => {
   try {
       await getDatabase();
-      console.log('Database connection established on server startup.');
+      console.log('Database connection opprettet');
   } catch (error) {
-      console.error('Database connection failed on server startup:', error);
+      console.error('Database connection feilet', error);
   }
   console.log(`Server kjører på http://localhost:${port}`);
 });
