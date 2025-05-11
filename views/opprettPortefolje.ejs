@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Opprett Portefølje</title>
     <link rel="stylesheet" href="/styles/index.css">
-    <link rel="stylesheet" href="/styles/portofolje.css">
+    <link rel="stylesheet" href="/styles/portefolje.css">
     <link rel="stylesheet" href="/styles/opprettPortefolje.css">
 </head>
 <body>
@@ -18,29 +18,36 @@
 
         <label for="kontoID">VELG KONTO</label>
         <select id="kontoID" name="kontoID" required>
-            <% kontoer.forEach(konto => { %>
-                <option value="<%= konto.kontoID %>"><%= konto.kontoNavn %></option>
-            <% }) %>
         </select>
 
         <input type="hidden" name="brukernavn" id="brukernavnSkjult"></input>
-        <button type="submit" class="opprettKnapp">Opprett Portefølje</button>
+        <button type="submit" class="opprettKnapp" id="opprettKnapp">Opprett Portefølje</button>
     </form>
     </main>
 
     <script>
         const brukernavn = localStorage.getItem('brukernavn');
 
-        document.getElementById('brukernavnSkjult').value = localStorage.getItem('brukernavn');
-        if (brukernavn && !location.search.includes('brukernavn')) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('brukernavn', brukernavn);
-            window.location.href = url.toString();
-        }
-        /*
-        const brukernavn = localStorage.getItem('brukernavn');
+        fetch('api/konto',{
+            headers: {'brukernavn': brukernavn}
+        })
+
+        .then (response => response.json())
+        .then(kontoer => {
+            const velg = document.getElementById('kontoID');
+            kontoer.forEach(konto =>{
+            const valg = document.createElement('option');
+            valg.value = konto.kontoID;
+            valg.textContent = konto.kontoNavn;
+            velg.appendChild(valg);
+            })
+        })
+        .catch(error => {
+        console.error('Feil da du skulle velge konto')
+    });
+    
         
-        const submitbutton = document.getElementById('submitbutton');
+        const submitbutton = document.getElementById('opprettKnapp');
         submitbutton.addEventListener('click', function(event) {
             event.preventDefault();
 
@@ -74,7 +81,7 @@
             alert(error.message)
             });
         });
-        */
+        document.getElementById('brukernavnSkjult').value = brukernavn;
     </script>
 </body>
 </html>
