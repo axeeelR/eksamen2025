@@ -62,6 +62,10 @@ app.post('/login', async(req, res) => {
     }
 });
 
+app.get('/logout', (req, res) => {  
+    res.redirect('/logout');
+});
+
 //viser skjema for ny bruker
 app.get('/blikunde', (req, res) => {
     res.render('blikunde');
