@@ -972,6 +972,7 @@ app.post('/aksjeienkeltportefolje', async (req, res) => {
                 antall: aksje.totalMengde,
                 totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
                 urealisertGevinst: urealisert,
+                snittKjøpspris: aksje.snittKjøpspris
               };
             } catch (feil) {
               console.error('Feil ved henting av aksjeinformasjon:', feil);
