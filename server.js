@@ -61,7 +61,7 @@ app.post('/login', async(req, res) => {
 });
 
 app.get('/logout', (req, res) => {  
-    res.redirect('/login');
+    res.redirect('/logout');
 });
 
 app.get('/blikunde', (req, res) => {
