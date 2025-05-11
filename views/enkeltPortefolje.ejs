@@ -117,26 +117,29 @@
       const aksjeTabell = document.getElementById('aksjeInnhold');
 
       // Dounugth diagram oversikt
-
+      //Henter og visualiserer fordeling av aksjer i porteføljen som et doughnut-diagram
       fetch(`/api/portefolje/${portefoljeID}/fordeling`)
         .then(res => res.json())
         .then(data => {
-          const fordelingLabels = [];
-          const verdier = [];
+          const fordelingLabels = []; //Aksjenavn / ISIN
+          const verdier = []; //Mengde per aksje
         
+        //legger data i arrays for grafen
         data.forEach(aksje => {
             fordelingLabels.push(aksje.ISIN);
             verdier.push(aksje.totalMengde);
           });
-        
-          const doughnutCtx = document.getElementById('fordelingGraf').getContext('2d');
 
+          //refererer til canvas elementet i HTML
+          const doughnutCtx = document.getElementById('fordelingGraf').getContext('2d'); 
+
+          //setter opp data og design til selve diagrammet
           const doughnutData = {
             labels: fordelingLabels,
             datasets: [{
               label: 'Fordeling av verdi',
               data: verdier,
-              backgroundColor: [
+              backgroundColor: [ //Farger til hver aksje
                 'rgba(255, 99, 132, 1)',
                 'rgba(54, 162, 235, 1)',
                 'rgba(255, 206, 86, 1)',
@@ -151,24 +154,32 @@
             type: 'doughnut',
             data: doughnutData,
           };
+          //Lager diagrammet med Chart.js
           new Chart(doughnutCtx, doughnutConfig)
         });
 
+
+        
+
+
         //Linje diagram oversikt
+        //Henter verdiutvikling for porteføljen
       fetch('/api/portefolje/verdiutvikling',{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ portefoljeID })
+        body: JSON.stringify({ portefoljeID }) //Sender porteføljeID i body til serveren
       })
         .then(res => res.json())
         .then(data => {
           const verdiGraf = document.getElementById('verdiGraf').getContext('2d');
 
+          //Lager arrays med datoer og tilhørende verdier
           const labels = data.map(entry=> entry.dato);
           const verdier = data.map(entry => entry.verdi);
 
+          //konfiguerasjon av linjediagrammet
           const chartConfig = {
             type: 'line',
             data:{
@@ -178,14 +189,14 @@
               backgroundColor: 'rgba(75, 192, 192, 0.2)',
               borderColor: 'rgba(75, 192, 192, 1)',
               data: verdier,
-              fill: false,
+              fill: false, //Ingen fyll under linjen
             }]
            }
           };
-           new Chart(verdiGraf, chartConfig);
+           new Chart(verdiGraf, chartConfig); //Lager diagrammet med Chart.js
         })
         .catch(error => {
-          console.error('Feil ved henting av linjegraf:', error);
+          console.error('Feil ved henting av linjegraf:', error); //Logger feil
         });
         
 
