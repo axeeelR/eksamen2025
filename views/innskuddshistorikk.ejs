@@ -80,7 +80,7 @@
             rad.innerHTML = `
               <td>${historikk.kontoID}</td>
               <td>${historikk.valuta}</td>
-              <td>${historikk.verdi}</td>
+              <td>${historikk.verdi.toFixed(2)} ${historikk.valuta}</td>
               <td>${new Date(historikk.dato_tidspunkt).toLocaleDateString()}</td>
             `;
             historikkTabell.appendChild(rad);
