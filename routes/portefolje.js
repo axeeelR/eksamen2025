@@ -5,9 +5,29 @@ const { VarChar } = require('mssql');
 const yahooFinance = require('yahoo-finance2').default;
 const sql = require('mssql'); // Importer hele mssql-biblioteket
 
+//opprett portefolje
+router.get('/opprettPortefolje', (req, res) => {
+  res.render('opprettPortefolje');
+});
+
+//hvis portefolje oversikten
+router.get('/portefolje', (req, res) => {
+  res.render('portefolje');
+});
+
+//hvis enkelt porteføljene sin side
+router.get('/enkeltPortefolje', (req, res) => {
+  res.render('enkeltPortefolje');
+});
+
 //viser oversikten over porteføljene
 router.get('/', (req, res) => {
     res.render('portefolje');
+});
+
+//dashboard
+router.get('/dashboard', (req, res) => {
+  res.render('dashboard');
 });
 
 //API endepunkt som alle porteføljer tilhørende en bruker
