@@ -265,7 +265,7 @@ router.get('/handelshistorikk', (req, res) => {
       const result = await database.poolconnection.request()
         .input('portefoljeID', sql.Int, portefoljeID)
         .query(`
-          SELECT t.*, k.kontoNavn 
+          SELECT t.*, k.kontoNavn, k.valuta 
           From investApp.transaksjon t
           JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
           JOIN investApp.konto k ON t.kontoID = k.kontoID

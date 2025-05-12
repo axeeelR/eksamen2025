@@ -144,8 +144,9 @@ router.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
       const result = await poolconnection.request()
         .input('portefoljeID', sql.Int, portefoljeID)
         .query(`
-          SELECT p.portefoljeNavn 
-          FROM investApp.portefolje p 
+          SELECT p.portefoljeNavn, k.valuta 
+          FROM investApp.portefolje p
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
           WHERE p.portefoljeID = @portefoljeID`);
   
       if (result.recordset.length === 0) {
