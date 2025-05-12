@@ -65,7 +65,12 @@
       }
 
       kontoer.forEach(konto =>{
-        let erDenLukket = !!konto.lukkedatoK;
+        let erDenLukket;
+        if (konto.lukkedatoK) {
+          erDenLukket = true;
+        } else {
+          erDenLukket = false;
+        }
 
         let opprettetDato ='';
         if (konto.opprettelsedatoK) {
