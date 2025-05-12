@@ -13,7 +13,7 @@ h1 {
 .dashboard-innhold {
   margin-left: 160px;
   padding: 32px;
-  max-width: 1000%
+  max-width: 100%
 }
 .samletVerdiBoks {
   display: flex;

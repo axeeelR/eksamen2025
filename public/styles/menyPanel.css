@@ -11,8 +11,8 @@ body {
   font-family: 'Inter', sans-serif;
   border-radius: 6px;
   color: #ffffff;
-  text-decoration: none; /* Fjerner understrek */
-  font-size: 8px;
+  text-decoration: none;
+  font-size: 10px;
   transition: background-color 0.3s ease;
   box-sizing: border-box;
 }
