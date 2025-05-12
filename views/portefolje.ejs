@@ -191,6 +191,27 @@
             .join('<br>');
         })
         .catch(error => console.error('Feil ved henting av samlet verdi', error));
+        router.get('/api/samletverdi', async (req, res) => {
+  const brukernavn = req.headers['brukernavn'];
+  try {
+    const { poolconnection } = await getDatabase();
+    const result = await poolconnection.request()
+      .input('brukernavn', sql.VarChar(255), brukernavn)
+      .query(`
+        SELECT SUM(t.mengde * t.verdiPapirPris) AS samletVerdi
+        FROM investApp.transaksjon t
+        JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+        JOIN investApp.konto k ON p.kontoID = k.kontoID
+        JOIN investApp.bruker b ON k.brukerID = b.brukerID
+        WHERE b.brukernavn = @brukernavn
+      `);
+    res.json({ samletVerdi: result.recordset[0].samletVerdi || 0 });
+  } catch (err) {
+    console.error("Feil ved henting av samlet verdi:", err);
+    res.status(500).json({ error: "Kunne ikke hente samlet verdi" });
+  }
+});
+
     </script>
 </body>
 </html>
