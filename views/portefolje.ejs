@@ -116,7 +116,7 @@
                 <td>${sisteHandelTekst}</td>
                 <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
                 <td>${portefolje.kontoNavn}</td>
-                <td>${portefolje.opprettelsedatoP}
+                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString()}</td>
                 `;
             tbody.appendChild(tr);
 
