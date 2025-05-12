@@ -20,13 +20,6 @@ const portefoljeRouter = require('./routes/portefolje.js')
 const transaksjonRouter = require('./routes/transaksjon.js')
 
 //Ruter
-app.get('/', (req, res) => res.render('index'));
-
-app.get('/login', (req, res) => {res.render('login');});
-app.get('/konto', (req, res) => {res.render('konto');});
-app.get('/dashboard', (req, res) => {res.render('dashboard');});
-app.get('/kjop', (req, res) => {res.render('kjop');});
-
 app.use('/', autoriseringRouter);
 app.use('/', kontoRouter);
 app.use('/', portefoljeRouter);

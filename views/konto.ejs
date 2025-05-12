@@ -69,7 +69,7 @@
 
         let opprettetDato ='';
         if (konto.opprettelsedatoK) {
-          opprettetDato = new Date(konto.opprettetelsedatoK).toLocaleDateString('no-NO');
+          opprettetDato = new Date(konto.opprettelsedatoK).toLocaleDateString('no-NO');
           }else {
             opprettetDato = 'ukjent';
             }
@@ -144,7 +144,7 @@
         <td>${konto.saldo}</td>
         <td>${konto.valuta}</td>
         <td>${konto.bank}</td>
-        <td>${konto.opprettetDato}</td>
+        <td>${opprettetDato}</td>
         `
         rad.appendChild(lukketCelle);
         rad.appendChild(statusCelle);

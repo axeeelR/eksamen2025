@@ -5,9 +5,29 @@ const { VarChar } = require('mssql');
 const yahooFinance = require('yahoo-finance2').default;
 const sql = require('mssql'); // Importer hele mssql-biblioteket
 
+//opprett portefolje
+router.get('/opprettPortefolje', (req, res) => {
+  res.render('opprettPortefolje');
+});
+
+//hvis portefolje oversikten
+router.get('/portefolje', (req, res) => {
+  res.render('portefolje');
+});
+
+//hvis enkelt porteføljene sin side
+router.get('/enkeltPortefolje', (req, res) => {
+  res.render('enkeltPortefolje');
+});
+
 //viser oversikten over porteføljene
 router.get('/', (req, res) => {
     res.render('portefolje');
+});
+
+//dashboard
+router.get('/dashboard', (req, res) => {
+  res.render('dashboard');
 });
 
 //API endepunkt som alle porteføljer tilhørende en bruker
@@ -124,8 +144,9 @@ router.get('/api/portefolje/:portefoljeID/info', async (req, res) => {
       const result = await poolconnection.request()
         .input('portefoljeID', sql.Int, portefoljeID)
         .query(`
-          SELECT p.portefoljeNavn 
-          FROM investApp.portefolje p 
+          SELECT p.portefoljeNavn, k.valuta 
+          FROM investApp.portefolje p
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
           WHERE p.portefoljeID = @portefoljeID`);
   
       if (result.recordset.length === 0) {

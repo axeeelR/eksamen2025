@@ -1,5 +1,40 @@
 .formContainer {
-    margin-top: 20px;
-    margin-left: 300px;
-    margin-right: 100px;
+    margin-left: 250px;
+    margin-right: 50px;
+    padding: 32px 40px;
+    border-radius: 12px;
+    color: #c3c3c3;
+    font-family: 'inter', sans-serif;
+    font-size: 14px;
+    max-width: 1000px;
+}
+
+.formContainer h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #c3c3c3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 16px;
+}
+
+
+th {
+    padding: 10px 6px;
+    border-bottom: 1px solid #84837e;
+    color: #84837e;
+    font-weight: 600;
+    text-align: left;
+    font-size: 10px;
+}
+
+td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #84837e;
+    color: #c3c3c3;
+    font-size: 10px;
 }

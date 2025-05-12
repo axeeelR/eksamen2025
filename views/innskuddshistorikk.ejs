@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Innskuddshistorikk</title>
-  <link rel="stylesheet" href="/styles/opprettPortefolje.css">
+  <link rel="stylesheet" href="/styles/innskuddshistorikk.css">
   <link rel="stylesheet" href="/styles/index.css">
   <link rel="stylesheet" href="/styles/menyPanel.css">
 
@@ -80,7 +80,7 @@
             rad.innerHTML = `
               <td>${historikk.kontoID}</td>
               <td>${historikk.valuta}</td>
-              <td>${historikk.verdi}</td>
+              <td>${historikk.verdi.toFixed(2)} ${historikk.valuta}</td>
               <td>${new Date(historikk.dato_tidspunkt).toLocaleDateString()}</td>
             `;
             historikkTabell.appendChild(rad);
