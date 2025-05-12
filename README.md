@@ -8,9 +8,13 @@ Dette repository inneholder koden vår til eksamensprosjektet i programmering.
 
 1. npm install
 2. motcha
-3. Chai
+3. Chai-http
 4. yahoo-finance2
-5. npm test
+5. mssql
+6. Express
+7. ejs
+8. chai
+9. npm test
 
 ## Kjøring av prosjektet
 
