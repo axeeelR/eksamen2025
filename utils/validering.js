@@ -4,3 +4,5 @@ function gyldigISIN(isin){
 }
 
 module.exports = { gyldigISIN };
+
+

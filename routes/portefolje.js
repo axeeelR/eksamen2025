@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { getDatabase } = require('../backend/database/instance.js');
 const { VarChar } = require('mssql');
+const yahooFinance = require('yahoo-finance2').default;
+const sql = require('mssql'); // Importer hele mssql-biblioteket
 
 //viser oversikten over porteføljene
 router.get('/', (req, res) => {
