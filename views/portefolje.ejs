@@ -47,6 +47,7 @@
                             <th>Siste handel</th>
                             <th>Total Value</th>
                             <th>Tilhørende konto</th>
+                            <th>Opprettelsedato</th>
                         </tr>
                         </thead>
                         <tbody id="portefoljeOversikt"></tbody>
@@ -115,6 +116,7 @@
                 <td>${sisteHandelTekst}</td>
                 <td>${totalVerdi.toFixed(2)} ${portefolje.valuta} </td>
                 <td>${portefolje.kontoNavn}</td>
+                <td>${new Date(portefolje.opprettelsedatoP).toLocaleDateString()}</td>
                 `;
             tbody.appendChild(tr);
 
