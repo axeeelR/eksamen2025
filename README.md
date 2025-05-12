@@ -1,4 +1,6 @@
-# Eksamensprosjekt - Porteføljeapp
+# Eksamensprosjekt 
+
+## MAA Invest - aksjeportefølje applikasjon
 
 Dette repository inneholder koden vår til eksamensprosjektet i programmering.
 
