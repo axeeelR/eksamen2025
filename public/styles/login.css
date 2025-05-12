@@ -52,13 +52,13 @@ form {
 }
 
 .byttepassord {
-  background-color: #c3c3c3;
+  background-color: #242424;
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  color: #ffffff;
+  color: #c3c3c3;
 }
 
 .byttepassord:hover {
@@ -86,7 +86,7 @@ form input {
   margin-bottom: 20px;
   border: none;
   border-radius: 8px;
-  color: #ffffff;
+  color: #242424;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
 }
