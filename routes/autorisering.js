@@ -3,6 +3,26 @@ const router = express.Router();
 const { getDatabase } = require('../backend/database/instance.js');
 const { VarChar } = require('mssql');
 
+//hjem siden
+router.get('/', (req, res) => {
+    res.render('index');
+});
+
+//login
+router.get('/login', (req, res) => {
+    res.render('login');
+});
+
+//bli kunde
+router.get('/blikunde', (req, res) => {
+    res.render('blikunde');
+});
+
+//bytte passord
+router.get('/byttepassord', (req, res) => {
+    res.render('byttepassord');
+});
+
 //Logger inn brukeren ved å verifisere brukernavn og passord i databasen
 router.post('/login', async(req, res) => {
     const bruker = req.body

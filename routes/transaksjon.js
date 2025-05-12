@@ -2,6 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { getDatabase } = require('../backend/database/instance.js');
 const { VarChar } = require('mssql');
+const yahooFinance = require('yahoo-finance2').default;
+const sql = require('mssql'); // Importer hele mssql-biblioteket
+
+//side for kjøp
+router.get('/kjop', (req, res) => {
+  res.render('kjop');
+});
+
+//side for salg
+router.get('/salg', (req, res) => {
+  res.render('salg');
+});
+
+//side for insettelse av penger
+router.get('/indsettelse', (req, res) => {
+  res.render('indsettelse');
+});
+
+//side for handelshistorikk
+router.get('/handelshistorikk', (req, res) => {
+  res.render('handelshistorikk');
+});
+
+//side for innskuddshistorikk
+router.get('/innskuddshistorikk', (req, res) => {
+  res.render('innskuddshistorikk');
+});
 
 //viser oversikten over porteføljene
 router.get('/', (req, res) => {
@@ -366,5 +393,65 @@ router.get('/api/aksje/:navn', async (req, res) => {
     res.status(500).json({ message: 'Klarte ikke hente aksjeinformasjon' });
     }
   });
+
+  router.post('/aksjeienkeltportefolje', async (req, res) => {
+    const {portefoljeID} = req.body;
+  
+    if (!portefoljeID) {
+      return res.status(400).json({ message: 'PortefoljeID mangler' });
+    }
+    try {
+      const database = await getDatabase();
+  
+      //Henter ISIN og beregner snittprisen per aksje i porteføljen
+      const aksjeResultat = await database.poolconnection.request()
+        .input('portefoljeID', sql.Int, portefoljeID)
+        .query(`
+          select ISIN, sum(mengde) AS totalMengde,
+          CASE when sum(mengde *verdiPapirPris) = 0 then 0 
+          else sum( mengde * verdiPapirPris) /sum(mengde)
+          end as snittKjøpspris
+          from investApp.transaksjon
+          where portefoljeID = @portefoljeID
+          Group by ISIN
+        `);
+        
+          const aksjer = aksjeResultat.recordset;
+  
+          //Hente markedsdata og kalkulerer urealisert gevinst for hver aksje
+          const aksjeData = await Promise.all(
+            aksjer.map(async (aksje) => {;
+              try {
+                const markedsdata = await yahooFinance.quote(aksje.ISIN);
+                const prisNå = markedsdata.regularMarketPrice
+                const verdi = prisNå * aksje.totalMengde;
+                const urealisert = verdi - (aksje.snittKjøpspris * aksje.totalMengde)
+                return {
+                  navn: markedsdata.shortName || aksje.ISIN,
+                  pris: markedsdata.regularMarketPrice,
+                  endringProsent: markedsdata.regularMarketChangePercent,
+                  antall: aksje.totalMengde,
+                  totalVerdi: markedsdata.regularMarketPrice * aksje.totalMengde,
+                  urealisertGevinst: urealisert,
+                  snittKjøpspris: aksje.snittKjøpspris
+                };
+              } catch (feil) {
+                console.error('Feil ved henting av aksjeinformasjon:', feil);
+                return null;
+              }
+            })
+          );
+  
+          //Filtrer ut eventuelle nullverdier (feil i API)
+          const aksjeDataFiltrert = aksjeData.filter(aksje => aksje !== null);
+          res.json(aksjeDataFiltrert);
+      
+    }
+    catch (error) {
+      console.error('Feil i POST /aksjeienkeltportefolje', error);
+      res.status(500).json({ message: 'Intern feil' });
+    }
+  });
+  
 
 module.exports = router;

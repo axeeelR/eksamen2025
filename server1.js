@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const { getDatabase } = require('./backend/database/instance.js');
 const sql = require('mssql'); // Importer hele mssql-biblioteket
-const yahooFinance = require('yahoo-finance2').default;
 const app = express();
 const port = 3000;
 
@@ -21,17 +20,10 @@ const portefoljeRouter = require('./routes/portefolje.js')
 const transaksjonRouter = require('./routes/transaksjon.js')
 
 //Ruter
-app.get('/', (req, res) => res.render('index'));
-
-app.get('/login', (req, res) => {res.render('login');});
-app.get('/konto', (req, res) => {res.render('konto');});
-app.get('/dashboard', (req, res) => {res.render('dashboard');});
-app.get('/kjop', (req, res) => {res.render('kjop');});
-
 app.use('/', autoriseringRouter);
-app.use('/konto', kontoRouter);
-app.use('/portefolje', portefoljeRouter);
-app.use('/transaksjon', transaksjonRouter);
+app.use('/', kontoRouter);
+app.use('/', portefoljeRouter);
+app.use('/', transaksjonRouter);
 
 //Starter serveren og etablere dataforbidnelsen
 app.listen(port, async () => {

@@ -11,10 +11,12 @@
 
   form {
     border-radius: 12px;
-    background-color: #c3c3c3;
+    background-color: #1b1b1b;
+    color: #c3c3c3;
     padding: 20px;
     margin: 20px 0;
     width: 400px; /* Set a fixed width for the form */
+    font-family: 'inter', sans-serif;
  }
 
   .home-button {

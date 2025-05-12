@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const { getDatabase } = require('../backend/database/instance.js');
 const { VarChar } = require('mssql');
+const sql = require('mssql'); // Importer hele mssql-biblioteket
+
+//viser oversikt over konto
+router.get('/konto', (req, res) => {
+  res.render('konto');
+});
+
+//viser skjema for å opprette ny konto
+router.get('/opprettKonto', (req, res) => {
+  res.render('opprettKonto');
+});
 
 //viser oversikten over konto
 router.get('/', (req, res) => {
