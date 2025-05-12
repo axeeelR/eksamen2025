@@ -78,7 +78,8 @@
         const brukernavn = localStorage.getItem('brukernavn');
         //refferanse til tabellen for top 5 aksjer etter uralisert gevinst
         const topp5AksjerGevinst = document.getElementById('aksjerGevinst');
-        
+
+
         //hent og vis topp 5 aksjer etter gevinst
         fetch('/topp5AksjerGevinst', {
           method: 'POST',
@@ -91,7 +92,11 @@
         .then(response => response.json())
         .then(data => { 
           //Viser urealisert gevinst
-          document.getElementById('urealisertGevinst').textContent = data.totalUrealisertGevinst + ' dkk';
+          let valuta = 'DKK';
+          if (data.totalRealisertGevinst.length > 0) {
+            valuta = data.totalRealisertGevinst[0].valuta || 'DKK';
+          }
+          document.getElementById('urealisertGevinst').textContent = `${data.totalUrealisertGevinst} ${valuta}`;
           
           //viser realisert gevinst per valuta eller "--" hvis ingen finnes
           const realisert = document.getElementById('realisertGevinst')
