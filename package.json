@@ -4,7 +4,7 @@
   "main": "mocha",
   "scripts": {
     "test": "mocha",
-    "eksamen": "npm install && node app.js"
+    "eksamen": "npm install && node server.js"
   },
   "repository": {
     "type": "git",
