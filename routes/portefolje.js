@@ -207,7 +207,7 @@ router.post('/api/portefolje/verdiutvikling', async (req, res) => {
   });
 
 //Returnerer samlet verdiutvikling for alle transaksjoner i systemet (alle brukere)
-router.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
+  router.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
     try {
       const database = await getDatabase();
       const result = await database.poolconnection.request().query(`
@@ -217,7 +217,12 @@ router.get('/api/portefolje/samletverdiutvikling', async (req, res) => {
           GROUP BY CAST(opprettelsedatoT AS DATE)
           ORDER BY dato ASC
           `);
-  
+
+          /*JOIN investApp.portefolje p ON t.portefoljeID = p.portefoljeID
+          JOIN investApp.konto k ON p.kontoID = k.kontoID
+          JOIN investApp.bruker b ON k.brukerID = b.brukerID
+          WHERE b.brukernavn = @brukernavn*/  
+
           //omstrukturerer resultatet til ønsket format for visning i linjediagrammet
           const verdiHistorikk = result.recordset.map(transaksjon => ({
             dato: transaksjon.dato,
