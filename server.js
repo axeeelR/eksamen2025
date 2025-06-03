@@ -25,6 +25,8 @@ app.use('/', kontoRouter);
 app.use('/', portefoljeRouter);
 app.use('/', transaksjonRouter);
 
+module.exports = app;
+
 //Starter serveren og etablere dataforbidnelsen
 app.listen(port, async () => {
     try {
